@@ -21,6 +21,19 @@
 		012 /* NavigationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 112 /* NavigationManager.swift */; };
 		013 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 113 /* Constants.swift */; };
 		014 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 114 /* Assets.xcassets */; };
+		015 /* StandardBackgroundView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 115 /* StandardBackgroundView.swift */; };
+		016 /* StatCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 116 /* StatCard.swift */; };
+		017 /* InfoCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 117 /* InfoCard.swift */; };
+		018 /* ProgressBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 118 /* ProgressBar.swift */; };
+		019 /* Badge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 119 /* Badge.swift */; };
+		020 /* PrimaryButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120 /* PrimaryButton.swift */; };
+		021 /* SecondaryButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 121 /* SecondaryButton.swift */; };
+		022 /* IconButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 122 /* IconButton.swift */; };
+		023 /* StatDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 123 /* StatDisplay.swift */; };
+		024 /* TimeControlBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 124 /* TimeControlBar.swift */; };
+		025 /* NavigationBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 125 /* NavigationBar.swift */; };
+		026 /* EventCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 126 /* EventCard.swift */; };
+		027 /* ChoiceButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 127 /* ChoiceButton.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -39,6 +52,19 @@
 		112 /* NavigationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationManager.swift; sourceTree = "<group>"; };
 		113 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		114 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		115 /* StandardBackgroundView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StandardBackgroundView.swift; sourceTree = "<group>"; };
+		116 /* StatCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatCard.swift; sourceTree = "<group>"; };
+		117 /* InfoCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoCard.swift; sourceTree = "<group>"; };
+		118 /* ProgressBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressBar.swift; sourceTree = "<group>"; };
+		119 /* Badge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Badge.swift; sourceTree = "<group>"; };
+		120 /* PrimaryButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrimaryButton.swift; sourceTree = "<group>"; };
+		121 /* SecondaryButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecondaryButton.swift; sourceTree = "<group>"; };
+		122 /* IconButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconButton.swift; sourceTree = "<group>"; };
+		123 /* StatDisplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatDisplay.swift; sourceTree = "<group>"; };
+		124 /* TimeControlBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeControlBar.swift; sourceTree = "<group>"; };
+		125 /* NavigationBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationBar.swift; sourceTree = "<group>"; };
+		126 /* EventCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventCard.swift; sourceTree = "<group>"; };
+		127 /* ChoiceButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChoiceButton.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -119,8 +145,29 @@
 		313 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				317 /* Components */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		317 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				115 /* StandardBackgroundView.swift */,
+				116 /* StatCard.swift */,
+				117 /* InfoCard.swift */,
+				118 /* ProgressBar.swift */,
+				119 /* Badge.swift */,
+				120 /* PrimaryButton.swift */,
+				121 /* SecondaryButton.swift */,
+				122 /* IconButton.swift */,
+				123 /* StatDisplay.swift */,
+				124 /* TimeControlBar.swift */,
+				125 /* NavigationBar.swift */,
+				126 /* EventCard.swift */,
+				127 /* ChoiceButton.swift */,
+			);
+			path = Components;
 			sourceTree = "<group>";
 		};
 		314 /* Services */ = {
@@ -226,6 +273,19 @@
 				011 /* TimeManager.swift in Sources */,
 				012 /* NavigationManager.swift in Sources */,
 				013 /* Constants.swift in Sources */,
+				015 /* StandardBackgroundView.swift in Sources */,
+				016 /* StatCard.swift in Sources */,
+				017 /* InfoCard.swift in Sources */,
+				018 /* ProgressBar.swift in Sources */,
+				019 /* Badge.swift in Sources */,
+				020 /* PrimaryButton.swift in Sources */,
+				021 /* SecondaryButton.swift in Sources */,
+				022 /* IconButton.swift in Sources */,
+				023 /* StatDisplay.swift in Sources */,
+				024 /* TimeControlBar.swift in Sources */,
+				025 /* NavigationBar.swift in Sources */,
+				026 /* EventCard.swift in Sources */,
+				027 /* ChoiceButton.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

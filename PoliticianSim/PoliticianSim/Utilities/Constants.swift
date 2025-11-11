@@ -41,10 +41,30 @@ enum Constants {
         static let luck = Color(red: 0.2, green: 0.8, blue: 0.3) // Green
         static let diplomacyColor = Color(red: 0.4, green: 0.5, blue: 0.9) // Royal blue
 
+        // Secondary Stats
+        static let health = Color(red: 0.2, green: 0.9, blue: 0.4) // Bright green
+        static let stress = Color(red: 0.9, green: 0.3, blue: 0.2) // Red-orange
+        static let money = Color(red: 0.2, green: 0.8, blue: 0.2) // Money green
+
+        // Approval Colors
+        static let approvalGood = Color(red: 0.2, green: 0.8, blue: 0.3) // Green
+        static let approvalNeutral = Color(red: 1.0, green: 0.8, blue: 0.0) // Yellow
+        static let approvalBad = Color(red: 0.9, green: 0.3, blue: 0.2) // Red
+
+        // Political & Gameplay
+        static let political = Color(red: 0.3, green: 0.4, blue: 0.7) // Blue-purple
+
+        // Text Colors
+        static let secondaryText = Color.gray
+
         // UI Elements
         static let cardBackground = Color.gray.opacity(0.3)
         static let cardBackgroundDark = Color(red: 0.12, green: 0.12, blue: 0.12)
         static let overlay = Color.black.opacity(0.6)
+
+        // Button Colors
+        static let buttonPrimary = Color(red: 0.2, green: 0.5, blue: 0.9) // Blue
+        static let buttonSecondary = Color(red: 0.4, green: 0.4, blue: 0.4) // Gray
     }
 
     // MARK: - Typography
@@ -55,9 +75,11 @@ enum Constants {
         static let standardDataSize: CGFloat = 15
         static let bodyTextSize: CGFloat = 15
         static let sectionHeaderSize: CGFloat = 15
+        static let sectionTitleSize: CGFloat = 16
         static let sectionLabelSize: CGFloat = 12.75
         static let labelSize: CGFloat = 11.25
         static let captionSize: CGFloat = 12
+        static let buttonTextSize: CGFloat = 15
         static let smallTextSize: CGFloat = 10.5
         static let microLabelSize: CGFloat = 8.8
     }
