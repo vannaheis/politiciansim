@@ -48,6 +48,7 @@
 		039 /* NewHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139 /* NewHomeView.swift */; };
 		040 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 140 /* ProfileView.swift */; };
 		041 /* StatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 141 /* StatsView.swift */; };
+		042 /* PositionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 142 /* PositionView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -93,6 +94,7 @@
 		139 /* NewHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewHomeView.swift; sourceTree = "<group>"; };
 		140 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		141 /* StatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsView.swift; sourceTree = "<group>"; };
+		142 /* PositionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PositionView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -179,6 +181,7 @@
 				319 /* Home */,
 				320 /* Profile */,
 				321 /* Stats */,
+				322 /* Career */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -264,6 +267,14 @@
 				141 /* StatsView.swift */,
 			);
 			path = Stats;
+			sourceTree = "<group>";
+		};
+		322 /* Career */ = {
+			isa = PBXGroup;
+			children = (
+				142 /* PositionView.swift */,
+			);
+			path = Career;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -374,6 +385,7 @@
 				039 /* NewHomeView.swift in Sources */,
 				040 /* ProfileView.swift in Sources */,
 				041 /* StatsView.swift in Sources */,
+				042 /* PositionView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
