@@ -16,6 +16,7 @@ class GameManager: ObservableObject {
     @Published var statManager = StatManager()
     @Published var timeManager = TimeManager()
     @Published var navigationManager = NavigationManager()
+    @Published var eventEngine = EventEngine()
 
     // Game state
     @Published var gameState: GameState
@@ -61,6 +62,12 @@ class GameManager: ObservableObject {
                 self?.objectWillChange.send()
             }
             .store(in: &cancellables)
+
+        eventEngine.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
     }
 
     // MARK: - Character Operations
@@ -93,7 +100,7 @@ class GameManager: ObservableObject {
 
         timeManager.skipDay(character: &character) { [weak self] char in
             guard let self = self else { return char }
-            var updatedChar = self.timeManager.performDailyChecks(for: char)
+            let updatedChar = self.timeManager.performDailyChecks(for: char)
 
             // Check for death
             if self.characterManager.isDead() {
@@ -103,6 +110,11 @@ class GameManager: ObservableObject {
 
             // Record approval changes
             self.statManager.recordApprovalIfChanged(character: updatedChar)
+
+            // Check for random events
+            if let event = self.eventEngine.checkForEvent(character: updatedChar) {
+                self.gameState.activeEvent = event
+            }
 
             return updatedChar
         }
@@ -115,7 +127,7 @@ class GameManager: ObservableObject {
 
         timeManager.skipWeek(character: &character) { [weak self] char in
             guard let self = self else { return char }
-            var updatedChar = self.timeManager.performDailyChecks(for: char)
+            let updatedChar = self.timeManager.performDailyChecks(for: char)
 
             if self.characterManager.isDead() {
                 self.characterManager.handleDeath()
@@ -123,6 +135,11 @@ class GameManager: ObservableObject {
             }
 
             self.statManager.recordApprovalIfChanged(character: updatedChar)
+
+            // Check for random events
+            if let event = self.eventEngine.checkForEvent(character: updatedChar) {
+                self.gameState.activeEvent = event
+            }
 
             return updatedChar
         }
@@ -154,6 +171,20 @@ class GameManager: ObservableObject {
         guard var character = character else { return }
         try statManager.spendFunds(character: &character, amount: amount, purpose: purpose)
         characterManager.updateCharacter(character)
+    }
+
+    // MARK: - Event Operations
+
+    func handleEventChoice(_ choice: Event.Choice) {
+        guard var character = character else { return }
+        eventEngine.handleChoice(choice: choice, character: &character)
+        characterManager.updateCharacter(character)
+        gameState.activeEvent = nil
+    }
+
+    func dismissEvent() {
+        eventEngine.dismissEvent()
+        gameState.activeEvent = nil
     }
 
     // MARK: - Navigation

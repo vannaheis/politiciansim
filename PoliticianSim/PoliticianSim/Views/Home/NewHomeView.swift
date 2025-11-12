@@ -136,6 +136,20 @@ struct NewHomeView: View {
 
             // Side menu overlay
             SideMenuView(isOpen: $gameManager.navigationManager.isMenuOpen)
+
+            // Event dialog overlay
+            if let activeEvent = gameManager.gameState.activeEvent {
+                EventDialog(
+                    event: activeEvent,
+                    onChoiceSelected: { choice in
+                        gameManager.handleEventChoice(choice)
+                    },
+                    onDismiss: {
+                        gameManager.dismissEvent()
+                    }
+                )
+                .transition(.opacity)
+            }
         }
     }
 

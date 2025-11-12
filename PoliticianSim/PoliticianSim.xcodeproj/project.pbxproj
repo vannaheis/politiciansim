@@ -50,6 +50,8 @@
 		041 /* StatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 141 /* StatsView.swift */; };
 		042 /* PositionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 142 /* PositionView.swift */; };
 		043 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 143 /* SettingsView.swift */; };
+		7C6E450C2EC54B25005F7A3D /* EventEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E450B2EC54B25005F7A3D /* EventEngine.swift */; };
+		7C6E450E2EC54B3E005F7A3D /* EventDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E450D2EC54B3E005F7A3D /* EventDialog.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -97,6 +99,8 @@
 		141 /* StatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsView.swift; sourceTree = "<group>"; };
 		142 /* PositionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PositionView.swift; sourceTree = "<group>"; };
 		143 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		7C6E450B2EC54B25005F7A3D /* EventEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventEngine.swift; sourceTree = "<group>"; };
+		7C6E450D2EC54B3E005F7A3D /* EventDialog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDialog.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -168,6 +172,7 @@
 				108 /* GameManager.swift */,
 				109 /* CharacterManager.swift */,
 				110 /* StatManager.swift */,
+				7C6E450B2EC54B25005F7A3D /* EventEngine.swift */,
 				111 /* TimeManager.swift */,
 				112 /* NavigationManager.swift */,
 				128 /* CharacterCreationViewModel.swift */,
@@ -218,6 +223,7 @@
 				116 /* StatCard.swift */,
 				117 /* InfoCard.swift */,
 				118 /* ProgressBar.swift */,
+				7C6E450D2EC54B3E005F7A3D /* EventDialog.swift */,
 				119 /* Badge.swift */,
 				120 /* PrimaryButton.swift */,
 				121 /* SecondaryButton.swift */,
@@ -358,6 +364,7 @@
 			files = (
 				001 /* PoliticianSimApp.swift in Sources */,
 				002 /* ContentView.swift in Sources */,
+				7C6E450E2EC54B3E005F7A3D /* EventDialog.swift in Sources */,
 				003 /* Character.swift in Sources */,
 				004 /* GameState.swift in Sources */,
 				005 /* Stats.swift in Sources */,
@@ -377,6 +384,7 @@
 				020 /* PrimaryButton.swift in Sources */,
 				021 /* SecondaryButton.swift in Sources */,
 				022 /* IconButton.swift in Sources */,
+				7C6E450C2EC54B25005F7A3D /* EventEngine.swift in Sources */,
 				023 /* StatDisplay.swift in Sources */,
 				024 /* TimeControlBar.swift in Sources */,
 				025 /* NavigationBar.swift in Sources */,
