@@ -32,13 +32,6 @@ struct CharacterCreationContainerView: View {
                             removal: .move(edge: .leading)
                         ))
 
-                case .attributes:
-                    AttributeGenerationView(viewModel: viewModel)
-                        .transition(.asymmetric(
-                            insertion: .move(edge: .trailing),
-                            removal: .move(edge: .leading)
-                        ))
-
                 case .summary:
                     CharacterSummaryView(viewModel: viewModel) {
                         createCharacter()
@@ -81,8 +74,6 @@ struct ProgressIndicator: View {
             ConnectorLine(isActive: stepIndex >= 1)
             StepDot(isActive: currentStep == .details, isCompleted: stepIndex >= 2)
             ConnectorLine(isActive: stepIndex >= 2)
-            StepDot(isActive: currentStep == .attributes, isCompleted: stepIndex >= 3)
-            ConnectorLine(isActive: stepIndex >= 3)
             StepDot(isActive: currentStep == .summary, isCompleted: false)
         }
         .padding(.vertical, 12)
@@ -97,8 +88,7 @@ struct ProgressIndicator: View {
         switch currentStep {
         case .country: return 0
         case .details: return 1
-        case .attributes: return 2
-        case .summary: return 3
+        case .summary: return 2
         }
     }
 }

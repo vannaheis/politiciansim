@@ -37,54 +37,9 @@ struct CharacterSummaryView: View {
                         }
                     }
 
-                    // Attributes Card
-                    InfoCard(title: "Starting Attributes") {
-                        VStack(spacing: 12) {
-                            StatDisplay(
-                                iconName: Constants.Icons.Attributes.charisma,
-                                iconColor: Constants.Colors.charisma,
-                                label: "Charisma",
-                                value: viewModel.charisma,
-                                maxValue: 100
-                            )
-
-                            StatDisplay(
-                                iconName: Constants.Icons.Attributes.intelligence,
-                                iconColor: Constants.Colors.intelligence,
-                                label: "Intelligence",
-                                value: viewModel.intelligence,
-                                maxValue: 100
-                            )
-
-                            StatDisplay(
-                                iconName: Constants.Icons.Attributes.reputation,
-                                iconColor: Constants.Colors.reputation,
-                                label: "Reputation",
-                                value: viewModel.reputation,
-                                maxValue: 100
-                            )
-
-                            StatDisplay(
-                                iconName: Constants.Icons.Attributes.luck,
-                                iconColor: Constants.Colors.luck,
-                                label: "Luck",
-                                value: viewModel.luck,
-                                maxValue: 100
-                            )
-
-                            StatDisplay(
-                                iconName: Constants.Icons.Attributes.diplomacy,
-                                iconColor: Constants.Colors.diplomacyColor,
-                                label: "Diplomacy",
-                                value: viewModel.diplomacy,
-                                maxValue: 100
-                            )
-                        }
-                    }
-
                     // Starting Position Info
                     InfoCard(title: "Your Journey Begins") {
-                        VStack(alignment: .leading, spacing: 8) {
+                        VStack(alignment: .leading, spacing: 12) {
                             Text("You will start as a citizen with political ambitions. Your journey to the presidency begins now.")
                                 .font(.system(size: Constants.Typography.bodyTextSize))
                                 .foregroundColor(Constants.Colors.secondaryText)
@@ -99,6 +54,12 @@ struct CharacterSummaryView: View {
                                     .foregroundColor(.white)
                             }
                             .padding(.top, 4)
+
+                            Text("Your attributes will be revealed as your political career unfolds.")
+                                .font(.system(size: Constants.Typography.captionSize))
+                                .foregroundColor(Constants.Colors.secondaryText.opacity(0.7))
+                                .italic()
+                                .padding(.top, 8)
                         }
                     }
                 }

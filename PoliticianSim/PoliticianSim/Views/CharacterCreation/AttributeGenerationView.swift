@@ -103,9 +103,7 @@ struct AttributeGenerationView: View {
                 }
 
                 PrimaryButton(title: "Continue", icon: "arrow.right") {
-                    if viewModel.canProceedFromAttributes {
-                        viewModel.nextStep()
-                    }
+                    viewModel.nextStep()
                 }
             }
             .padding(.horizontal, 20)

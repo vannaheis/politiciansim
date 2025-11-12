@@ -25,7 +25,6 @@ class CharacterCreationViewModel: ObservableObject {
     enum CharacterCreationStep {
         case country
         case details
-        case attributes
         case summary
     }
 
@@ -43,10 +42,6 @@ class CharacterCreationViewModel: ObservableObject {
         isNameValid
     }
 
-    var canProceedFromAttributes: Bool {
-        charisma > 0 && intelligence > 0 && reputation > 0 && luck > 0 && diplomacy > 0
-    }
-
     // MARK: - Navigation
 
     func nextStep() {
@@ -54,11 +49,10 @@ class CharacterCreationViewModel: ObservableObject {
         case .country:
             currentStep = .details
         case .details:
-            currentStep = .attributes
+            // Generate attributes automatically when moving to summary
             if charisma == 0 {
                 generateAttributes()
             }
-        case .attributes:
             currentStep = .summary
         case .summary:
             break
@@ -71,10 +65,8 @@ class CharacterCreationViewModel: ObservableObject {
             break
         case .details:
             currentStep = .country
-        case .attributes:
-            currentStep = .details
         case .summary:
-            currentStep = .attributes
+            currentStep = .details
         }
     }
 
