@@ -52,6 +52,10 @@
 		043 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 143 /* SettingsView.swift */; };
 		7C6E450C2EC54B25005F7A3D /* EventEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E450B2EC54B25005F7A3D /* EventEngine.swift */; };
 		7C6E450E2EC54B3E005F7A3D /* EventDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E450D2EC54B3E005F7A3D /* EventDialog.swift */; };
+		7C6E45102EC552FB005F7A3D /* Campaign.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E450F2EC552FB005F7A3D /* Campaign.swift */; };
+		7C6E45122EC5530A005F7A3D /* ElectionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E45112EC5530A005F7A3D /* ElectionManager.swift */; };
+		7C6E45152EC5532D005F7A3D /* CampaignView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E45132EC5532D005F7A3D /* CampaignView.swift */; };
+		7C6E45182EC55337005F7A3D /* ElectionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E45162EC55337005F7A3D /* ElectionsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -101,6 +105,10 @@
 		143 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		7C6E450B2EC54B25005F7A3D /* EventEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventEngine.swift; sourceTree = "<group>"; };
 		7C6E450D2EC54B3E005F7A3D /* EventDialog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDialog.swift; sourceTree = "<group>"; };
+		7C6E450F2EC552FB005F7A3D /* Campaign.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Campaign.swift; sourceTree = "<group>"; };
+		7C6E45112EC5530A005F7A3D /* ElectionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ElectionManager.swift; sourceTree = "<group>"; };
+		7C6E45132EC5532D005F7A3D /* CampaignView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CampaignView.swift; sourceTree = "<group>"; };
+		7C6E45162EC55337005F7A3D /* ElectionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ElectionsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -158,6 +166,7 @@
 			isa = PBXGroup;
 			children = (
 				103 /* Character.swift */,
+				7C6E450F2EC552FB005F7A3D /* Campaign.swift */,
 				104 /* GameState.swift */,
 				105 /* Stats.swift */,
 				106 /* Event.swift */,
@@ -176,6 +185,7 @@
 				111 /* TimeManager.swift */,
 				112 /* NavigationManager.swift */,
 				128 /* CharacterCreationViewModel.swift */,
+				7C6E45112EC5530A005F7A3D /* ElectionManager.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -183,6 +193,8 @@
 		313 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				7C6E45172EC55337005F7A3D /* Elections */,
+				7C6E45142EC5532D005F7A3D /* Campaign */,
 				317 /* Components */,
 				318 /* CharacterCreation */,
 				319 /* Home */,
@@ -294,6 +306,22 @@
 			path = Settings;
 			sourceTree = "<group>";
 		};
+		7C6E45142EC5532D005F7A3D /* Campaign */ = {
+			isa = PBXGroup;
+			children = (
+				7C6E45132EC5532D005F7A3D /* CampaignView.swift */,
+			);
+			path = Campaign;
+			sourceTree = "<group>";
+		};
+		7C6E45172EC55337005F7A3D /* Elections */ = {
+			isa = PBXGroup;
+			children = (
+				7C6E45162EC55337005F7A3D /* ElectionsView.swift */,
+			);
+			path = Elections;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -365,6 +393,7 @@
 				001 /* PoliticianSimApp.swift in Sources */,
 				002 /* ContentView.swift in Sources */,
 				7C6E450E2EC54B3E005F7A3D /* EventDialog.swift in Sources */,
+				7C6E45152EC5532D005F7A3D /* CampaignView.swift in Sources */,
 				003 /* Character.swift in Sources */,
 				004 /* GameState.swift in Sources */,
 				005 /* Stats.swift in Sources */,
@@ -376,6 +405,7 @@
 				011 /* TimeManager.swift in Sources */,
 				012 /* NavigationManager.swift in Sources */,
 				013 /* Constants.swift in Sources */,
+				7C6E45122EC5530A005F7A3D /* ElectionManager.swift in Sources */,
 				015 /* StandardBackgroundView.swift in Sources */,
 				016 /* StatCard.swift in Sources */,
 				017 /* InfoCard.swift in Sources */,
@@ -405,7 +435,9 @@
 				040 /* ProfileView.swift in Sources */,
 				041 /* StatsView.swift in Sources */,
 				042 /* PositionView.swift in Sources */,
+				7C6E45102EC552FB005F7A3D /* Campaign.swift in Sources */,
 				043 /* SettingsView.swift in Sources */,
+				7C6E45182EC55337005F7A3D /* ElectionsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

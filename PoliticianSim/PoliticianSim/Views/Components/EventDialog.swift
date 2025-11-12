@@ -12,75 +12,116 @@ struct EventDialog: View {
     let onChoiceSelected: (Event.Choice) -> Void
     let onDismiss: () -> Void
 
+    @State private var scale: CGFloat = 0.8
+    @State private var opacity: Double = 0
+
     var body: some View {
         ZStack {
-            // Semi-transparent background
-            Color.black.opacity(0.7)
+            // Blurred background overlay
+            Color.black.opacity(0.5)
                 .ignoresSafeArea()
                 .onTapGesture {
                     // Prevent dismissal by background tap - force user to make choice
                 }
 
-            // Event card
-            VStack(spacing: 0) {
-                // Header with category icon
-                HStack(spacing: 12) {
-                    Image(systemName: event.category.iconName)
-                        .font(.system(size: 28, weight: .semibold))
-                        .foregroundColor(categoryColor)
+            // Popup card
+            ScrollView {
+                VStack(spacing: 0) {
+                    // Category badge at top
+                    HStack(spacing: 8) {
+                        ZStack {
+                            Circle()
+                                .fill(categoryColor.opacity(0.2))
+                                .frame(width: 36, height: 36)
 
-                    Text(event.category.rawValue)
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(categoryColor)
+                            Image(systemName: event.category.iconName)
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(categoryColor)
+                        }
 
-                    Spacer()
-                }
-                .padding(16)
-                .background(categoryColor.opacity(0.15))
+                        Text(event.category.rawValue.uppercased())
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundColor(categoryColor)
+                            .tracking(0.5)
 
-                // Event content
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 16) {
+                        Spacer()
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 20)
+                    .padding(.bottom, 16)
+
+                    // Event content
+                    VStack(alignment: .leading, spacing: 14) {
                         // Title
                         Text(event.title)
-                            .font(.system(size: 20, weight: .bold))
+                            .font(.system(size: 22, weight: .bold))
                             .foregroundColor(.white)
+                            .lineLimit(3)
+                            .fixedSize(horizontal: false, vertical: true)
 
                         // Description
                         Text(event.description)
-                            .font(.system(size: 14))
+                            .font(.system(size: 14, weight: .regular))
                             .foregroundColor(Constants.Colors.secondaryText)
-                            .lineLimit(nil)
+                            .lineSpacing(4)
                             .fixedSize(horizontal: false, vertical: true)
 
-                        Divider()
-                            .background(Color.white.opacity(0.2))
-                            .padding(.vertical, 4)
+                        // Divider
+                        Rectangle()
+                            .fill(categoryColor.opacity(0.3))
+                            .frame(height: 1)
+                            .padding(.vertical, 8)
 
-                        // Choices
-                        Text("Your Options:")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundColor(Constants.Colors.secondaryText)
+                        // Choices section
+                        Text("Choose Your Action")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(Constants.Colors.secondaryText.opacity(0.8))
+                            .textCase(.uppercase)
+                            .tracking(0.5)
 
-                        ForEach(event.choices) { choice in
-                            EventChoiceButton(choice: choice) {
-                                onChoiceSelected(choice)
+                        VStack(spacing: 10) {
+                            ForEach(event.choices) { choice in
+                                EventChoiceButton(choice: choice, categoryColor: categoryColor) {
+                                    onChoiceSelected(choice)
+                                }
                             }
                         }
                     }
-                    .padding(16)
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 24)
                 }
             }
-            .frame(maxWidth: 400)
+            .frame(maxWidth: 380, maxHeight: 600)
             .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color(red: 0.15, green: 0.15, blue: 0.2))
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(Color(red: 0.12, green: 0.12, blue: 0.18))
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                    .strokeBorder(categoryColor.opacity(0.3), lineWidth: 2)
+                RoundedRectangle(cornerRadius: 20)
+                    .strokeBorder(
+                        LinearGradient(
+                            colors: [
+                                categoryColor.opacity(0.4),
+                                categoryColor.opacity(0.1)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1.5
+                    )
             )
-            .padding(.horizontal, 24)
+            .shadow(color: categoryColor.opacity(0.3), radius: 30, x: 0, y: 10)
+            .shadow(color: Color.black.opacity(0.5), radius: 20, x: 0, y: 10)
+            .padding(.horizontal, 32)
+            .padding(.vertical, 60)
+            .scaleEffect(scale)
+            .opacity(opacity)
+        }
+        .onAppear {
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                scale = 1.0
+                opacity = 1.0
+            }
         }
     }
 
@@ -102,33 +143,79 @@ struct EventDialog: View {
 
 struct EventChoiceButton: View {
     let choice: Event.Choice
+    let categoryColor: Color
     let action: () -> Void
+
+    @State private var isPressed = false
 
     var body: some View {
         Button(action: action) {
-            VStack(alignment: .leading, spacing: 8) {
-                Text(choice.text)
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(.white)
-                    .multilineTextAlignment(.leading)
+            HStack(alignment: .top, spacing: 12) {
+                // Choice indicator
+                ZStack {
+                    Circle()
+                        .strokeBorder(categoryColor.opacity(0.5), lineWidth: 2)
+                        .frame(width: 20, height: 20)
 
-                Text(choice.outcomePreview)
-                    .font(.system(size: 12))
-                    .foregroundColor(Constants.Colors.secondaryText)
-                    .multilineTextAlignment(.leading)
+                    Circle()
+                        .fill(categoryColor.opacity(isPressed ? 0.8 : 0.0))
+                        .frame(width: 12, height: 12)
+                }
+                .padding(.top, 2)
+
+                // Choice content
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(choice.text)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(.white)
+                        .multilineTextAlignment(.leading)
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    Text(choice.outcomePreview)
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundColor(Constants.Colors.secondaryText)
+                        .multilineTextAlignment(.leading)
+                        .lineSpacing(2)
+                        .lineLimit(3)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                Spacer(minLength: 0)
+
+                // Arrow indicator
+                Image(systemName: "arrow.right")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(categoryColor.opacity(0.6))
+                    .padding(.top, 2)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(12)
+            .padding(.vertical, 14)
+            .padding(.horizontal, 16)
             .background(
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(Color.white.opacity(0.08))
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(
+                        isPressed
+                            ? categoryColor.opacity(0.15)
+                            : Color.white.opacity(0.05)
+                    )
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 10)
-                    .strokeBorder(Constants.Colors.political.opacity(0.3), lineWidth: 1)
+                RoundedRectangle(cornerRadius: 12)
+                    .strokeBorder(
+                        isPressed
+                            ? categoryColor.opacity(0.5)
+                            : categoryColor.opacity(0.2),
+                        lineWidth: 1.5
+                    )
             )
         }
         .buttonStyle(PlainButtonStyle())
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in isPressed = true }
+                .onEnded { _ in isPressed = false }
+        )
     }
 }
 

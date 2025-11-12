@@ -41,6 +41,10 @@ struct MainGameRouter: View {
                 PositionView()
             case .settings:
                 SettingsView()
+            case .campaigns:
+                CampaignView()
+            case .elections:
+                ElectionsView()
             default:
                 // Placeholder for other views
                 PlaceholderView(viewName: gameManager.navigationManager.currentView.rawValue)
