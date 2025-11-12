@@ -32,15 +32,15 @@ struct SideMenuView: View {
                     if let character = gameManager.character {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(character.name)
-                                .font(.system(size: 20, weight: .bold))
+                                .font(.system(size: 18, weight: .bold))
                                 .foregroundColor(.white)
 
                             Text("Age \(character.age) • \(formattedDate(character.currentDate))")
-                                .font(.system(size: 14))
+                                .font(.system(size: 13))
                                 .foregroundColor(Constants.Colors.secondaryText)
 
                             Text(formatMoney(character.campaignFunds))
-                                .font(.system(size: 18, weight: .semibold))
+                                .font(.system(size: 15, weight: .semibold))
                                 .foregroundColor(Constants.Colors.positive)
                         }
                         .padding(.horizontal, 20)
@@ -64,11 +64,11 @@ struct SideMenuView: View {
                             ForEach(gameManager.navigationManager.getMenuItems(), id: \.0) { section, items in
                                 if section != .none && section != .settings {
                                     Text(section.rawValue)
-                                        .font(.system(size: 12, weight: .semibold))
+                                        .font(.system(size: 11, weight: .semibold))
                                         .foregroundColor(Constants.Colors.secondaryText.opacity(0.6))
                                         .padding(.horizontal, 20)
-                                        .padding(.top, 24)
-                                        .padding(.bottom, 8)
+                                        .padding(.top, 20)
+                                        .padding(.bottom, 6)
                                 }
 
                                 ForEach(items, id: \.self) { item in
@@ -120,20 +120,20 @@ struct MenuItemButton: View {
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 16) {
+            HStack(spacing: 14) {
                 Image(systemName: icon)
-                    .font(.system(size: 20))
+                    .font(.system(size: 16))
                     .foregroundColor(isSelected ? Constants.Colors.buttonPrimary : .white)
-                    .frame(width: 24, height: 24)
+                    .frame(width: 20, height: 20)
 
                 Text(title)
-                    .font(.system(size: 16, weight: isSelected ? .semibold : .regular))
+                    .font(.system(size: 15, weight: isSelected ? .semibold : .regular))
                     .foregroundColor(isSelected ? Constants.Colors.buttonPrimary : .white)
 
                 Spacer()
             }
             .padding(.horizontal, 20)
-            .padding(.vertical, 14)
+            .padding(.vertical, 12)
             .background(
                 isSelected ? Constants.Colors.buttonPrimary.opacity(0.15) : Color.clear
             )

@@ -37,17 +37,17 @@ struct NewHomeView: View {
                         Button(action: {
                             gameManager.skipDay()
                         }) {
-                            HStack(spacing: 6) {
+                            HStack(spacing: 4) {
                                 Image(systemName: "play.fill")
-                                    .font(.system(size: 12))
+                                    .font(.system(size: 10))
                                 Text("Day")
-                                    .font(.system(size: 16, weight: .medium))
+                                    .font(.system(size: 12, weight: .medium))
                             }
                             .foregroundColor(Constants.Colors.secondaryText)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 10)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
                             .background(
-                                RoundedRectangle(cornerRadius: 8)
+                                RoundedRectangle(cornerRadius: 6)
                                     .fill(Color.white.opacity(0.1))
                             )
                         }
@@ -56,38 +56,38 @@ struct NewHomeView: View {
                         Button(action: {
                             gameManager.skipWeek()
                         }) {
-                            HStack(spacing: 6) {
+                            HStack(spacing: 4) {
                                 Image(systemName: "play.fill")
-                                    .font(.system(size: 12))
+                                    .font(.system(size: 10))
                                 Text("Week")
-                                    .font(.system(size: 16, weight: .semibold))
+                                    .font(.system(size: 12, weight: .semibold))
                             }
                             .foregroundColor(.white)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 10)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
                             .background(
-                                RoundedRectangle(cornerRadius: 8)
+                                RoundedRectangle(cornerRadius: 6)
                                     .fill(Constants.Colors.buttonPrimary)
                             )
                         }
                     }
                 }
                 .padding(.horizontal, 20)
-                .padding(.top, 60)
+                .padding(.top, 16)
 
                 // Money/Level badge
                 if let character = gameManager.character {
-                    HStack(spacing: 8) {
+                    HStack(spacing: 6) {
                         Image(systemName: "dollarsign.circle.fill")
-                            .font(.system(size: 20))
+                            .font(.system(size: 14))
                             .foregroundColor(Constants.Colors.money)
 
                         Text("\(Int(truncating: character.campaignFunds as NSDecimalNumber))")
-                            .font(.system(size: 20, weight: .bold))
+                            .font(.system(size: 14, weight: .bold))
                             .foregroundColor(Constants.Colors.money)
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
                     .background(
                         RoundedRectangle(cornerRadius: 20)
                             .fill(Color.white.opacity(0.1))
@@ -98,29 +98,29 @@ struct NewHomeView: View {
                     )
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 20)
-                    .padding(.top, 16)
+                    .padding(.top, 12)
                 }
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 20) {
                         if let character = gameManager.character {
                             // Character info
-                            VStack(alignment: .leading, spacing: 4) {
-                                HStack(spacing: 8) {
+                            VStack(alignment: .leading, spacing: 3) {
+                                HStack(spacing: 6) {
                                     Image(systemName: "person.fill")
-                                        .font(.system(size: 16))
+                                        .font(.system(size: 12))
                                         .foregroundColor(Constants.Colors.buttonPrimary)
 
                                     Text(character.name)
-                                        .font(.system(size: 28, weight: .bold))
+                                        .font(.system(size: 18, weight: .bold))
                                         .foregroundColor(.white)
                                 }
 
                                 Text("Age \(character.age) • \(formattedDate(character.currentDate))")
-                                    .font(.system(size: 16))
+                                    .font(.system(size: 12))
                                     .foregroundColor(Constants.Colors.secondaryText)
                             }
-                            .padding(.top, 20)
+                            .padding(.top, 12)
 
                             // Country stats card
                             CountryStatsCard(character: character)
@@ -152,12 +152,12 @@ struct CountryStatsCard: View {
     let character: Character
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: 12) {
             Text("Country Overview")
-                .font(.system(size: 18, weight: .semibold))
+                .font(.system(size: 13, weight: .semibold))
                 .foregroundColor(Constants.Colors.secondaryText)
 
-            VStack(spacing: 12) {
+            VStack(spacing: 10) {
                 CountryStatRow(
                     icon: "flag.fill",
                     iconColor: Constants.Colors.political,
@@ -187,9 +187,9 @@ struct CountryStatsCard: View {
                 )
             }
         }
-        .padding(20)
+        .padding(14)
         .background(
-            RoundedRectangle(cornerRadius: 16)
+            RoundedRectangle(cornerRadius: 12)
                 .fill(Color.white.opacity(0.05))
         )
     }
@@ -202,25 +202,25 @@ struct CountryStatRow: View {
     let value: String
 
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 10) {
             ZStack {
                 Circle()
                     .fill(iconColor.opacity(0.2))
-                    .frame(width: 36, height: 36)
+                    .frame(width: 28, height: 28)
 
                 Image(systemName: icon)
-                    .font(.system(size: 16))
+                    .font(.system(size: 12))
                     .foregroundColor(iconColor)
             }
 
             Text(label)
-                .font(.system(size: 16))
+                .font(.system(size: 13))
                 .foregroundColor(Constants.Colors.secondaryText)
 
             Spacer()
 
             Text(value)
-                .font(.system(size: 16, weight: .semibold))
+                .font(.system(size: 13, weight: .semibold))
                 .foregroundColor(.white)
         }
     }
@@ -232,12 +232,12 @@ struct CharacterAttributesCard: View {
     let character: Character
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: 12) {
             Text("Your Attributes")
-                .font(.system(size: 18, weight: .semibold))
+                .font(.system(size: 13, weight: .semibold))
                 .foregroundColor(Constants.Colors.secondaryText)
 
-            VStack(spacing: 12) {
+            VStack(spacing: 10) {
                 AttributeStatRow(
                     icon: Constants.Icons.Attributes.charisma,
                     iconColor: Constants.Colors.charisma,
@@ -274,9 +274,9 @@ struct CharacterAttributesCard: View {
                 )
             }
         }
-        .padding(20)
+        .padding(14)
         .background(
-            RoundedRectangle(cornerRadius: 16)
+            RoundedRectangle(cornerRadius: 12)
                 .fill(Color.white.opacity(0.05))
         )
     }
@@ -289,25 +289,25 @@ struct AttributeStatRow: View {
     let value: Int
 
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 10) {
             ZStack {
                 Circle()
                     .fill(iconColor.opacity(0.2))
-                    .frame(width: 36, height: 36)
+                    .frame(width: 28, height: 28)
 
                 Image(systemName: icon)
-                    .font(.system(size: 16))
+                    .font(.system(size: 12))
                     .foregroundColor(iconColor)
             }
 
             Text(label)
-                .font(.system(size: 16))
+                .font(.system(size: 13))
                 .foregroundColor(Constants.Colors.secondaryText)
 
             Spacer()
 
             Text("\(value)")
-                .font(.system(size: 18, weight: .bold))
+                .font(.system(size: 14, weight: .bold))
                 .foregroundColor(valueColor(for: value))
         }
     }
