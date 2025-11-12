@@ -10,21 +10,23 @@ import SwiftUI
 struct StandardBackgroundView: View {
     var body: some View {
         ZStack {
-            // Base background color
+            // Base background color (fallback)
             Constants.Colors.background
                 .ignoresSafeArea()
 
-            // Optional: Background image with overlay
-            // Uncomment when background image is added to Assets
-            /*
-            Image("background")
-                .resizable()
-                .aspectRatio(contentMode: .fill)
-                .ignoresSafeArea()
+            // Background image
+            GeometryReader { geometry in
+                Image("BackgroundImage")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: geometry.size.width, height: geometry.size.height)
+                    .clipped()
+            }
+            .ignoresSafeArea()
 
+            // Dark overlay for better text readability
             Color.black.opacity(0.3)
                 .ignoresSafeArea()
-            */
         }
     }
 }

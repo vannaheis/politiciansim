@@ -33,6 +33,8 @@ struct MainGameRouter: View {
             switch gameManager.navigationManager.currentView {
             case .home:
                 NewHomeView()
+            case .profile:
+                ProfileView()
             default:
                 // Placeholder for other views
                 PlaceholderView(viewName: gameManager.navigationManager.currentView.rawValue)

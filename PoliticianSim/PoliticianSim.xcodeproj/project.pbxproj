@@ -46,6 +46,7 @@
 		037 /* QuickStatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 137 /* QuickStatsView.swift */; };
 		038 /* SideMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 138 /* SideMenuView.swift */; };
 		039 /* NewHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139 /* NewHomeView.swift */; };
+		040 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 140 /* ProfileView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -89,6 +90,7 @@
 		137 /* QuickStatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickStatsView.swift; sourceTree = "<group>"; };
 		138 /* SideMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SideMenuView.swift; sourceTree = "<group>"; };
 		139 /* NewHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewHomeView.swift; sourceTree = "<group>"; };
+		140 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -173,6 +175,7 @@
 				317 /* Components */,
 				318 /* CharacterCreation */,
 				319 /* Home */,
+				320 /* Profile */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -242,6 +245,14 @@
 				139 /* NewHomeView.swift */,
 			);
 			path = Home;
+			sourceTree = "<group>";
+		};
+		320 /* Profile */ = {
+			isa = PBXGroup;
+			children = (
+				140 /* ProfileView.swift */,
+			);
+			path = Profile;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -350,6 +361,7 @@
 				037 /* QuickStatsView.swift in Sources */,
 				038 /* SideMenuView.swift in Sources */,
 				039 /* NewHomeView.swift in Sources */,
+				040 /* ProfileView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

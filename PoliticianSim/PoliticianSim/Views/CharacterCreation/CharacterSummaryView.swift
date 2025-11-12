@@ -86,7 +86,7 @@ struct CharacterSummaryView: View {
                 .padding(.top, 20)
                 .padding(.bottom, 20)
             }
-            .background(Constants.Colors.background)
+            .background(Color.black.opacity(0.5))
         }
     }
 }
