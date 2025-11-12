@@ -42,26 +42,26 @@ struct Character: Codable, Identifiable {
     }
 
     enum Gender: String, Codable, CaseIterable {
-        case male = "Male"
-        case female = "Female"
-        case nonBinary = "Non-Binary"
+        case male = "male"
+        case female = "female"
+        case other = "other"
     }
 
     enum Background: String, Codable, CaseIterable {
-        case workingClass = "Working Class"
-        case middleClass = "Middle Class"
-        case wealthy = "Wealthy"
+        case workingClass = "workingClass"
+        case middleClass = "middleClass"
+        case upperClass = "upperClass"
 
         var startingFunds: Decimal {
             switch self {
             case .workingClass: return 1_000
             case .middleClass: return 5_000
-            case .wealthy: return 50_000
+            case .upperClass: return 50_000
             }
         }
     }
 
-    // Initialize new character
+    // Initialize new character with random attributes
     init(
         name: String,
         gender: Gender,
@@ -70,7 +70,7 @@ struct Character: Codable, Identifiable {
     ) {
         self.id = UUID()
         self.name = name
-        self.age = 0
+        self.age = 18 // Starting age
         self.gender = gender
         self.country = country
         self.background = background
@@ -92,8 +92,53 @@ struct Character: Codable, Identifiable {
         self.currentPosition = nil
         self.careerHistory = []
 
-        // Dates
-        self.birthDate = Date()
+        // Dates (18 years old)
+        let calendar = Calendar.current
+        let birthDate = calendar.date(byAdding: .year, value: -18, to: Date()) ?? Date()
+        self.birthDate = birthDate
+        self.currentDate = Date()
+    }
+
+    // Initialize new character with custom attributes
+    init(
+        name: String,
+        gender: Gender,
+        country: String,
+        background: Background,
+        charisma: Int,
+        intelligence: Int,
+        reputation: Int,
+        luck: Int,
+        diplomacy: Int
+    ) {
+        self.id = UUID()
+        self.name = name
+        self.age = 18 // Starting age
+        self.gender = gender
+        self.country = country
+        self.background = background
+
+        // Use provided attributes
+        self.charisma = max(0, min(100, charisma))
+        self.intelligence = max(0, min(100, intelligence))
+        self.reputation = max(0, min(100, reputation))
+        self.luck = max(0, min(100, luck))
+        self.diplomacy = max(0, min(100, diplomacy))
+
+        // Initialize secondary stats
+        self.approvalRating = 50.0
+        self.campaignFunds = background.startingFunds
+        self.health = 100
+        self.stress = 10
+
+        // Career
+        self.currentPosition = nil
+        self.careerHistory = []
+
+        // Dates (18 years old)
+        let calendar = Calendar.current
+        let birthDate = calendar.date(byAdding: .year, value: -18, to: Date()) ?? Date()
+        self.birthDate = birthDate
         self.currentDate = Date()
     }
 

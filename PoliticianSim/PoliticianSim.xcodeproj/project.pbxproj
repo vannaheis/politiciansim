@@ -34,6 +34,12 @@
 		025 /* NavigationBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 125 /* NavigationBar.swift */; };
 		026 /* EventCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 126 /* EventCard.swift */; };
 		027 /* ChoiceButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 127 /* ChoiceButton.swift */; };
+		028 /* CharacterCreationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 128 /* CharacterCreationViewModel.swift */; };
+		029 /* CountrySelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 129 /* CountrySelectionView.swift */; };
+		030 /* CharacterDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 130 /* CharacterDetailsView.swift */; };
+		031 /* AttributeGenerationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 131 /* AttributeGenerationView.swift */; };
+		032 /* CharacterSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 132 /* CharacterSummaryView.swift */; };
+		033 /* CharacterCreationContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 133 /* CharacterCreationContainerView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -65,6 +71,12 @@
 		125 /* NavigationBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationBar.swift; sourceTree = "<group>"; };
 		126 /* EventCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventCard.swift; sourceTree = "<group>"; };
 		127 /* ChoiceButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChoiceButton.swift; sourceTree = "<group>"; };
+		128 /* CharacterCreationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CharacterCreationViewModel.swift; sourceTree = "<group>"; };
+		129 /* CountrySelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountrySelectionView.swift; sourceTree = "<group>"; };
+		130 /* CharacterDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CharacterDetailsView.swift; sourceTree = "<group>"; };
+		131 /* AttributeGenerationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttributeGenerationView.swift; sourceTree = "<group>"; };
+		132 /* CharacterSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CharacterSummaryView.swift; sourceTree = "<group>"; };
+		133 /* CharacterCreationContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CharacterCreationContainerView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -138,6 +150,7 @@
 				110 /* StatManager.swift */,
 				111 /* TimeManager.swift */,
 				112 /* NavigationManager.swift */,
+				128 /* CharacterCreationViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -146,28 +159,9 @@
 			isa = PBXGroup;
 			children = (
 				317 /* Components */,
+				318 /* CharacterCreation */,
 			);
 			path = Views;
-			sourceTree = "<group>";
-		};
-		317 /* Components */ = {
-			isa = PBXGroup;
-			children = (
-				115 /* StandardBackgroundView.swift */,
-				116 /* StatCard.swift */,
-				117 /* InfoCard.swift */,
-				118 /* ProgressBar.swift */,
-				119 /* Badge.swift */,
-				120 /* PrimaryButton.swift */,
-				121 /* SecondaryButton.swift */,
-				122 /* IconButton.swift */,
-				123 /* StatDisplay.swift */,
-				124 /* TimeControlBar.swift */,
-				125 /* NavigationBar.swift */,
-				126 /* EventCard.swift */,
-				127 /* ChoiceButton.swift */,
-			);
-			path = Components;
 			sourceTree = "<group>";
 		};
 		314 /* Services */ = {
@@ -190,6 +184,38 @@
 				113 /* Constants.swift */,
 			);
 			path = Utilities;
+			sourceTree = "<group>";
+		};
+		317 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				115 /* StandardBackgroundView.swift */,
+				116 /* StatCard.swift */,
+				117 /* InfoCard.swift */,
+				118 /* ProgressBar.swift */,
+				119 /* Badge.swift */,
+				120 /* PrimaryButton.swift */,
+				121 /* SecondaryButton.swift */,
+				122 /* IconButton.swift */,
+				123 /* StatDisplay.swift */,
+				124 /* TimeControlBar.swift */,
+				125 /* NavigationBar.swift */,
+				126 /* EventCard.swift */,
+				127 /* ChoiceButton.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		318 /* CharacterCreation */ = {
+			isa = PBXGroup;
+			children = (
+				129 /* CountrySelectionView.swift */,
+				130 /* CharacterDetailsView.swift */,
+				131 /* AttributeGenerationView.swift */,
+				132 /* CharacterSummaryView.swift */,
+				133 /* CharacterCreationContainerView.swift */,
+			);
+			path = CharacterCreation;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -286,6 +312,12 @@
 				025 /* NavigationBar.swift in Sources */,
 				026 /* EventCard.swift in Sources */,
 				027 /* ChoiceButton.swift in Sources */,
+				028 /* CharacterCreationViewModel.swift in Sources */,
+				029 /* CountrySelectionView.swift in Sources */,
+				030 /* CharacterDetailsView.swift in Sources */,
+				031 /* AttributeGenerationView.swift in Sources */,
+				032 /* CharacterSummaryView.swift in Sources */,
+				033 /* CharacterCreationContainerView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -418,7 +450,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 8SK57XYUT9;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -431,7 +463,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.politiciansim.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vannaheis.politiciansim;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -446,7 +478,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 8SK57XYUT9;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -459,7 +491,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.politiciansim.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vannaheis.politiciansim;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;

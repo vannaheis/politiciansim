@@ -111,20 +111,24 @@ enum Constants {
         static let maxStatValue = 100
         static let minStatValue = 0
         static let autosaveInterval: TimeInterval = 2.0 // 2 seconds
+    }
 
-        // Starting age ranges for random attributes
+    // MARK: - Character Creation
+    enum CharacterCreation {
         static let attributeMinStart = 40
         static let attributeMaxStart = 80
     }
 
     // MARK: - SF Symbols
     enum Icons {
-        // Stats
-        static let charisma = "person.fill"
-        static let intelligence = "brain.head.profile"
-        static let reputation = "star.fill"
-        static let luck = "dice.fill"
-        static let diplomacy = "bubble.left.and.bubble.right.fill"
+        // Attributes
+        enum Attributes {
+            static let charisma = "person.fill"
+            static let intelligence = "brain.head.profile"
+            static let reputation = "star.fill"
+            static let luck = "dice.fill"
+            static let diplomacy = "bubble.left.and.bubble.right.fill"
+        }
 
         // Career
         static let communityOrganizer = "person.3.fill"

@@ -2,7 +2,7 @@
 //  ContentView.swift
 //  PoliticianSim
 //
-//  Created on 11/11/2024.
+//  Root view that routes to character creation or main game
 //
 
 import SwiftUI
@@ -11,10 +11,26 @@ struct ContentView: View {
     @EnvironmentObject var gameManager: GameManager
 
     var body: some View {
+        Group {
+            if gameManager.character == nil {
+                // Show character creation if no character exists
+                CharacterCreationContainerView()
+            } else {
+                // Show main game
+                MainGameView()
+            }
+        }
+    }
+}
+
+// MARK: - Main Game View (Placeholder)
+
+struct MainGameView: View {
+    @EnvironmentObject var gameManager: GameManager
+
+    var body: some View {
         ZStack {
-            // Background
-            Color.black
-                .ignoresSafeArea()
+            StandardBackgroundView()
 
             VStack(spacing: 20) {
                 Text("Politician Sim")
@@ -27,7 +43,6 @@ struct ContentView: View {
 
                 Spacer()
 
-                // Temporary test content
                 if let character = gameManager.character {
                     VStack(spacing: 12) {
                         Text("Character: \(character.name)")
@@ -38,24 +53,19 @@ struct ContentView: View {
 
                         Text("Charisma: \(character.charisma)/100")
                             .foregroundColor(.blue)
-                    }
-                } else {
-                    Button(action: {
-                        gameManager.createTestCharacter()
-                    }) {
-                        Text("Create Character")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 40)
-                            .padding(.vertical, 15)
-                            .background(Color.blue)
-                            .cornerRadius(10)
+
+                        // Temporary delete button for testing
+                        Button("Delete Character") {
+                            gameManager.characterManager.character = nil
+                        }
+                        .padding()
+                        .foregroundColor(.red)
                     }
                 }
 
                 Spacer()
 
-                Text("Phase 1: Foundation")
+                Text("Phase 1.4: Character Creation Complete")
                     .font(.caption)
                     .foregroundColor(.gray.opacity(0.5))
             }
