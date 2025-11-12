@@ -161,6 +161,14 @@ class StatManager: ObservableObject {
             )
         }
     }
+
+    // MARK: - Clear History
+
+    func clearHistory() {
+        statChanges.removeAll()
+        approvalHistory.removeAll()
+        fundTransactions.removeAll()
+    }
 }
 
 // MARK: - Stat Type Enum

@@ -39,6 +39,8 @@ struct MainGameRouter: View {
                 StatsView()
             case .position:
                 PositionView()
+            case .settings:
+                SettingsView()
             default:
                 // Placeholder for other views
                 PlaceholderView(viewName: gameManager.navigationManager.currentView.rawValue)

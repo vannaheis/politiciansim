@@ -1,0 +1,346 @@
+//
+//  SettingsView.swift
+//  PoliticianSim
+//
+//  Game settings and preferences view
+//
+
+import SwiftUI
+
+struct SettingsView: View {
+    @EnvironmentObject var gameManager: GameManager
+    @State private var showResetConfirmation = false
+    @State private var showDeleteConfirmation = false
+
+    var body: some View {
+        ZStack {
+            StandardBackgroundView()
+
+            VStack(spacing: 0) {
+                // Top header with menu button
+                HStack {
+                    Button(action: {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            gameManager.navigationManager.toggleMenu()
+                        }
+                    }) {
+                        Image(systemName: "line.3.horizontal")
+                            .font(.system(size: 24, weight: .medium))
+                            .foregroundColor(.white)
+                            .frame(width: 44, height: 44)
+                    }
+
+                    Spacer()
+
+                    Text("Settings")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(.white)
+
+                    Spacer()
+
+                    // Spacer to balance menu button
+                    Color.clear.frame(width: 44, height: 44)
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 16)
+
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        // Game Info Card
+                        GameInfoCard(character: gameManager.character)
+
+                        // Account Actions Card
+                        AccountActionsCard(
+                            showResetConfirmation: $showResetConfirmation,
+                            showDeleteConfirmation: $showDeleteConfirmation
+                        )
+
+                        // About Card
+                        AboutCard()
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 20)
+                }
+            }
+
+            // Side menu overlay
+            SideMenuView(isOpen: $gameManager.navigationManager.isMenuOpen)
+        }
+        .alert("Reset Game Progress?", isPresented: $showResetConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Reset", role: .destructive) {
+                resetGame()
+            }
+        } message: {
+            Text("This will reset all game progress and return you to character creation. This action cannot be undone.")
+        }
+        .alert("Delete Character?", isPresented: $showDeleteConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                deleteCharacter()
+            }
+        } message: {
+            Text("This will permanently delete your character and all associated progress. This action cannot be undone.")
+        }
+    }
+
+    private func resetGame() {
+        // Reset game state
+        gameManager.characterManager.character = nil
+        gameManager.statManager.clearHistory()
+        gameManager.navigationManager.navigateToHome()
+    }
+
+    private func deleteCharacter() {
+        // Delete character and return to character creation
+        gameManager.characterManager.character = nil
+        gameManager.statManager.clearHistory()
+        gameManager.navigationManager.navigateToHome()
+    }
+}
+
+// MARK: - Game Info Card
+
+struct GameInfoCard: View {
+    let character: Character?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Game Information")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(Constants.Colors.secondaryText)
+
+            if let character = character {
+                VStack(spacing: 10) {
+                    SettingsInfoRow(
+                        icon: "person.fill",
+                        label: "Character",
+                        value: character.name
+                    )
+
+                    SettingsInfoRow(
+                        icon: "calendar",
+                        label: "In-Game Date",
+                        value: formattedDate(character.currentDate)
+                    )
+
+                    SettingsInfoRow(
+                        icon: "clock.fill",
+                        label: "Days Played",
+                        value: "\(daysPlayed(character: character))"
+                    )
+
+                    SettingsInfoRow(
+                        icon: "flag.fill",
+                        label: "Country",
+                        value: character.country
+                    )
+                }
+            } else {
+                Text("No active game")
+                    .font(.system(size: 13))
+                    .foregroundColor(Constants.Colors.secondaryText)
+                    .padding(.vertical, 8)
+            }
+        }
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.white.opacity(0.05))
+        )
+    }
+
+    private func formattedDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM d, yyyy"
+        return formatter.string(from: date)
+    }
+
+    private func daysPlayed(character: Character) -> Int {
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.day], from: character.birthDate, to: character.currentDate)
+        return components.day ?? 0
+    }
+}
+
+// MARK: - Account Actions Card
+
+struct AccountActionsCard: View {
+    @Binding var showResetConfirmation: Bool
+    @Binding var showDeleteConfirmation: Bool
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Game Management")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(Constants.Colors.secondaryText)
+
+            VStack(spacing: 8) {
+                // Reset Game Button
+                Button(action: {
+                    showResetConfirmation = true
+                }) {
+                    HStack(spacing: 10) {
+                        ZStack {
+                            Circle()
+                                .fill(Constants.Colors.warning.opacity(0.2))
+                                .frame(width: 28, height: 28)
+
+                            Image(systemName: "arrow.counterclockwise")
+                                .font(.system(size: 12))
+                                .foregroundColor(Constants.Colors.warning)
+                        }
+
+                        Text("Reset Game Progress")
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(.white)
+
+                        Spacer()
+
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 12))
+                            .foregroundColor(Constants.Colors.secondaryText)
+                    }
+                    .padding(.vertical, 10)
+                    .padding(.horizontal, 12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color.white.opacity(0.05))
+                    )
+                }
+
+                // Delete Character Button
+                Button(action: {
+                    showDeleteConfirmation = true
+                }) {
+                    HStack(spacing: 10) {
+                        ZStack {
+                            Circle()
+                                .fill(Constants.Colors.negative.opacity(0.2))
+                                .frame(width: 28, height: 28)
+
+                            Image(systemName: "trash.fill")
+                                .font(.system(size: 12))
+                                .foregroundColor(Constants.Colors.negative)
+                        }
+
+                        Text("Delete Character")
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(.white)
+
+                        Spacer()
+
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 12))
+                            .foregroundColor(Constants.Colors.secondaryText)
+                    }
+                    .padding(.vertical, 10)
+                    .padding(.horizontal, 12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color.white.opacity(0.05))
+                    )
+                }
+            }
+        }
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.white.opacity(0.05))
+        )
+    }
+}
+
+// MARK: - About Card
+
+struct AboutCard: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("About")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(Constants.Colors.secondaryText)
+
+            VStack(spacing: 10) {
+                SettingsInfoRow(
+                    icon: "app.badge",
+                    label: "Version",
+                    value: "1.0.0"
+                )
+
+                SettingsInfoRow(
+                    icon: "hammer.fill",
+                    label: "Build",
+                    value: "Phase 1.0"
+                )
+
+                SettingsInfoRow(
+                    icon: "info.circle.fill",
+                    label: "Status",
+                    value: "Early Development"
+                )
+            }
+
+            Divider()
+                .background(Color.white.opacity(0.2))
+                .padding(.vertical, 4)
+
+            Text("Politician Sim")
+                .font(.system(size: 15, weight: .bold))
+                .foregroundColor(.white)
+
+            Text("A political life simulation game where you rise from citizen to President.")
+                .font(.system(size: 12))
+                .foregroundColor(Constants.Colors.secondaryText)
+                .lineLimit(nil)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Text("© 2024 Politician Sim. All rights reserved.")
+                .font(.system(size: 11))
+                .foregroundColor(Constants.Colors.secondaryText.opacity(0.7))
+                .padding(.top, 8)
+        }
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.white.opacity(0.05))
+        )
+    }
+}
+
+// MARK: - Supporting Views
+
+struct SettingsInfoRow: View {
+    let icon: String
+    let label: String
+    let value: String
+
+    var body: some View {
+        HStack(spacing: 10) {
+            ZStack {
+                Circle()
+                    .fill(Constants.Colors.political.opacity(0.2))
+                    .frame(width: 28, height: 28)
+
+                Image(systemName: icon)
+                    .font(.system(size: 12))
+                    .foregroundColor(Constants.Colors.political)
+            }
+
+            Text(label)
+                .font(.system(size: 13))
+                .foregroundColor(Constants.Colors.secondaryText)
+
+            Spacer()
+
+            Text(value)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(.white)
+                .multilineTextAlignment(.trailing)
+        }
+    }
+}
+
+#Preview {
+    SettingsView()
+        .environmentObject(GameManager.shared)
+}
