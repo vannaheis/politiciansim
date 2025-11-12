@@ -56,10 +56,15 @@ struct CharacterCreationContainerView: View {
     }
 
     private func createCharacter() {
+        print("DEBUG: createCharacter() called")
         let character = viewModel.createCharacter()
+        print("DEBUG: Character created - Name: \(character.name)")
         gameManager.characterManager.character = character
+        print("DEBUG: Character set in manager")
         gameManager.statManager.initializeHistory(for: character)
+        print("DEBUG: Stats initialized")
         gameManager.navigationManager.navigateTo(.home)
+        print("DEBUG: Navigation to home completed")
     }
 }
 

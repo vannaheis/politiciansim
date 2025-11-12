@@ -30,18 +30,18 @@ struct NavigationBar: View {
 
             NavBarItem(
                 icon: "briefcase.fill",
-                label: "Career",
-                isSelected: currentView == .career
+                label: "Position",
+                isSelected: currentView == .position
             ) {
-                currentView = .career
+                currentView = .position
             }
 
             NavBarItem(
                 icon: "chart.bar.fill",
                 label: "Stats",
-                isSelected: currentView == .policies
+                isSelected: currentView == .stats
             ) {
-                currentView = .policies
+                currentView = .stats
             }
 
             NavBarItem(

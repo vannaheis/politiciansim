@@ -12,64 +12,57 @@ struct ContentView: View {
 
     var body: some View {
         Group {
-            if gameManager.character == nil {
+            if gameManager.characterManager.character == nil {
                 // Show character creation if no character exists
                 CharacterCreationContainerView()
             } else {
-                // Show main game
-                MainGameView()
+                // Show main game based on navigation
+                MainGameRouter()
             }
         }
     }
 }
 
-// MARK: - Main Game View (Placeholder)
+// MARK: - Main Game Router
 
-struct MainGameView: View {
+struct MainGameRouter: View {
     @EnvironmentObject var gameManager: GameManager
+
+    var body: some View {
+        Group {
+            switch gameManager.navigationManager.currentView {
+            case .home:
+                NewHomeView()
+            default:
+                // Placeholder for other views
+                PlaceholderView(viewName: gameManager.navigationManager.currentView.rawValue)
+            }
+        }
+    }
+}
+
+// MARK: - Placeholder View
+
+struct PlaceholderView: View {
+    let viewName: String
 
     var body: some View {
         ZStack {
             StandardBackgroundView()
 
             VStack(spacing: 20) {
-                Text("Politician Sim")
-                    .font(.system(size: 40, weight: .bold))
+                Image(systemName: "wrench.and.screwdriver")
+                    .font(.system(size: 60))
+                    .foregroundColor(Constants.Colors.secondaryText)
+
+                Text(viewName)
+                    .font(.system(size: Constants.Typography.pageTitleSize, weight: .bold))
                     .foregroundColor(.white)
 
-                Text("From Birth to the Presidency")
-                    .font(.system(size: 16))
-                    .foregroundColor(.gray)
-
-                Spacer()
-
-                if let character = gameManager.character {
-                    VStack(spacing: 12) {
-                        Text("Character: \(character.name)")
-                            .foregroundColor(.white)
-
-                        Text("Age: \(character.age)")
-                            .foregroundColor(.gray)
-
-                        Text("Charisma: \(character.charisma)/100")
-                            .foregroundColor(.blue)
-
-                        // Temporary delete button for testing
-                        Button("Delete Character") {
-                            gameManager.characterManager.character = nil
-                        }
-                        .padding()
-                        .foregroundColor(.red)
-                    }
-                }
-
-                Spacer()
-
-                Text("Phase 1.4: Character Creation Complete")
-                    .font(.caption)
-                    .foregroundColor(.gray.opacity(0.5))
+                Text("Coming Soon")
+                    .font(.system(size: Constants.Typography.bodyTextSize))
+                    .foregroundColor(Constants.Colors.secondaryText)
             }
-            .padding()
         }
     }
 }

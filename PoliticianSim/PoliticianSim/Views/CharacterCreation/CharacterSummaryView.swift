@@ -12,7 +12,7 @@ struct CharacterSummaryView: View {
     let onComplete: () -> Void
 
     var body: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: 0) {
             // Header
             VStack(spacing: 8) {
                 Text("Confirm Your Character")
@@ -24,6 +24,7 @@ struct CharacterSummaryView: View {
                     .foregroundColor(Constants.Colors.secondaryText)
             }
             .padding(.top, 40)
+            .padding(.bottom, 24)
 
             ScrollView {
                 VStack(spacing: 20) {
@@ -64,20 +65,28 @@ struct CharacterSummaryView: View {
                     }
                 }
                 .padding(.horizontal, 20)
+                .padding(.bottom, 100) // Add bottom padding to ensure buttons are visible
             }
 
-            // Navigation Buttons
-            HStack(spacing: 12) {
-                SecondaryButton(title: "Back", icon: "arrow.left") {
-                    viewModel.previousStep()
-                }
+            Spacer()
 
-                PrimaryButton(title: "Start Journey", icon: "flag.fill") {
-                    onComplete()
+            // Navigation Buttons (fixed at bottom)
+            VStack(spacing: 0) {
+                HStack(spacing: 12) {
+                    SecondaryButton(title: "Back", icon: "arrow.left") {
+                        viewModel.previousStep()
+                    }
+
+                    PrimaryButton(title: "Start Journey", icon: "flag.fill") {
+                        print("DEBUG: Start Journey button tapped")
+                        onComplete()
+                    }
                 }
+                .padding(.horizontal, 20)
+                .padding(.top, 20)
+                .padding(.bottom, 20)
             }
-            .padding(.horizontal, 20)
-            .padding(.bottom, 20)
+            .background(Constants.Colors.background)
         }
     }
 }
