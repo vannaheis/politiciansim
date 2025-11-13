@@ -51,6 +51,8 @@ struct MainGameRouter: View {
                 BudgetView()
             case .laws:
                 LawsView()
+            case .diplomacy:
+                DiplomacyView()
             default:
                 // Placeholder for other views
                 PlaceholderView(viewName: gameManager.navigationManager.currentView.rawValue)
