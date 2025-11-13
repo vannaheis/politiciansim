@@ -71,6 +71,8 @@
 		7C6E45362EC59553005F7A3D /* PublicOpinionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E45352EC59552005F7A3D /* PublicOpinionManager.swift */; };
 		7C6E45382EC5955F005F7A3D /* PublicOpinion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E45372EC5955F005F7A3D /* PublicOpinion.swift */; };
 		7C6E453B2EC59569005F7A3D /* PublicOpinionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E45392EC59569005F7A3D /* PublicOpinionView.swift */; };
+		7C6E453D2EC59BBC005F7A3D /* SaveManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E453C2EC59BBC005F7A3D /* SaveManager.swift */; };
+		7C6E453F2EC59BC8005F7A3D /* SaveGame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E453E2EC59BC8005F7A3D /* SaveGame.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -139,6 +141,8 @@
 		7C6E45352EC59552005F7A3D /* PublicOpinionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublicOpinionManager.swift; sourceTree = "<group>"; };
 		7C6E45372EC5955F005F7A3D /* PublicOpinion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublicOpinion.swift; sourceTree = "<group>"; };
 		7C6E45392EC59569005F7A3D /* PublicOpinionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublicOpinionView.swift; sourceTree = "<group>"; };
+		7C6E453C2EC59BBC005F7A3D /* SaveManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveManager.swift; sourceTree = "<group>"; };
+		7C6E453E2EC59BC8005F7A3D /* SaveGame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveGame.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -206,6 +210,7 @@
 				7C6E45272EC58536005F7A3D /* Law.swift */,
 				7C6E45312EC58E2B005F7A3D /* Diplomacy.swift */,
 				7C6E45372EC5955F005F7A3D /* PublicOpinion.swift */,
+				7C6E453E2EC59BC8005F7A3D /* SaveGame.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -226,6 +231,7 @@
 				7C6E45292EC58543005F7A3D /* LawsManager.swift */,
 				7C6E45332EC58E41005F7A3D /* DiplomacyManager.swift */,
 				7C6E45352EC59552005F7A3D /* PublicOpinionManager.swift */,
+				7C6E453C2EC59BBC005F7A3D /* SaveManager.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -528,7 +534,9 @@
 				7C6E45282EC58536005F7A3D /* Law.swift in Sources */,
 				035 /* DateDisplayView.swift in Sources */,
 				036 /* CharacterOverviewCard.swift in Sources */,
+				7C6E453F2EC59BC8005F7A3D /* SaveGame.swift in Sources */,
 				037 /* QuickStatsView.swift in Sources */,
+				7C6E453D2EC59BBC005F7A3D /* SaveManager.swift in Sources */,
 				038 /* SideMenuView.swift in Sources */,
 				039 /* NewHomeView.swift in Sources */,
 				040 /* ProfileView.swift in Sources */,

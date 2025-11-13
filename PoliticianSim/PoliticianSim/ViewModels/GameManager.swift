@@ -23,6 +23,7 @@ class GameManager: ObservableObject {
     @Published var lawsManager = LawsManager()
     @Published var diplomacyManager = DiplomacyManager()
     @Published var publicOpinionManager = PublicOpinionManager()
+    let saveManager = SaveManager.shared
 
     // Game state
     @Published var gameState: GameState
@@ -36,6 +37,9 @@ class GameManager: ObservableObject {
 
     private init() {
         self.gameState = GameState()
+
+        // Start autosave
+        saveManager.startAutosave(gameManager: self)
 
         // Sync character between managers
         characterManager.$character
@@ -260,15 +264,47 @@ class GameManager: ObservableObject {
         navigationManager.navigateTo(view)
     }
 
-    // MARK: - Save/Load (Placeholder)
+    // MARK: - Save/Load
 
-    func saveGame(to slot: Int) {
-        print("Saving to slot \(slot)")
-        // Will implement SaveManager in Phase 1.7
+    func saveGame(to slot: Int) -> Bool {
+        return saveManager.saveToSlot(slot, gameManager: self)
     }
 
-    func loadGame(from slot: Int) {
-        print("Loading from slot \(slot)")
-        // Will implement SaveManager in Phase 1.7
+    func loadGame(from slot: Int) -> Bool {
+        return saveManager.loadFromSlot(slot, to: self)
+    }
+
+    func deleteSlot(_ slot: Int) -> Bool {
+        return saveManager.deleteSlot(slot)
+    }
+
+    func loadAutosave() -> Bool {
+        return saveManager.loadAutosave(to: self)
+    }
+
+    func newGame() {
+        // Clear all data for new game
+        characterManager.character = nil
+        statManager.clearHistory()
+        electionManager.activeCampaign = nil
+        electionManager.upcomingElection = nil
+        electionManager.electionHistory = []
+        gameState.activeEvent = nil
+        policyManager.proposedPolicies = []
+        policyManager.enactedPolicies = []
+        budgetManager.currentBudget = nil
+        budgetManager.budgetHistory = []
+        lawsManager.draftLaws = []
+        lawsManager.activeLaws = []
+        lawsManager.enactedLaws = []
+        lawsManager.rejectedLaws = []
+        lawsManager.currentSession = nil
+        diplomacyManager.relationships = []
+        diplomacyManager.activeTreaties = []
+        diplomacyManager.diplomaticEvents = []
+        publicOpinionManager.pollHistory = []
+        publicOpinionManager.mediaCoverage = []
+        publicOpinionManager.currentPoll = nil
     }
 }
+
