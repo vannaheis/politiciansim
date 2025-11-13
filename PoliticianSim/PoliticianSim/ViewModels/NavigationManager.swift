@@ -18,6 +18,7 @@ class NavigationManager: ObservableObject {
         // Character
         case profile = "Profile"
         case stats = "Stats"
+        case education = "Education"
 
         // Political Career
         case position = "Position"
@@ -41,6 +42,7 @@ class NavigationManager: ObservableObject {
             case .home: return "house.fill"
             case .profile: return "person.fill"
             case .stats: return "chart.bar.fill"
+            case .education: return "book.fill"
             case .position: return "star.fill"
             case .elections: return "checkmark.seal.fill"
             case .campaigns: return "megaphone.fill"
@@ -56,7 +58,7 @@ class NavigationManager: ObservableObject {
         var section: MenuSection {
             switch self {
             case .home: return .none
-            case .profile, .stats: return .character
+            case .profile, .stats, .education: return .character
             case .position, .elections, .campaigns: return .career
             case .policies, .budget, .laws: return .governance
             case .diplomacy, .publicOpinion: return .relations

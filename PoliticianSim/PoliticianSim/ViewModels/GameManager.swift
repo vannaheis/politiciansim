@@ -23,6 +23,7 @@ class GameManager: ObservableObject {
     @Published var lawsManager = LawsManager()
     @Published var diplomacyManager = DiplomacyManager()
     @Published var publicOpinionManager = PublicOpinionManager()
+    @Published var educationManager = EducationManager()
     let saveManager = SaveManager.shared
 
     // Game state
@@ -113,6 +114,12 @@ class GameManager: ObservableObject {
             .store(in: &cancellables)
 
         publicOpinionManager.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
+
+        educationManager.objectWillChange
             .sink { [weak self] _ in
                 self?.objectWillChange.send()
             }
@@ -308,6 +315,7 @@ class GameManager: ObservableObject {
         publicOpinionManager.pollHistory = []
         publicOpinionManager.mediaCoverage = []
         publicOpinionManager.currentPoll = nil
+        educationManager.enrollmentStatus = EnrollmentStatus()
     }
 }
 

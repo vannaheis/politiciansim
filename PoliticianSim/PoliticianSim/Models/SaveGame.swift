@@ -44,6 +44,7 @@ struct SaveGame: Codable {
     let pollHistory: [OpinionPoll]
     let mediaCoverage: [MediaCoverage]
     let socialMetrics: SocialMediaMetrics
+    let enrollmentStatus: EnrollmentStatus
 
     init(gameManager: GameManager) {
         self.id = UUID()
@@ -96,6 +97,9 @@ struct SaveGame: Codable {
         self.pollHistory = gameManager.publicOpinionManager.pollHistory
         self.mediaCoverage = gameManager.publicOpinionManager.mediaCoverage
         self.socialMetrics = gameManager.publicOpinionManager.socialMetrics
+
+        // Education
+        self.enrollmentStatus = gameManager.educationManager.enrollmentStatus
     }
 
     func restore(to gameManager: GameManager) {
@@ -143,6 +147,9 @@ struct SaveGame: Codable {
         gameManager.publicOpinionManager.pollHistory = pollHistory
         gameManager.publicOpinionManager.mediaCoverage = mediaCoverage
         gameManager.publicOpinionManager.socialMetrics = socialMetrics
+
+        // Restore education
+        gameManager.educationManager.enrollmentStatus = enrollmentStatus
     }
 }
 

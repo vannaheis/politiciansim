@@ -73,6 +73,10 @@
 		7C6E453B2EC59569005F7A3D /* PublicOpinionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E45392EC59569005F7A3D /* PublicOpinionView.swift */; };
 		7C6E453D2EC59BBC005F7A3D /* SaveManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E453C2EC59BBC005F7A3D /* SaveManager.swift */; };
 		7C6E453F2EC59BC8005F7A3D /* SaveGame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E453E2EC59BC8005F7A3D /* SaveGame.swift */; };
+		7C6E45412EC684BF005F7A3D /* Education.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E45402EC684BF005F7A3D /* Education.swift */; };
+		7C6E45432EC684D4005F7A3D /* EducationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E45422EC684D4005F7A3D /* EducationManager.swift */; };
+		7C6E45472EC684EA005F7A3D /* EnrollmentSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E45452EC684EA005F7A3D /* EnrollmentSheet.swift */; };
+		7C6E45482EC684EA005F7A3D /* EducationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E45442EC684EA005F7A3D /* EducationView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -143,6 +147,10 @@
 		7C6E45392EC59569005F7A3D /* PublicOpinionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublicOpinionView.swift; sourceTree = "<group>"; };
 		7C6E453C2EC59BBC005F7A3D /* SaveManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveManager.swift; sourceTree = "<group>"; };
 		7C6E453E2EC59BC8005F7A3D /* SaveGame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveGame.swift; sourceTree = "<group>"; };
+		7C6E45402EC684BF005F7A3D /* Education.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Education.swift; sourceTree = "<group>"; };
+		7C6E45422EC684D4005F7A3D /* EducationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EducationManager.swift; sourceTree = "<group>"; };
+		7C6E45442EC684EA005F7A3D /* EducationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EducationView.swift; sourceTree = "<group>"; };
+		7C6E45452EC684EA005F7A3D /* EnrollmentSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnrollmentSheet.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -211,6 +219,7 @@
 				7C6E45312EC58E2B005F7A3D /* Diplomacy.swift */,
 				7C6E45372EC5955F005F7A3D /* PublicOpinion.swift */,
 				7C6E453E2EC59BC8005F7A3D /* SaveGame.swift */,
+				7C6E45402EC684BF005F7A3D /* Education.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -229,6 +238,7 @@
 				7C6E451B2EC55F20005F7A3D /* PolicyManager.swift */,
 				7C6E45232EC57F3C005F7A3D /* BudgetManager.swift */,
 				7C6E45292EC58543005F7A3D /* LawsManager.swift */,
+				7C6E45422EC684D4005F7A3D /* EducationManager.swift */,
 				7C6E45332EC58E41005F7A3D /* DiplomacyManager.swift */,
 				7C6E45352EC59552005F7A3D /* PublicOpinionManager.swift */,
 				7C6E453C2EC59BBC005F7A3D /* SaveManager.swift */,
@@ -239,6 +249,7 @@
 		313 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				7C6E45462EC684EA005F7A3D /* Education */,
 				7C6E453A2EC59569005F7A3D /* PublicOpinion */,
 				7C6E452F2EC58E22005F7A3D /* Diplomacy */,
 				7C6E452C2EC5854E005F7A3D /* Laws */,
@@ -413,6 +424,15 @@
 			path = PublicOpinion;
 			sourceTree = "<group>";
 		};
+		7C6E45462EC684EA005F7A3D /* Education */ = {
+			isa = PBXGroup;
+			children = (
+				7C6E45442EC684EA005F7A3D /* EducationView.swift */,
+				7C6E45452EC684EA005F7A3D /* EnrollmentSheet.swift */,
+			);
+			path = Education;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -483,6 +503,7 @@
 			files = (
 				001 /* PoliticianSimApp.swift in Sources */,
 				002 /* ContentView.swift in Sources */,
+				7C6E45412EC684BF005F7A3D /* Education.swift in Sources */,
 				7C6E450E2EC54B3E005F7A3D /* EventDialog.swift in Sources */,
 				7C6E45152EC5532D005F7A3D /* CampaignView.swift in Sources */,
 				7C6E451A2EC55F08005F7A3D /* Policy.swift in Sources */,
@@ -495,12 +516,15 @@
 				007 /* Country.swift in Sources */,
 				008 /* GameManager.swift in Sources */,
 				009 /* CharacterManager.swift in Sources */,
+				7C6E45432EC684D4005F7A3D /* EducationManager.swift in Sources */,
 				010 /* StatManager.swift in Sources */,
 				7C6E45222EC57F2B005F7A3D /* BudgetView.swift in Sources */,
 				011 /* TimeManager.swift in Sources */,
 				012 /* NavigationManager.swift in Sources */,
 				013 /* Constants.swift in Sources */,
 				7C6E45122EC5530A005F7A3D /* ElectionManager.swift in Sources */,
+				7C6E45472EC684EA005F7A3D /* EnrollmentSheet.swift in Sources */,
+				7C6E45482EC684EA005F7A3D /* EducationView.swift in Sources */,
 				7C6E452D2EC5854E005F7A3D /* LawsView.swift in Sources */,
 				015 /* StandardBackgroundView.swift in Sources */,
 				016 /* StatCard.swift in Sources */,

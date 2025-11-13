@@ -37,6 +37,8 @@ struct MainGameRouter: View {
                 ProfileView()
             case .stats:
                 StatsView()
+            case .education:
+                EducationView()
             case .position:
                 PositionView()
             case .settings:
