@@ -37,15 +37,14 @@ struct Campaign: Codable, Identifiable {
         self.pollNumbers = 0
     }
 
-    var daysRemaining: Int {
+    func daysRemaining(from currentDate: Date) -> Int {
         let calendar = Calendar.current
-        let now = Date()
-        let components = calendar.dateComponents([.day], from: now, to: endDate)
+        let components = calendar.dateComponents([.day], from: currentDate, to: endDate)
         return max(0, components.day ?? 0)
     }
 
-    var isActive: Bool {
-        return status == .active && Date() < endDate
+    func isActive(on currentDate: Date) -> Bool {
+        return status == .active && currentDate < endDate
     }
 }
 
@@ -146,16 +145,15 @@ struct Election: Codable, Identifiable {
         self.voterTurnout = 0
     }
 
-    var daysUntilElection: Int {
+    func daysUntilElection(from currentDate: Date) -> Int {
         let calendar = Calendar.current
-        let now = Date()
-        let components = calendar.dateComponents([.day], from: now, to: electionDate)
+        let components = calendar.dateComponents([.day], from: currentDate, to: electionDate)
         return max(0, components.day ?? 0)
     }
 
-    var isElectionDay: Bool {
+    func isElectionDay(on currentDate: Date) -> Bool {
         let calendar = Calendar.current
-        return calendar.isDateInToday(electionDate)
+        return calendar.isDate(currentDate, inSameDayAs: electionDate)
     }
 }
 

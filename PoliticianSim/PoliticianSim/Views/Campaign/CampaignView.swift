@@ -144,7 +144,7 @@ struct CampaignStatusCard: View {
                     .font(.system(size: 14))
                     .foregroundColor(Constants.Colors.secondaryText)
 
-                Text("\(campaign.daysRemaining) days until election")
+                Text("\(campaign.daysRemaining(from: character.currentDate)) days until election")
                     .font(.system(size: 13))
                     .foregroundColor(Constants.Colors.secondaryText)
             }

@@ -158,7 +158,14 @@ class GameManager: ObservableObject {
                 self.gameState.activeEvent = event
             }
 
-            return updatedChar
+            // Check for election day
+            self.checkForElectionDay(character: updatedChar)
+
+            // Process active opinion actions
+            var charWithOpinion = updatedChar
+            self.publicOpinionManager.processActiveActions(character: &charWithOpinion, currentDate: updatedChar.currentDate)
+
+            return charWithOpinion
         }
 
         characterManager.updateCharacter(character)
@@ -183,7 +190,14 @@ class GameManager: ObservableObject {
                 self.gameState.activeEvent = event
             }
 
-            return updatedChar
+            // Check for election day
+            self.checkForElectionDay(character: updatedChar)
+
+            // Process active opinion actions
+            var charWithOpinion = updatedChar
+            self.publicOpinionManager.processActiveActions(character: &charWithOpinion, currentDate: updatedChar.currentDate)
+
+            return charWithOpinion
         }
 
         characterManager.updateCharacter(character)
@@ -227,6 +241,17 @@ class GameManager: ObservableObject {
     func dismissEvent() {
         eventEngine.dismissEvent()
         gameState.activeEvent = nil
+    }
+
+    // MARK: - Election Operations
+
+    private func checkForElectionDay(character: Character) {
+        guard let election = electionManager.upcomingElection else { return }
+
+        if election.isElectionDay(on: character.currentDate) {
+            // Automatically simulate the election
+            _ = electionManager.simulateElection(character: character)
+        }
     }
 
     // MARK: - Navigation

@@ -49,7 +49,7 @@ struct ElectionsView: View {
                                 UpcomingElectionCard(election: election, character: character)
 
                                 // Run election button
-                                if election.daysUntilElection <= 0 {
+                                if election.daysUntilElection(from: character.currentDate) <= 0 {
                                     RunElectionButton(election: election)
                                 }
                             }
@@ -119,8 +119,8 @@ struct UpcomingElectionCard: View {
                     .font(.system(size: 14))
                     .foregroundColor(Constants.Colors.secondaryText)
 
-                if election.daysUntilElection > 0 {
-                    Text("\(election.daysUntilElection) days until election day")
+                if election.daysUntilElection(from: character.currentDate) > 0 {
+                    Text("\(election.daysUntilElection(from: character.currentDate)) days until election day")
                         .font(.system(size: 13))
                         .foregroundColor(Constants.Colors.secondaryText)
                 } else {
