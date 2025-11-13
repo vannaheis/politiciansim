@@ -49,6 +49,8 @@ struct MainGameRouter: View {
                 PoliciesView()
             case .budget:
                 BudgetView()
+            case .laws:
+                LawsView()
             default:
                 // Placeholder for other views
                 PlaceholderView(viewName: gameManager.navigationManager.currentView.rawValue)

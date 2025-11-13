@@ -62,6 +62,9 @@
 		7C6E45222EC57F2B005F7A3D /* BudgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E45202EC57F2B005F7A3D /* BudgetView.swift */; };
 		7C6E45242EC57F3C005F7A3D /* BudgetManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E45232EC57F3C005F7A3D /* BudgetManager.swift */; };
 		7C6E45262EC57F4D005F7A3D /* Budget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E45252EC57F4D005F7A3D /* Budget.swift */; };
+		7C6E45282EC58536005F7A3D /* Law.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E45272EC58536005F7A3D /* Law.swift */; };
+		7C6E452A2EC58543005F7A3D /* LawsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E45292EC58543005F7A3D /* LawsManager.swift */; };
+		7C6E452D2EC5854E005F7A3D /* LawsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E452B2EC5854E005F7A3D /* LawsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -121,6 +124,9 @@
 		7C6E45202EC57F2B005F7A3D /* BudgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetView.swift; sourceTree = "<group>"; };
 		7C6E45232EC57F3C005F7A3D /* BudgetManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetManager.swift; sourceTree = "<group>"; };
 		7C6E45252EC57F4D005F7A3D /* Budget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Budget.swift; sourceTree = "<group>"; };
+		7C6E45272EC58536005F7A3D /* Law.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Law.swift; sourceTree = "<group>"; };
+		7C6E45292EC58543005F7A3D /* LawsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LawsManager.swift; sourceTree = "<group>"; };
+		7C6E452B2EC5854E005F7A3D /* LawsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LawsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -185,6 +191,7 @@
 				107 /* Country.swift */,
 				7C6E45192EC55F08005F7A3D /* Policy.swift */,
 				7C6E45252EC57F4D005F7A3D /* Budget.swift */,
+				7C6E45272EC58536005F7A3D /* Law.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -202,6 +209,7 @@
 				7C6E45112EC5530A005F7A3D /* ElectionManager.swift */,
 				7C6E451B2EC55F20005F7A3D /* PolicyManager.swift */,
 				7C6E45232EC57F3C005F7A3D /* BudgetManager.swift */,
+				7C6E45292EC58543005F7A3D /* LawsManager.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -209,6 +217,7 @@
 		313 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				7C6E452C2EC5854E005F7A3D /* Laws */,
 				7C6E45212EC57F2B005F7A3D /* Budget */,
 				7C6E451E2EC55F37005F7A3D /* Policies */,
 				7C6E45172EC55337005F7A3D /* Elections */,
@@ -356,6 +365,14 @@
 			path = Budget;
 			sourceTree = "<group>";
 		};
+		7C6E452C2EC5854E005F7A3D /* Laws */ = {
+			isa = PBXGroup;
+			children = (
+				7C6E452B2EC5854E005F7A3D /* LawsView.swift */,
+			);
+			path = Laws;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -430,6 +447,7 @@
 				7C6E45152EC5532D005F7A3D /* CampaignView.swift in Sources */,
 				7C6E451A2EC55F08005F7A3D /* Policy.swift in Sources */,
 				003 /* Character.swift in Sources */,
+				7C6E452A2EC58543005F7A3D /* LawsManager.swift in Sources */,
 				004 /* GameState.swift in Sources */,
 				005 /* Stats.swift in Sources */,
 				006 /* Event.swift in Sources */,
@@ -442,6 +460,7 @@
 				012 /* NavigationManager.swift in Sources */,
 				013 /* Constants.swift in Sources */,
 				7C6E45122EC5530A005F7A3D /* ElectionManager.swift in Sources */,
+				7C6E452D2EC5854E005F7A3D /* LawsView.swift in Sources */,
 				015 /* StandardBackgroundView.swift in Sources */,
 				016 /* StatCard.swift in Sources */,
 				017 /* InfoCard.swift in Sources */,
@@ -467,6 +486,7 @@
 				032 /* CharacterSummaryView.swift in Sources */,
 				033 /* CharacterCreationContainerView.swift in Sources */,
 				034 /* HomeView.swift in Sources */,
+				7C6E45282EC58536005F7A3D /* Law.swift in Sources */,
 				035 /* DateDisplayView.swift in Sources */,
 				036 /* CharacterOverviewCard.swift in Sources */,
 				037 /* QuickStatsView.swift in Sources */,
