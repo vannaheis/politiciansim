@@ -45,6 +45,8 @@ struct MainGameRouter: View {
                 CampaignView()
             case .elections:
                 ElectionsView()
+            case .policies:
+                PoliciesView()
             default:
                 // Placeholder for other views
                 PlaceholderView(viewName: gameManager.navigationManager.currentView.rawValue)

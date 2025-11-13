@@ -18,6 +18,7 @@ class GameManager: ObservableObject {
     @Published var navigationManager = NavigationManager()
     @Published var eventEngine = EventEngine()
     @Published var electionManager = ElectionManager()
+    @Published var policyManager = PolicyManager()
 
     // Game state
     @Published var gameState: GameState
@@ -71,6 +72,12 @@ class GameManager: ObservableObject {
             .store(in: &cancellables)
 
         electionManager.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
+
+        policyManager.objectWillChange
             .sink { [weak self] _ in
                 self?.objectWillChange.send()
             }

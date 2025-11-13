@@ -56,6 +56,9 @@
 		7C6E45122EC5530A005F7A3D /* ElectionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E45112EC5530A005F7A3D /* ElectionManager.swift */; };
 		7C6E45152EC5532D005F7A3D /* CampaignView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E45132EC5532D005F7A3D /* CampaignView.swift */; };
 		7C6E45182EC55337005F7A3D /* ElectionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E45162EC55337005F7A3D /* ElectionsView.swift */; };
+		7C6E451A2EC55F08005F7A3D /* Policy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E45192EC55F08005F7A3D /* Policy.swift */; };
+		7C6E451C2EC55F20005F7A3D /* PolicyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E451B2EC55F20005F7A3D /* PolicyManager.swift */; };
+		7C6E451F2EC55F37005F7A3D /* PoliciesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E451D2EC55F37005F7A3D /* PoliciesView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -109,6 +112,9 @@
 		7C6E45112EC5530A005F7A3D /* ElectionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ElectionManager.swift; sourceTree = "<group>"; };
 		7C6E45132EC5532D005F7A3D /* CampaignView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CampaignView.swift; sourceTree = "<group>"; };
 		7C6E45162EC55337005F7A3D /* ElectionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ElectionsView.swift; sourceTree = "<group>"; };
+		7C6E45192EC55F08005F7A3D /* Policy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Policy.swift; sourceTree = "<group>"; };
+		7C6E451B2EC55F20005F7A3D /* PolicyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PolicyManager.swift; sourceTree = "<group>"; };
+		7C6E451D2EC55F37005F7A3D /* PoliciesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PoliciesView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -171,6 +177,7 @@
 				105 /* Stats.swift */,
 				106 /* Event.swift */,
 				107 /* Country.swift */,
+				7C6E45192EC55F08005F7A3D /* Policy.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -186,6 +193,7 @@
 				112 /* NavigationManager.swift */,
 				128 /* CharacterCreationViewModel.swift */,
 				7C6E45112EC5530A005F7A3D /* ElectionManager.swift */,
+				7C6E451B2EC55F20005F7A3D /* PolicyManager.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -193,6 +201,7 @@
 		313 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				7C6E451E2EC55F37005F7A3D /* Policies */,
 				7C6E45172EC55337005F7A3D /* Elections */,
 				7C6E45142EC5532D005F7A3D /* Campaign */,
 				317 /* Components */,
@@ -322,6 +331,14 @@
 			path = Elections;
 			sourceTree = "<group>";
 		};
+		7C6E451E2EC55F37005F7A3D /* Policies */ = {
+			isa = PBXGroup;
+			children = (
+				7C6E451D2EC55F37005F7A3D /* PoliciesView.swift */,
+			);
+			path = Policies;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -394,6 +411,7 @@
 				002 /* ContentView.swift in Sources */,
 				7C6E450E2EC54B3E005F7A3D /* EventDialog.swift in Sources */,
 				7C6E45152EC5532D005F7A3D /* CampaignView.swift in Sources */,
+				7C6E451A2EC55F08005F7A3D /* Policy.swift in Sources */,
 				003 /* Character.swift in Sources */,
 				004 /* GameState.swift in Sources */,
 				005 /* Stats.swift in Sources */,
@@ -413,6 +431,7 @@
 				019 /* Badge.swift in Sources */,
 				020 /* PrimaryButton.swift in Sources */,
 				021 /* SecondaryButton.swift in Sources */,
+				7C6E451F2EC55F37005F7A3D /* PoliciesView.swift in Sources */,
 				022 /* IconButton.swift in Sources */,
 				7C6E450C2EC54B25005F7A3D /* EventEngine.swift in Sources */,
 				023 /* StatDisplay.swift in Sources */,
@@ -420,6 +439,7 @@
 				025 /* NavigationBar.swift in Sources */,
 				026 /* EventCard.swift in Sources */,
 				027 /* ChoiceButton.swift in Sources */,
+				7C6E451C2EC55F20005F7A3D /* PolicyManager.swift in Sources */,
 				028 /* CharacterCreationViewModel.swift in Sources */,
 				029 /* CountrySelectionView.swift in Sources */,
 				030 /* CharacterDetailsView.swift in Sources */,

@@ -114,34 +114,6 @@ class GameState: ObservableObject, Codable {
     }
 }
 
-// MARK: - Policy Model
-
-struct Policy: Codable, Identifiable {
-    let id: UUID
-    let title: String
-    let description: String
-    let category: PolicyCategory
-    let enactedDate: Date
-    var isActive: Bool
-
-    enum PolicyCategory: String, Codable {
-        case economic = "Economic"
-        case social = "Social"
-        case environmental = "Environmental"
-        case criminalJustice = "Criminal Justice"
-        case foreign = "Foreign"
-    }
-
-    init(title: String, description: String, category: PolicyCategory, enactedDate: Date) {
-        self.id = UUID()
-        self.title = title
-        self.description = description
-        self.category = category
-        self.enactedDate = enactedDate
-        self.isActive = true
-    }
-}
-
 // MARK: - Scandal Risk Model
 
 struct ScandalRisk: Codable, Identifiable {
