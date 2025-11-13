@@ -68,6 +68,9 @@
 		7C6E45302EC58E22005F7A3D /* DiplomacyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E452E2EC58E22005F7A3D /* DiplomacyView.swift */; };
 		7C6E45322EC58E2C005F7A3D /* Diplomacy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E45312EC58E2B005F7A3D /* Diplomacy.swift */; };
 		7C6E45342EC58E41005F7A3D /* DiplomacyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E45332EC58E41005F7A3D /* DiplomacyManager.swift */; };
+		7C6E45362EC59553005F7A3D /* PublicOpinionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E45352EC59552005F7A3D /* PublicOpinionManager.swift */; };
+		7C6E45382EC5955F005F7A3D /* PublicOpinion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E45372EC5955F005F7A3D /* PublicOpinion.swift */; };
+		7C6E453B2EC59569005F7A3D /* PublicOpinionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E45392EC59569005F7A3D /* PublicOpinionView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -133,6 +136,9 @@
 		7C6E452E2EC58E22005F7A3D /* DiplomacyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiplomacyView.swift; sourceTree = "<group>"; };
 		7C6E45312EC58E2B005F7A3D /* Diplomacy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Diplomacy.swift; sourceTree = "<group>"; };
 		7C6E45332EC58E41005F7A3D /* DiplomacyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiplomacyManager.swift; sourceTree = "<group>"; };
+		7C6E45352EC59552005F7A3D /* PublicOpinionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublicOpinionManager.swift; sourceTree = "<group>"; };
+		7C6E45372EC5955F005F7A3D /* PublicOpinion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublicOpinion.swift; sourceTree = "<group>"; };
+		7C6E45392EC59569005F7A3D /* PublicOpinionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublicOpinionView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -199,6 +205,7 @@
 				7C6E45252EC57F4D005F7A3D /* Budget.swift */,
 				7C6E45272EC58536005F7A3D /* Law.swift */,
 				7C6E45312EC58E2B005F7A3D /* Diplomacy.swift */,
+				7C6E45372EC5955F005F7A3D /* PublicOpinion.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -218,6 +225,7 @@
 				7C6E45232EC57F3C005F7A3D /* BudgetManager.swift */,
 				7C6E45292EC58543005F7A3D /* LawsManager.swift */,
 				7C6E45332EC58E41005F7A3D /* DiplomacyManager.swift */,
+				7C6E45352EC59552005F7A3D /* PublicOpinionManager.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -225,6 +233,7 @@
 		313 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				7C6E453A2EC59569005F7A3D /* PublicOpinion */,
 				7C6E452F2EC58E22005F7A3D /* Diplomacy */,
 				7C6E452C2EC5854E005F7A3D /* Laws */,
 				7C6E45212EC57F2B005F7A3D /* Budget */,
@@ -390,6 +399,14 @@
 			path = Diplomacy;
 			sourceTree = "<group>";
 		};
+		7C6E453A2EC59569005F7A3D /* PublicOpinion */ = {
+			isa = PBXGroup;
+			children = (
+				7C6E45392EC59569005F7A3D /* PublicOpinionView.swift */,
+			);
+			path = PublicOpinion;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -485,6 +502,7 @@
 				018 /* ProgressBar.swift in Sources */,
 				019 /* Badge.swift in Sources */,
 				020 /* PrimaryButton.swift in Sources */,
+				7C6E45382EC5955F005F7A3D /* PublicOpinion.swift in Sources */,
 				021 /* SecondaryButton.swift in Sources */,
 				7C6E451F2EC55F37005F7A3D /* PoliciesView.swift in Sources */,
 				022 /* IconButton.swift in Sources */,
@@ -496,6 +514,7 @@
 				7C6E45262EC57F4D005F7A3D /* Budget.swift in Sources */,
 				026 /* EventCard.swift in Sources */,
 				7C6E45322EC58E2C005F7A3D /* Diplomacy.swift in Sources */,
+				7C6E45362EC59553005F7A3D /* PublicOpinionManager.swift in Sources */,
 				027 /* ChoiceButton.swift in Sources */,
 				7C6E451C2EC55F20005F7A3D /* PolicyManager.swift in Sources */,
 				028 /* CharacterCreationViewModel.swift in Sources */,
@@ -517,6 +536,7 @@
 				042 /* PositionView.swift in Sources */,
 				7C6E45102EC552FB005F7A3D /* Campaign.swift in Sources */,
 				043 /* SettingsView.swift in Sources */,
+				7C6E453B2EC59569005F7A3D /* PublicOpinionView.swift in Sources */,
 				7C6E45182EC55337005F7A3D /* ElectionsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
