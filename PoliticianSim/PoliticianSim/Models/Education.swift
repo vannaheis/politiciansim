@@ -204,7 +204,7 @@ enum InstitutionType: String, Codable {
 
 // MARK: - Educational Institution
 
-struct EducationalInstitution: Codable, Identifiable {
+struct EducationalInstitution: Codable, Identifiable, Equatable {
     let id: UUID
     let name: String
     let type: InstitutionType
@@ -217,6 +217,10 @@ struct EducationalInstitution: Codable, Identifiable {
         self.type = type
         self.location = location
         self.prestige = min(10, max(1, prestige))
+    }
+
+    static func == (lhs: EducationalInstitution, rhs: EducationalInstitution) -> Bool {
+        return lhs.id == rhs.id
     }
 
     func costPerYear() -> Decimal {

@@ -73,6 +73,9 @@ struct EducationView: View {
                     .padding(.vertical, 16)
                 }
             }
+
+            // Side menu overlay
+            SideMenuView(isOpen: $gameManager.navigationManager.isMenuOpen)
         }
     }
 }

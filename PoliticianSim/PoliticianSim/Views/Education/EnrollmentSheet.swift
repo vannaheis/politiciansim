@@ -45,45 +45,55 @@ struct EnrollmentSheet: View {
                 .padding(.horizontal, 20)
                 .padding(.top, 16)
 
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 20) {
-                        // Degree Level Selection
-                        DegreeLevelSection(selectedLevel: $selectedLevel)
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 20) {
+                            // Degree Level Selection
+                            DegreeLevelSection(selectedLevel: $selectedLevel)
 
-                        // Field of Study Selection
-                        FieldOfStudySection(selectedLevel: selectedLevel, selectedField: $selectedField)
+                            // Field of Study Selection
+                            FieldOfStudySection(selectedLevel: selectedLevel, selectedField: $selectedField)
 
-                        // Institution Selection
-                        InstitutionSection(
-                            selectedLevel: selectedLevel,
-                            selectedInstitution: $selectedInstitution,
-                            character: character
-                        )
-
-                        // Payment Options
-                        if let institution = selectedInstitution {
-                            PaymentOptionsSection(
-                                institution: institution,
+                            // Institution Selection
+                            InstitutionSection(
                                 selectedLevel: selectedLevel,
-                                useLoans: $useLoans,
+                                selectedInstitution: $selectedInstitution,
                                 character: character
                             )
 
-                            // Enroll Button
-                            EnrollButton(
-                                selectedLevel: selectedLevel,
-                                selectedField: selectedField,
-                                institution: institution,
-                                useLoans: useLoans,
-                                character: character,
-                                showConfirmation: $showConfirmation,
-                                enrollmentMessage: $enrollmentMessage,
-                                isPresented: $isPresented
-                            )
+                            // Payment Options
+                            if let institution = selectedInstitution {
+                                PaymentOptionsSection(
+                                    institution: institution,
+                                    selectedLevel: selectedLevel,
+                                    useLoans: $useLoans,
+                                    character: character
+                                )
+                                .id("payment")
+
+                                // Enroll Button
+                                EnrollButton(
+                                    selectedLevel: selectedLevel,
+                                    selectedField: selectedField,
+                                    institution: institution,
+                                    useLoans: useLoans,
+                                    character: character,
+                                    showConfirmation: $showConfirmation,
+                                    enrollmentMessage: $enrollmentMessage,
+                                    isPresented: $isPresented
+                                )
+                            }
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 16)
+                    }
+                    .onChange(of: selectedInstitution) { newValue in
+                        if newValue != nil {
+                            withAnimation {
+                                proxy.scrollTo("payment", anchor: .top)
+                            }
                         }
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 16)
                 }
             }
         }
