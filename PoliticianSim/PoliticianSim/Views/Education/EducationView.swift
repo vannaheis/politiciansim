@@ -22,22 +22,25 @@ struct EducationView: View {
                 // Top header with menu button
                 HStack {
                     Button(action: {
-                        gameManager.navigationManager.toggleMenu()
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            gameManager.navigationManager.toggleMenu()
+                        }
                     }) {
                         Image(systemName: "line.3.horizontal")
-                            .font(.system(size: 20))
+                            .font(.system(size: 24, weight: .medium))
                             .foregroundColor(.white)
+                            .frame(width: 44, height: 44)
                     }
 
                     Spacer()
 
                     Text("Education")
-                        .font(.system(size: Constants.Typography.pageTitleSize, weight: .bold))
+                        .font(.system(size: 18, weight: .bold))
                         .foregroundColor(.white)
 
                     Spacer()
 
-                    Color.clear.frame(width: 44)
+                    Color.clear.frame(width: 44, height: 44)
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 16)
