@@ -30,6 +30,7 @@ struct EnrollmentSheet: View {
                         isPresented = false
                     }
                     .foregroundColor(Constants.Colors.accent)
+                    .frame(height: 44)
 
                     Spacer()
 
@@ -39,7 +40,7 @@ struct EnrollmentSheet: View {
 
                     Spacer()
 
-                    Color.clear.frame(width: 60)
+                    Color.clear.frame(width: 60, height: 44)
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 16)
