@@ -38,6 +38,9 @@ class GameManager: ObservableObject {
     private init() {
         self.gameState = GameState()
 
+        // Load autosave if available
+        _ = saveManager.loadAutosave(to: self)
+
         // Start autosave
         saveManager.startAutosave(gameManager: self)
 

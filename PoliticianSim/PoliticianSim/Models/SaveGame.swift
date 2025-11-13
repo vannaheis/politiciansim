@@ -159,6 +159,17 @@ struct SaveSlotInfo: Codable, Identifiable {
     let approvalRating: Double?
     let gameDate: Date?
 
+    enum CodingKeys: String, CodingKey {
+        case slotNumber
+        case isEmpty
+        case saveDate
+        case gameName
+        case characterName
+        case currentPosition
+        case approvalRating
+        case gameDate
+    }
+
     static func empty(slot: Int) -> SaveSlotInfo {
         SaveSlotInfo(
             slotNumber: slot,

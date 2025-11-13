@@ -17,8 +17,8 @@ class SaveManager: ObservableObject {
 
     private var autosaveTimer: Timer?
     private let fileManager = FileManager.default
-    private let encoder = JSONEncoder()
-    private let decoder = JSONDecoder()
+    private let encoder: JSONEncoder
+    private let decoder: JSONDecoder
 
     // File paths
     private var documentsDirectory: URL {
@@ -42,11 +42,16 @@ class SaveManager: ObservableObject {
     }
 
     init() {
+        // Initialize encoder/decoder with date strategies
+        encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+
+        decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+
         createSavesDirectory()
         loadSlotInfo()
         checkAutosave()
-        encoder.dateEncodingStrategy = .iso8601
-        decoder.dateDecodingStrategy = .iso8601
     }
 
     // MARK: - Setup
@@ -77,7 +82,10 @@ class SaveManager: ObservableObject {
 
     private func performAutosave(gameManager: GameManager) {
         // Only autosave if there's a character
-        guard gameManager.characterManager.character != nil else { return }
+        guard gameManager.characterManager.character != nil else {
+            print("Autosave skipped: No character")
+            return
+        }
 
         let saveGame = SaveGame(gameManager: gameManager)
 
@@ -86,8 +94,9 @@ class SaveManager: ObservableObject {
             try data.write(to: autosaveURL())
             lastAutosaveDate = Date()
             hasAutosave = true
+            print("Autosave successful at \(Date())")
         } catch {
-            print("Autosave failed: \(error.localizedDescription)")
+            print("Autosave failed: \(error)")
         }
     }
 
@@ -95,16 +104,24 @@ class SaveManager: ObservableObject {
         let url = autosaveURL()
 
         guard fileManager.fileExists(atPath: url.path) else {
+            print("No autosave file found")
             return false
         }
+
+        print("Loading autosave from: \(url.path)")
 
         do {
             let data = try Data(contentsOf: url)
             let saveGame = try decoder.decode(SaveGame.self, from: data)
             saveGame.restore(to: gameManager)
+            print("Autosave loaded successfully: \(saveGame.characterName) at \(saveGame.currentPosition)")
             return true
         } catch {
-            print("Load autosave failed: \(error.localizedDescription)")
+            print("Load autosave failed: \(error)")
+            // Delete corrupted autosave
+            try? fileManager.removeItem(at: url)
+            hasAutosave = false
+            lastAutosaveDate = nil
             return false
         }
     }
@@ -165,7 +182,7 @@ class SaveManager: ObservableObject {
             saveGame.restore(to: gameManager)
             return true
         } catch {
-            print("Load from slot \(slot) failed: \(error.localizedDescription)")
+            print("Load from slot \(slot) failed: \(error)")
             return false
         }
     }
@@ -221,8 +238,11 @@ class SaveManager: ObservableObject {
             }
             saveSlots.sort { $0.slotNumber < $1.slotNumber }
         } catch {
-            print("Load slot info failed: \(error.localizedDescription)")
+            print("Load slot info failed: \(error)")
+            // Delete corrupted file and start fresh
+            try? fileManager.removeItem(at: url)
             saveSlots = (1...4).map { SaveSlotInfo.empty(slot: $0) }
+            saveSlotInfo() // Save fresh slot info
         }
     }
 
@@ -257,5 +277,24 @@ class SaveManager: ObservableObject {
         }
 
         saveSlots = (1...4).map { SaveSlotInfo.empty(slot: $0) }
+    }
+
+    func clearAllSaveData() {
+        // Delete all save files including corrupted ones
+        deleteAutosave()
+
+        // Delete all slot files
+        for slot in 1...4 {
+            let url = slotURL(slot: slot)
+            try? fileManager.removeItem(at: url)
+        }
+
+        // Delete slot info file
+        let slotInfoUrl = slotInfoURL()
+        try? fileManager.removeItem(at: slotInfoUrl)
+
+        // Recreate fresh slots
+        saveSlots = (1...4).map { SaveSlotInfo.empty(slot: $0) }
+        saveSlotInfo()
     }
 }
