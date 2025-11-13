@@ -26,20 +26,23 @@ struct LawsView: View {
             StandardBackgroundView()
 
             VStack(spacing: 0) {
-                // Header
+                // Top header
                 HStack {
                     Button(action: {
-                        gameManager.navigationManager.toggleMenu()
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            gameManager.navigationManager.toggleMenu()
+                        }
                     }) {
                         Image(systemName: "line.3.horizontal")
-                            .font(.system(size: 20))
+                            .font(.system(size: 24, weight: .medium))
                             .foregroundColor(.white)
+                            .frame(width: 44, height: 44)
                     }
 
                     Spacer()
 
-                    Text("Legislative Affairs")
-                        .font(.system(size: Constants.Typography.pageTitleSize, weight: .bold))
+                    Text("Laws")
+                        .font(.system(size: 18, weight: .bold))
                         .foregroundColor(.white)
 
                     Spacer()
@@ -50,16 +53,21 @@ struct LawsView: View {
                         Image(systemName: "plus.circle.fill")
                             .font(.system(size: 24))
                             .foregroundColor(Constants.Colors.accent)
+                            .frame(width: 44, height: 44)
                     }
                 }
-                .padding()
-                .background(Constants.Colors.cardBackgroundDark)
-
-                // Session Summary
-                SessionSummaryBar()
+                .padding(.horizontal, 20)
+                .padding(.top, 16)
 
                 // Tab Selector
                 LawsTabSelector(selectedTab: $selectedTab)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 16)
+
+                // Session Summary
+                SessionSummaryBar()
+                    .padding(.horizontal, 20)
+                    .padding(.top, 12)
 
                 // Content
                 ScrollView {
@@ -75,7 +83,8 @@ struct LawsView: View {
                             RejectedLawsSection(selectedLaw: $selectedLaw)
                         }
                     }
-                    .padding()
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 20)
                 }
             }
 
@@ -111,9 +120,9 @@ struct SessionSummaryBar: View {
             SessionStatItem(label: "Passed", value: "\(summary.passed)", color: .green)
             SessionStatItem(label: "Rejected", value: "\(summary.rejected)", color: .red)
         }
-        .padding(.vertical, 12)
-        .padding(.horizontal)
-        .background(Color.black.opacity(0.3))
+        .padding()
+        .background(Constants.Colors.cardBackground)
+        .cornerRadius(Constants.CornerRadius.card)
     }
 }
 
@@ -140,37 +149,39 @@ struct LawsTabSelector: View {
     @Binding var selectedTab: LawsView.LawsTab
 
     var body: some View {
-        HStack(spacing: 0) {
-            LawsTabButton(title: "Drafts", tab: .drafts, selectedTab: $selectedTab)
-            LawsTabButton(title: "Active", tab: .active, selectedTab: $selectedTab)
-            LawsTabButton(title: "Enacted", tab: .enacted, selectedTab: $selectedTab)
-            LawsTabButton(title: "Rejected", tab: .rejected, selectedTab: $selectedTab)
+        HStack(spacing: 8) {
+            LawsTabButton(title: "Drafts", isSelected: selectedTab == .drafts) {
+                selectedTab = .drafts
+            }
+            LawsTabButton(title: "Active", isSelected: selectedTab == .active) {
+                selectedTab = .active
+            }
+            LawsTabButton(title: "Enacted", isSelected: selectedTab == .enacted) {
+                selectedTab = .enacted
+            }
+            LawsTabButton(title: "Rejected", isSelected: selectedTab == .rejected) {
+                selectedTab = .rejected
+            }
         }
-        .background(Color.black.opacity(0.3))
-    }
-}
-
-struct LawsTabButton: View {
-    let title: String
-    let tab: LawsView.LawsTab
-    @Binding var selectedTab: LawsView.LawsTab
-
-    var isSelected: Bool {
-        selectedTab == tab
     }
 
-    var body: some View {
-        Button(action: {
-            selectedTab = tab
-        }) {
-            Text(title)
-                .font(.system(size: 14, weight: isSelected ? .bold : .regular))
-                .foregroundColor(isSelected ? Constants.Colors.accent : Constants.Colors.secondaryText)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
-                .background(
-                    isSelected ? Color.white.opacity(0.1) : Color.clear
-                )
+    struct LawsTabButton: View {
+        let title: String
+        let isSelected: Bool
+        let action: () -> Void
+
+        var body: some View {
+            Button(action: action) {
+                Text(title)
+                    .font(.system(size: 13, weight: isSelected ? .bold : .medium))
+                    .foregroundColor(isSelected ? .white : Constants.Colors.secondaryText)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(isSelected ? Constants.Colors.political.opacity(0.3) : Color.clear)
+                    )
+            }
         }
     }
 }
