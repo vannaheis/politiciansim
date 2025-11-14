@@ -45,6 +45,7 @@ struct SaveGame: Codable {
     let mediaCoverage: [MediaCoverage]
     let socialMetrics: SocialMediaMetrics
     let enrollmentStatus: EnrollmentStatus
+    let economicData: EconomicData
 
     init(gameManager: GameManager) {
         self.id = UUID()
@@ -100,6 +101,9 @@ struct SaveGame: Codable {
 
         // Education
         self.enrollmentStatus = gameManager.educationManager.enrollmentStatus
+
+        // Economic Data
+        self.economicData = gameManager.economicDataManager.economicData
     }
 
     func restore(to gameManager: GameManager) {
@@ -150,6 +154,9 @@ struct SaveGame: Codable {
 
         // Restore education
         gameManager.educationManager.enrollmentStatus = enrollmentStatus
+
+        // Restore economic data
+        gameManager.economicDataManager.economicData = economicData
     }
 }
 
