@@ -13,7 +13,7 @@ struct EnrollmentSheet: View {
     @Binding var isPresented: Bool
 
     @State private var selectedLevel: EducationLevel = .bachelors
-    @State private var selectedField: FieldOfStudy = .politicalScience
+    @State private var selectedField: FieldOfStudy?
     @State private var selectedInstitution: EducationalInstitution?
     @State private var useLoans: Bool = false
     @State private var showConfirmation = false
@@ -53,16 +53,20 @@ struct EnrollmentSheet: View {
 
                             // Field of Study Selection
                             FieldOfStudySection(selectedLevel: selectedLevel, selectedField: $selectedField)
+                                .id("fields")
 
                             // Institution Selection
-                            InstitutionSection(
-                                selectedLevel: selectedLevel,
-                                selectedInstitution: $selectedInstitution,
-                                character: character
-                            )
+                            if let _ = selectedField {
+                                InstitutionSection(
+                                    selectedLevel: selectedLevel,
+                                    selectedInstitution: $selectedInstitution,
+                                    character: character
+                                )
+                                .id("institutions")
+                            }
 
                             // Payment Options
-                            if let institution = selectedInstitution {
+                            if let institution = selectedInstitution, let field = selectedField {
                                 PaymentOptionsSection(
                                     institution: institution,
                                     selectedLevel: selectedLevel,
@@ -74,7 +78,7 @@ struct EnrollmentSheet: View {
                                 // Enroll Button
                                 EnrollButton(
                                     selectedLevel: selectedLevel,
-                                    selectedField: selectedField,
+                                    selectedField: field,
                                     institution: institution,
                                     useLoans: useLoans,
                                     character: character,
@@ -86,6 +90,13 @@ struct EnrollmentSheet: View {
                         }
                         .padding(.horizontal, 20)
                         .padding(.vertical, 16)
+                    }
+                    .onChange(of: selectedField) { newValue in
+                        if newValue != nil {
+                            withAnimation {
+                                proxy.scrollTo("institutions", anchor: .top)
+                            }
+                        }
                     }
                     .onChange(of: selectedInstitution) { newValue in
                         if newValue != nil {
@@ -164,7 +175,7 @@ struct DegreeLevelSection: View {
 struct FieldOfStudySection: View {
     @EnvironmentObject var gameManager: GameManager
     let selectedLevel: EducationLevel
-    @Binding var selectedField: FieldOfStudy
+    @Binding var selectedField: FieldOfStudy?
 
     var availableFields: [FieldOfStudy] {
         gameManager.educationManager.getAvailableFields(for: selectedLevel)

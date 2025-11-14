@@ -156,7 +156,11 @@ class EducationManager: ObservableObject {
     // MARK: - Dropout
 
     func dropOut(character: inout Character) -> Bool {
-        guard enrollmentStatus.isEnrolled else { return false }
+        guard enrollmentStatus.isEnrolled,
+              let _ = enrollmentStatus.currentDegree else { return false }
+
+        // Student loan debt already reflects only the years attended
+        // (debt is added year-by-year, not upfront for the entire degree)
 
         enrollmentStatus.isEnrolled = false
         enrollmentStatus.currentDegree = nil
