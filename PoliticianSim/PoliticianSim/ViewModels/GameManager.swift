@@ -39,91 +39,14 @@ class GameManager: ObservableObject {
     private init() {
         self.gameState = GameState()
 
+        // Setup objectWillChange forwarding
+        setupObjectWillChangeForwarding()
+
         // Load autosave if available
         _ = saveManager.loadAutosave(to: self)
 
         // Start autosave
         saveManager.startAutosave(gameManager: self)
-
-        // Sync character between managers
-        characterManager.$character
-            .sink { [weak self] character in
-                self?.gameState.character = character
-            }
-            .store(in: &cancellables)
-
-        // Forward changes from nested ObservableObjects to GameManager
-        characterManager.objectWillChange
-            .sink { [weak self] _ in
-                self?.objectWillChange.send()
-            }
-            .store(in: &cancellables)
-
-        statManager.objectWillChange
-            .sink { [weak self] _ in
-                self?.objectWillChange.send()
-            }
-            .store(in: &cancellables)
-
-        timeManager.objectWillChange
-            .sink { [weak self] _ in
-                self?.objectWillChange.send()
-            }
-            .store(in: &cancellables)
-
-        navigationManager.objectWillChange
-            .sink { [weak self] _ in
-                self?.objectWillChange.send()
-            }
-            .store(in: &cancellables)
-
-        eventEngine.objectWillChange
-            .sink { [weak self] _ in
-                self?.objectWillChange.send()
-            }
-            .store(in: &cancellables)
-
-        electionManager.objectWillChange
-            .sink { [weak self] _ in
-                self?.objectWillChange.send()
-            }
-            .store(in: &cancellables)
-
-        policyManager.objectWillChange
-            .sink { [weak self] _ in
-                self?.objectWillChange.send()
-            }
-            .store(in: &cancellables)
-
-        budgetManager.objectWillChange
-            .sink { [weak self] _ in
-                self?.objectWillChange.send()
-            }
-            .store(in: &cancellables)
-
-        lawsManager.objectWillChange
-            .sink { [weak self] _ in
-                self?.objectWillChange.send()
-            }
-            .store(in: &cancellables)
-
-        diplomacyManager.objectWillChange
-            .sink { [weak self] _ in
-                self?.objectWillChange.send()
-            }
-            .store(in: &cancellables)
-
-        publicOpinionManager.objectWillChange
-            .sink { [weak self] _ in
-                self?.objectWillChange.send()
-            }
-            .store(in: &cancellables)
-
-        educationManager.objectWillChange
-            .sink { [weak self] _ in
-                self?.objectWillChange.send()
-            }
-            .store(in: &cancellables)
     }
 
     // MARK: - Character Operations
@@ -319,70 +242,119 @@ class GameManager: ObservableObject {
     }
 
     func newGame() {
-        // Clear all data for new game
+        // INDUSTRY STANDARD: Reinitialize ALL managers with fresh instances
+        // This ensures complete reset with no hidden state retained
 
-        // Character & Stats
-        characterManager.character = nil
-        statManager.clearHistory()
+        // CRITICAL: Delete autosave first to prevent old data from being loaded back
+        saveManager.deleteAutosave()
 
-        // Elections
-        electionManager.activeCampaign = nil
-        electionManager.upcomingElection = nil
-        electionManager.electionHistory = []
-
-        // Events
-        eventEngine.currentEvent = nil
-        eventEngine.eventHistory = []
-        // Note: triggeredEventIds is private, will be reset when EventEngine is reinitialized
-
-        // Game State
-        gameState.character = nil
-        gameState.eventQueue = []
-        gameState.activeEvent = nil
-        gameState.policies = []
-        gameState.scandalRisks = []
-        gameState.isPaused = false
-        gameState.timeSpeed = .day
-
-        // Policies
-        policyManager.proposedPolicies = []
-        policyManager.enactedPolicies = []
-
-        // Budget
-        budgetManager.currentBudget = nil
-        budgetManager.budgetHistory = []
-
-        // Laws
-        lawsManager.draftLaws = []
-        lawsManager.activeLaws = []
-        lawsManager.enactedLaws = []
-        lawsManager.rejectedLaws = []
-        lawsManager.currentSession = nil
-
-        // Diplomacy
-        diplomacyManager.relationships = []
-        diplomacyManager.activeTreaties = []
-        diplomacyManager.diplomaticEvents = []
-
-        // Public Opinion
-        publicOpinionManager.pollHistory = []
-        publicOpinionManager.mediaCoverage = []
-        publicOpinionManager.currentPoll = nil
-        publicOpinionManager.activeActions = []
-        publicOpinionManager.socialMetrics = SocialMediaMetrics()
-
-        // Education
-        educationManager.enrollmentStatus = EnrollmentStatus()
-
-        // Time
-        timeManager.timeSpeed = .day
-
-        // Navigation - reset to home
-        navigationManager.navigateTo(.home)
-        navigationManager.closeMenu()
-
-        // Reinitialize EventEngine to clear triggeredEventIds
+        // Reinitialize all managers (complete reset)
+        characterManager = CharacterManager()
+        statManager = StatManager()
+        timeManager = TimeManager()
+        navigationManager = NavigationManager()
         eventEngine = EventEngine()
+        electionManager = ElectionManager()
+        policyManager = PolicyManager()
+        budgetManager = BudgetManager()
+        lawsManager = LawsManager()
+        diplomacyManager = DiplomacyManager()
+        publicOpinionManager = PublicOpinionManager()
+        educationManager = EducationManager()
+
+        // Reset game state
+        gameState = GameState()
+
+        // Navigate to home
+        navigationManager.navigateTo(.home)
+
+        // Re-establish objectWillChange forwarding (required after manager reinitialization)
+        setupObjectWillChangeForwarding()
+    }
+
+    private func setupObjectWillChangeForwarding() {
+        // Clear old subscriptions
+        cancellables.removeAll()
+
+        // Sync character between managers
+        characterManager.$character
+            .sink { [weak self] character in
+                self?.gameState.character = character
+            }
+            .store(in: &cancellables)
+
+        // Forward changes from nested ObservableObjects to GameManager
+        characterManager.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
+
+        statManager.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
+
+        timeManager.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
+
+        navigationManager.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
+
+        eventEngine.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
+
+        electionManager.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
+
+        policyManager.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
+
+        budgetManager.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
+
+        lawsManager.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
+
+        diplomacyManager.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
+
+        publicOpinionManager.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
+
+        educationManager.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
     }
 }
 

@@ -92,17 +92,11 @@ struct SettingsView: View {
     }
 
     private func resetGame() {
-        // Reset game state
-        gameManager.characterManager.character = nil
-        gameManager.statManager.clearHistory()
-        gameManager.navigationManager.navigateToHome()
+        gameManager.newGame()
     }
 
     private func deleteCharacter() {
-        // Delete character and return to character creation
-        gameManager.characterManager.character = nil
-        gameManager.statManager.clearHistory()
-        gameManager.navigationManager.navigateToHome()
+        gameManager.newGame()
     }
 }
 
