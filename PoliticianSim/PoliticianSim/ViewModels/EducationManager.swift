@@ -100,7 +100,21 @@ class EducationManager: ObservableObject {
 
     // MARK: - Progression
 
-    func advanceAcademicYear(character: inout Character) {
+    func checkAcademicProgress(character: inout Character) {
+        guard enrollmentStatus.isEnrolled,
+              let degree = enrollmentStatus.currentDegree else { return }
+
+        // Check if a year has passed since enrollment or last year advancement
+        let calendar = Calendar.current
+        let yearsSinceStart = calendar.dateComponents([.year], from: degree.startDate, to: character.currentDate).year ?? 0
+
+        // If we've completed enough years in real game time, advance to next year
+        if yearsSinceStart >= degree.currentYear {
+            advanceAcademicYear(character: &character)
+        }
+    }
+
+    private func advanceAcademicYear(character: inout Character) {
         guard enrollmentStatus.isEnrolled,
               var degree = enrollmentStatus.currentDegree else { return }
 

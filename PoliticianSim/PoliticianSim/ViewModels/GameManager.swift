@@ -156,13 +156,16 @@ class GameManager: ObservableObject {
 
         timeManager.skipDay(character: &character) { [weak self] char in
             guard let self = self else { return char }
-            let updatedChar = self.timeManager.performDailyChecks(for: char)
+            var updatedChar = self.timeManager.performDailyChecks(for: char)
 
             // Check for death
             if self.characterManager.isDead() {
                 self.characterManager.handleDeath()
                 return updatedChar
             }
+
+            // Check academic progress
+            self.educationManager.checkAcademicProgress(character: &updatedChar)
 
             // Record approval changes
             self.statManager.recordApprovalIfChanged(character: updatedChar)
@@ -190,12 +193,15 @@ class GameManager: ObservableObject {
 
         timeManager.skipWeek(character: &character) { [weak self] char in
             guard let self = self else { return char }
-            let updatedChar = self.timeManager.performDailyChecks(for: char)
+            var updatedChar = self.timeManager.performDailyChecks(for: char)
 
             if self.characterManager.isDead() {
                 self.characterManager.handleDeath()
                 return updatedChar
             }
+
+            // Check academic progress
+            self.educationManager.checkAcademicProgress(character: &updatedChar)
 
             self.statManager.recordApprovalIfChanged(character: updatedChar)
 
