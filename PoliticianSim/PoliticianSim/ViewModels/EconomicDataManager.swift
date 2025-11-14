@@ -106,10 +106,14 @@ class EconomicDataManager: ObservableObject {
         // Inflation increases when unemployment is below natural rate
         let unemploymentGap = naturalUnemployment - newUnemployment
         let phillipsCurveEffect = 0.5 * unemploymentGap / 52.0 // Phillips coefficient: 0.5
-        let inflationMomentum = currentInflation * 0.7 // Inflation persistence
-        let inflationShock = Double.random(in: -0.15...0.15)
+
+        // Inflation dynamics: persistence + Phillips curve + target anchor + shock
+        let inflationPersistence = currentInflation * 0.7 // 70% of current inflation carries forward
+        let targetAnchor = inflationTarget * 0.3 // 30% weight on 2% target (anchors expectations)
+        let inflationShock = Double.random(in: -0.1...0.1)
+
         let newInflation = max(1.0, min(5.0,
-            inflationMomentum * 0.3 + phillipsCurveEffect + inflationShock + inflationTarget * 0.1))
+            inflationPersistence + targetAnchor + phillipsCurveEffect + inflationShock))
 
         // 4. Update interest rate using Taylor Rule
         // Fed responds to inflation gap and unemployment gap
