@@ -7,6 +7,18 @@
 
 import SwiftUI
 
+// MARK: - Helper Functions
+
+private func formatCurrency(_ amount: Decimal) -> String {
+    let formatter = NumberFormatter()
+    formatter.numberStyle = .decimal
+    formatter.minimumFractionDigits = 2
+    formatter.maximumFractionDigits = 2
+    formatter.groupingSeparator = ","
+    formatter.usesGroupingSeparator = true
+    return formatter.string(from: amount as NSDecimalNumber) ?? "0.00"
+}
+
 struct EducationView: View {
     @EnvironmentObject var gameManager: GameManager
 
@@ -269,7 +281,7 @@ struct StudentLoansCard: View {
                     Text("Total Debt")
                         .font(.system(size: 11))
                         .foregroundColor(Constants.Colors.secondaryText)
-                    Text("$\(gameManager.educationManager.enrollmentStatus.studentLoanDebt)")
+                    Text("$\(formatCurrency(gameManager.educationManager.enrollmentStatus.studentLoanDebt))")
                         .font(.system(size: 15, weight: .bold))
                         .foregroundColor(.white)
                 }
@@ -280,7 +292,7 @@ struct StudentLoansCard: View {
                     Text("Monthly Payment")
                         .font(.system(size: 11))
                         .foregroundColor(Constants.Colors.secondaryText)
-                    Text("$\(gameManager.educationManager.calculateMonthlyLoanPayment())")
+                    Text("$\(formatCurrency(gameManager.educationManager.calculateMonthlyLoanPayment()))")
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(.white)
                 }
@@ -307,7 +319,7 @@ struct StudentLoansCard: View {
                     gameManager.characterManager.updateCharacter(char)
                 }
             } message: {
-                Text("Pay off $\(gameManager.educationManager.enrollmentStatus.studentLoanDebt) in student loans?")
+                Text("Pay off $\(formatCurrency(gameManager.educationManager.enrollmentStatus.studentLoanDebt)) in student loans?")
             }
         }
         .padding(14)

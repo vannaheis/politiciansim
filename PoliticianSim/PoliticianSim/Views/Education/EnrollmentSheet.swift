@@ -7,6 +7,18 @@
 
 import SwiftUI
 
+// MARK: - Helper Functions
+
+private func formatCurrency(_ amount: Decimal) -> String {
+    let formatter = NumberFormatter()
+    formatter.numberStyle = .decimal
+    formatter.minimumFractionDigits = 2
+    formatter.maximumFractionDigits = 2
+    formatter.groupingSeparator = ","
+    formatter.usesGroupingSeparator = true
+    return formatter.string(from: amount as NSDecimalNumber) ?? "0.00"
+}
+
 struct EnrollmentSheet: View {
     @EnvironmentObject var gameManager: GameManager
     let character: Character
@@ -330,7 +342,7 @@ struct InstitutionCard: View {
                         Text("Tuition/Year")
                             .font(.system(size: 10))
                             .foregroundColor(Constants.Colors.secondaryText)
-                        Text("$\(yearCost)")
+                        Text("$\(formatCurrency(yearCost))")
                             .font(.system(size: 12, weight: .semibold))
                             .foregroundColor(.white)
                     }
@@ -391,7 +403,7 @@ struct PaymentOptionsSection: View {
                 HStack {
                     Text("Tuition (first year)")
                     Spacer()
-                    Text("$\(yearCost)")
+                    Text("$\(formatCurrency(yearCost))")
                 }
                 .font(.system(size: 12))
                 .foregroundColor(Constants.Colors.secondaryText)
@@ -400,7 +412,7 @@ struct PaymentOptionsSection: View {
                     HStack {
                         Text("Scholarship")
                         Spacer()
-                        Text("-$\(scholarship)")
+                        Text("-$\(formatCurrency(scholarship))")
                     }
                     .font(.system(size: 12))
                     .foregroundColor(.green)
@@ -411,7 +423,7 @@ struct PaymentOptionsSection: View {
                 HStack {
                     Text("Total Cost")
                     Spacer()
-                    Text("$\(actualCost)")
+                    Text("$\(formatCurrency(actualCost))")
                 }
                 .font(.system(size: 13, weight: .bold))
                 .foregroundColor(.white)
@@ -434,7 +446,7 @@ struct PaymentOptionsSection: View {
                                 .font(.system(size: 13, weight: .semibold))
                                 .foregroundColor(.white)
 
-                            Text("Available: $\(character.campaignFunds)")
+                            Text("Available: $\(formatCurrency(character.campaignFunds))")
                                 .font(.system(size: 11))
                                 .foregroundColor(character.campaignFunds >= actualCost ? .green : .red)
                         }
