@@ -688,17 +688,17 @@ struct LawDetailSheet: View {
                 }
             }
         }
-        .alert(isPresented: $showingConfirmation) {
-            Alert(
-                title: Text("Action Complete"),
-                message: Text(actionMessage),
-                dismissButton: .default(Text("OK")) {
-                    if law.status == .passed || law.status == .rejected {
-                        selectedLaw = nil
-                    }
+        .customAlert(
+            isPresented: $showingConfirmation,
+            title: "Action Complete",
+            message: actionMessage,
+            primaryButton: "OK",
+            primaryAction: {
+                if law.status == .passed || law.status == .rejected {
+                    selectedLaw = nil
                 }
-            )
-        }
+            }
+        )
     }
 
     private func formatCurrency(_ amount: Decimal) -> String {
@@ -786,13 +786,13 @@ struct DraftActions: View {
             .padding()
         }
         .background(Color.black.opacity(0.3))
-        .alert(isPresented: $showingAlert) {
-            Alert(
-                title: Text("Action Complete"),
-                message: Text(actionMessage),
-                dismissButton: .default(Text("OK"))
-            )
-        }
+        .customAlert(
+            isPresented: $showingAlert,
+            title: "Action Complete",
+            message: actionMessage,
+            primaryButton: "OK",
+            primaryAction: {}
+        )
     }
 }
 
@@ -854,13 +854,13 @@ struct ActiveLawActions: View {
             .padding()
         }
         .background(Color.black.opacity(0.3))
-        .alert(isPresented: $showingAlert) {
-            Alert(
-                title: Text("Action Complete"),
-                message: Text(actionMessage),
-                dismissButton: .default(Text("OK"))
-            )
-        }
+        .customAlert(
+            isPresented: $showingAlert,
+            title: "Action Complete",
+            message: actionMessage,
+            primaryButton: "OK",
+            primaryAction: {}
+        )
     }
 }
 

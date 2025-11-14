@@ -120,11 +120,13 @@ struct EnrollmentSheet: View {
                 }
             }
         }
-        .alert("Enrollment Result", isPresented: $showConfirmation) {
-            Button("OK") { }
-        } message: {
-            Text(enrollmentMessage)
-        }
+        .customAlert(
+            isPresented: $showConfirmation,
+            title: "Enrollment Result",
+            message: enrollmentMessage,
+            primaryButton: "OK",
+            primaryAction: {}
+        )
     }
 }
 

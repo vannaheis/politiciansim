@@ -85,25 +85,23 @@ struct PublicOpinionView: View {
             // Side Menu
             SideMenuView(isOpen: $gameManager.navigationManager.isMenuOpen)
         }
-        .alert(isPresented: $showingActionSheet) {
-            if let action = selectedAction {
-                return Alert(
-                    title: Text(action.name),
-                    message: Text("\(action.description)\n\nThis will cost \(formatCost(action)) and last \(action.duration) days."),
-                    primaryButton: .default(Text("Perform Action")) {
-                        var char = character
-                        let result = gameManager.publicOpinionManager.performAction(action, character: &char)
-                        gameManager.characterManager.updateCharacter(char)
-                        if result.success {
-                            gameManager.publicOpinionManager.generateMediaCoverage(character: char)
-                        }
-                    },
-                    secondaryButton: .cancel()
-                )
-            } else {
-                return Alert(title: Text("Error"))
-            }
-        }
+        .customAlert(
+            isPresented: $showingActionSheet,
+            title: selectedAction?.name ?? "Public Opinion Action",
+            message: selectedAction != nil ? "\(selectedAction!.description)\n\nThis will cost \(formatCost(selectedAction!)) and last \(selectedAction!.duration) days." : "",
+            primaryButton: "Perform Action",
+            primaryAction: {
+                if let action = selectedAction {
+                    var char = character
+                    let result = gameManager.publicOpinionManager.performAction(action, character: &char)
+                    gameManager.characterManager.updateCharacter(char)
+                    if result.success {
+                        gameManager.publicOpinionManager.generateMediaCoverage(character: char)
+                    }
+                }
+            },
+            secondaryButton: "Cancel"
+        )
     }
 
     private func formatCost(_ action: PublicOpinionAction) -> String {

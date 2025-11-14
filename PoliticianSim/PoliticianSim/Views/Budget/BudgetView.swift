@@ -96,9 +96,13 @@ struct BudgetView: View {
                 gameManager.budgetManager.initializeBudget(for: character)
             }
         }
-        .alert(feedbackMessage, isPresented: $showingFeedback) {
-            Button("OK", role: .cancel) {}
-        }
+        .customAlert(
+            isPresented: $showingFeedback,
+            title: "Budget",
+            message: feedbackMessage,
+            primaryButton: "OK",
+            primaryAction: {}
+        )
     }
 }
 

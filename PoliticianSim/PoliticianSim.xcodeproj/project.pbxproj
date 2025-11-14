@@ -77,6 +77,7 @@
 		7C6E45432EC684D4005F7A3D /* EducationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E45422EC684D4005F7A3D /* EducationManager.swift */; };
 		7C6E45472EC684EA005F7A3D /* EnrollmentSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E45452EC684EA005F7A3D /* EnrollmentSheet.swift */; };
 		7C6E45482EC684EA005F7A3D /* EducationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E45442EC684EA005F7A3D /* EducationView.swift */; };
+		FB1BD9A2FE914F06F1F9D2BC /* CustomAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61D83AE85A5956CC2FFCB315 /* CustomAlert.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -124,6 +125,7 @@
 		141 /* StatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsView.swift; sourceTree = "<group>"; };
 		142 /* PositionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PositionView.swift; sourceTree = "<group>"; };
 		143 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		61D83AE85A5956CC2FFCB315 /* CustomAlert.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomAlert.swift; sourceTree = "<group>"; };
 		7C6E450B2EC54B25005F7A3D /* EventEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventEngine.swift; sourceTree = "<group>"; };
 		7C6E450D2EC54B3E005F7A3D /* EventDialog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDialog.swift; sourceTree = "<group>"; };
 		7C6E450F2EC552FB005F7A3D /* Campaign.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Campaign.swift; sourceTree = "<group>"; };
@@ -308,6 +310,7 @@
 				126 /* EventCard.swift */,
 				127 /* ChoiceButton.swift */,
 				138 /* SideMenuView.swift */,
+				61D83AE85A5956CC2FFCB315 /* CustomAlert.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -570,6 +573,7 @@
 				043 /* SettingsView.swift in Sources */,
 				7C6E453B2EC59569005F7A3D /* PublicOpinionView.swift in Sources */,
 				7C6E45182EC55337005F7A3D /* ElectionsView.swift in Sources */,
+				FB1BD9A2FE914F06F1F9D2BC /* CustomAlert.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -177,16 +177,18 @@ struct CurrentEnrollmentCard: View {
             .padding(14)
             .background(Constants.Colors.cardBackground)
             .cornerRadius(Constants.CornerRadius.card)
-            .alert("Drop Out?", isPresented: $showDropoutConfirmation) {
-                Button("Cancel", role: .cancel) { }
-                Button("Drop Out", role: .destructive) {
+            .customAlert(
+                isPresented: $showDropoutConfirmation,
+                title: "Drop Out?",
+                message: "Are you sure you want to drop out? You will lose all progress toward this degree.",
+                primaryButton: "Drop Out",
+                primaryAction: {
                     var char = character
                     _ = gameManager.educationManager.dropOut(character: &char)
                     gameManager.characterManager.updateCharacter(char)
-                }
-            } message: {
-                Text("Are you sure you want to drop out? You will lose all progress toward this degree.")
-            }
+                },
+                secondaryButton: "Cancel"
+            )
         }
     }
 }
@@ -311,20 +313,22 @@ struct StudentLoansCard: View {
             }
             .disabled(character.campaignFunds < gameManager.educationManager.enrollmentStatus.studentLoanDebt)
             .opacity(character.campaignFunds < gameManager.educationManager.enrollmentStatus.studentLoanDebt ? 0.5 : 1.0)
-            .alert("Pay Off Loans?", isPresented: $showPayoffConfirmation) {
-                Button("Cancel", role: .cancel) { }
-                Button("Pay Off") {
-                    var char = character
-                    _ = gameManager.educationManager.payOffLoans(character: &char)
-                    gameManager.characterManager.updateCharacter(char)
-                }
-            } message: {
-                Text("Pay off $\(formatCurrency(gameManager.educationManager.enrollmentStatus.studentLoanDebt)) in student loans?")
-            }
         }
         .padding(14)
         .background(Constants.Colors.cardBackground)
         .cornerRadius(Constants.CornerRadius.card)
+        .customAlert(
+            isPresented: $showPayoffConfirmation,
+            title: "Pay Off Loans?",
+            message: "Pay off $\(formatCurrency(gameManager.educationManager.enrollmentStatus.studentLoanDebt)) in student loans?",
+            primaryButton: "Pay Off",
+            primaryAction: {
+                var char = character
+                _ = gameManager.educationManager.payOffLoans(character: &char)
+                gameManager.characterManager.updateCharacter(char)
+            },
+            secondaryButton: "Cancel"
+        )
     }
 }
 

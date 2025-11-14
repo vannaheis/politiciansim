@@ -70,22 +70,22 @@ struct SettingsView: View {
             // Side menu overlay
             SideMenuView(isOpen: $gameManager.navigationManager.isMenuOpen)
         }
-        .alert("Reset Game Progress?", isPresented: $showResetConfirmation) {
-            Button("Cancel", role: .cancel) { }
-            Button("Reset", role: .destructive) {
-                resetGame()
-            }
-        } message: {
-            Text("This will reset all game progress and return you to character creation. This action cannot be undone.")
-        }
-        .alert("Delete Character?", isPresented: $showDeleteConfirmation) {
-            Button("Cancel", role: .cancel) { }
-            Button("Delete", role: .destructive) {
-                deleteCharacter()
-            }
-        } message: {
-            Text("This will permanently delete your character and all associated progress. This action cannot be undone.")
-        }
+        .customAlert(
+            isPresented: $showResetConfirmation,
+            title: "Reset Game Progress?",
+            message: "This will reset all game progress and return you to character creation. This action cannot be undone.",
+            primaryButton: "Reset",
+            primaryAction: { resetGame() },
+            secondaryButton: "Cancel"
+        )
+        .customAlert(
+            isPresented: $showDeleteConfirmation,
+            title: "Delete Character?",
+            message: "This will permanently delete your character and all associated progress. This action cannot be undone.",
+            primaryButton: "Delete",
+            primaryAction: { deleteCharacter() },
+            secondaryButton: "Cancel"
+        )
         .sheet(isPresented: $showSaveLoadSheet) {
             SaveLoadSheet(isPresented: $showSaveLoadSheet)
         }
@@ -518,12 +518,14 @@ struct SaveLoadSheet: View {
                 }
             }
         }
-        .alert(confirmationMessage, isPresented: $showConfirmation) {
-            Button("Cancel", role: .cancel) { }
-            Button("Confirm") {
-                confirmationAction?()
-            }
-        }
+        .customAlert(
+            isPresented: $showConfirmation,
+            title: "Confirm Action",
+            message: confirmationMessage,
+            primaryButton: "Confirm",
+            primaryAction: { confirmationAction?() },
+            secondaryButton: "Cancel"
+        )
     }
 
     struct SaveLoadTabButton: View {

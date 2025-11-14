@@ -363,18 +363,18 @@ struct TreatyCard: View {
         .padding()
         .background(Constants.Colors.cardBackground)
         .cornerRadius(Constants.CornerRadius.card)
-        .alert(isPresented: $showingRevokeAlert) {
-            Alert(
-                title: Text("Revoke Treaty"),
-                message: Text("This will damage relations. Are you sure?"),
-                primaryButton: .destructive(Text("Revoke")) {
-                    var char = character
-                    _ = gameManager.diplomacyManager.revokeTreaty(treaty.id, character: &char)
-                    gameManager.characterManager.updateCharacter(char)
-                },
-                secondaryButton: .cancel()
-            )
-        }
+        .customAlert(
+            isPresented: $showingRevokeAlert,
+            title: "Revoke Treaty",
+            message: "This will damage relations. Are you sure?",
+            primaryButton: "Revoke",
+            primaryAction: {
+                var char = character
+                _ = gameManager.diplomacyManager.revokeTreaty(treaty.id, character: &char)
+                gameManager.characterManager.updateCharacter(char)
+            },
+            secondaryButton: "Cancel"
+        )
     }
 
     private func formatDate(_ date: Date) -> String {
@@ -459,20 +459,20 @@ struct ForeignPolicySection: View {
                 }
             }
         }
-        .alert(isPresented: $showingChangeAlert) {
-            Alert(
-                title: Text("Change Foreign Policy"),
-                message: Text("This will affect all international relationships."),
-                primaryButton: .default(Text("Change")) {
-                    if let stance = selectedStance {
-                        var char = character
-                        gameManager.diplomacyManager.changeForeignPolicyStance(stance, character: &char)
-                        gameManager.characterManager.updateCharacter(char)
-                    }
-                },
-                secondaryButton: .cancel()
-            )
-        }
+        .customAlert(
+            isPresented: $showingChangeAlert,
+            title: "Change Foreign Policy",
+            message: "This will affect all international relationships.",
+            primaryButton: "Change",
+            primaryAction: {
+                if let stance = selectedStance {
+                    var char = character
+                    gameManager.diplomacyManager.changeForeignPolicyStance(stance, character: &char)
+                    gameManager.characterManager.updateCharacter(char)
+                }
+            },
+            secondaryButton: "Cancel"
+        )
     }
 }
 
@@ -672,27 +672,25 @@ struct CountryDetailSheet: View {
                 }
             }
         }
-        .alert(isPresented: $showingActionSheet) {
-            if let action = selectedAction {
-                return Alert(
-                    title: Text(action.name),
-                    message: Text(action.description),
-                    primaryButton: .default(Text("Proceed")) {
-                        performAction(action)
-                    },
-                    secondaryButton: .cancel()
-                )
-            } else {
-                return Alert(title: Text("Error"))
-            }
-        }
-        .alert(isPresented: $showingResult) {
-            Alert(
-                title: Text("Action Complete"),
-                message: Text(actionMessage),
-                dismissButton: .default(Text("OK"))
-            )
-        }
+        .customAlert(
+            isPresented: $showingActionSheet,
+            title: selectedAction?.name ?? "Diplomatic Action",
+            message: selectedAction?.description ?? "",
+            primaryButton: "Proceed",
+            primaryAction: {
+                if let action = selectedAction {
+                    performAction(action)
+                }
+            },
+            secondaryButton: "Cancel"
+        )
+        .customAlert(
+            isPresented: $showingResult,
+            title: "Action Complete",
+            message: actionMessage,
+            primaryButton: "OK",
+            primaryAction: {}
+        )
     }
 
     private func performAction(_ action: DiplomaticAction) {

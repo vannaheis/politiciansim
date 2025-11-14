@@ -458,9 +458,13 @@ struct ActionButton: View {
             )
         }
         .disabled(!canPerformAction)
-        .alert(feedbackMessage, isPresented: $showingFeedback) {
-            Button("OK", role: .cancel) {}
-        }
+        .customAlert(
+            isPresented: $showingFeedback,
+            title: "Policy Action",
+            message: feedbackMessage,
+            primaryButton: "OK",
+            primaryAction: {}
+        )
     }
 
     private var actionTitle: String {
