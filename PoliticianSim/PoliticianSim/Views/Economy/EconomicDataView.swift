@@ -10,6 +10,13 @@ import SwiftUI
 struct EconomicDataView: View {
     @EnvironmentObject var gameManager: GameManager
     @State private var selectedIndicator: IndicatorDetailType?
+    @State private var selectedTab: EconomicTab = .overview
+
+    enum EconomicTab {
+        case overview
+        case worldGDP
+        case worldPopulation
+    }
 
     enum IndicatorDetailType: Identifiable {
         case federalGDP
@@ -66,19 +73,32 @@ struct EconomicDataView: View {
                 .padding(.horizontal, 20)
                 .padding(.top, 16)
 
+                // Tab Selector
+                HStack(spacing: 0) {
+                    TabButton(title: "Overview", isSelected: selectedTab == .overview) {
+                        selectedTab = .overview
+                    }
+                    TabButton(title: "World GDP", isSelected: selectedTab == .worldGDP) {
+                        selectedTab = .worldGDP
+                    }
+                    TabButton(title: "Population", isSelected: selectedTab == .worldPopulation) {
+                        selectedTab = .worldPopulation
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 12)
+
+                // Content
                 ScrollView {
                     VStack(spacing: 20) {
-                        // Federal Section
-                        FederalEconomicSection(selectedIndicator: $selectedIndicator)
-
-                        // State Section
-                        StateEconomicSection(selectedIndicator: $selectedIndicator)
-
-                        // Local Section
-                        LocalEconomicSection(selectedIndicator: $selectedIndicator)
-
-                        // World GDP Rankings
-                        WorldGDPRankingsSection()
+                        switch selectedTab {
+                        case .overview:
+                            OverviewTabContent(selectedIndicator: $selectedIndicator)
+                        case .worldGDP:
+                            WorldGDPTabContent()
+                        case .worldPopulation:
+                            WorldPopulationTabContent()
+                        }
                     }
                     .padding(.horizontal, 20)
                     .padding(.vertical, 16)
@@ -91,6 +111,124 @@ struct EconomicDataView: View {
         .sheet(item: $selectedIndicator) { indicator in
             IndicatorDetailView(indicator: indicator)
         }
+    }
+}
+
+// MARK: - Tab Button
+
+struct TabButton: View {
+    let title: String
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 6) {
+                Text(title)
+                    .font(.system(size: 13, weight: isSelected ? .semibold : .regular))
+                    .foregroundColor(isSelected ? .white : Constants.Colors.secondaryText)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+
+                Rectangle()
+                    .fill(isSelected ? Constants.Colors.accent : Color.clear)
+                    .frame(height: 2)
+            }
+        }
+    }
+}
+
+// MARK: - Overview Tab Content
+
+struct OverviewTabContent: View {
+    @Binding var selectedIndicator: EconomicDataView.IndicatorDetailType?
+
+    var body: some View {
+        VStack(spacing: 20) {
+            // Federal Section
+            FederalEconomicSection(selectedIndicator: $selectedIndicator)
+
+            // State Section
+            StateEconomicSection(selectedIndicator: $selectedIndicator)
+
+            // Local Section
+            LocalEconomicSection(selectedIndicator: $selectedIndicator)
+        }
+    }
+}
+
+// MARK: - World GDP Tab Content
+
+struct WorldGDPTabContent: View {
+    var body: some View {
+        WorldGDPRankingsSection()
+    }
+}
+
+// MARK: - World Population Tab Content
+
+struct WorldPopulationTabContent: View {
+    @EnvironmentObject var gameManager: GameManager
+
+    var sortedByPopulation: [WorldCountryGDP] {
+        gameManager.economicDataManager.economicData.worldGDPs.sorted { $0.population > $1.population }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("World Population Rankings")
+                .font(.system(size: 16, weight: .bold))
+                .foregroundColor(.white)
+
+            VStack(spacing: 8) {
+                ForEach(Array(sortedByPopulation.enumerated()), id: \.element.id) { index, country in
+                    WorldPopulationRankingRow(rank: index + 1, country: country)
+                }
+            }
+        }
+    }
+}
+
+struct WorldPopulationRankingRow: View {
+    @EnvironmentObject var gameManager: GameManager
+    let rank: Int
+    let country: WorldCountryGDP
+
+    var body: some View {
+        HStack(spacing: 12) {
+            // Rank
+            Text("#\(rank)")
+                .font(.system(size: 14, weight: .bold))
+                .foregroundColor(rank <= 3 ? .yellow : Constants.Colors.secondaryText)
+                .frame(width: 35)
+
+            // Country
+            VStack(alignment: .leading, spacing: 2) {
+                Text(country.countryName)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(.white)
+
+                Text("GDP: \(gameManager.economicDataManager.formatGDP(country.gdp))")
+                    .font(.system(size: 10))
+                    .foregroundColor(Constants.Colors.secondaryText)
+            }
+
+            Spacer()
+
+            // Population
+            VStack(alignment: .trailing, spacing: 2) {
+                Text(gameManager.economicDataManager.formatPopulation(country.population))
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundColor(Constants.Colors.accent)
+
+                Text("Per Capita: \(gameManager.economicDataManager.formatGDP(country.gdpPerCapita))")
+                    .font(.system(size: 10))
+                    .foregroundColor(Constants.Colors.secondaryText)
+            }
+        }
+        .padding(10)
+        .background(Color.white.opacity(0.05))
+        .cornerRadius(8)
     }
 }
 
