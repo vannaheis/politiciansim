@@ -17,6 +17,37 @@ class EconomicDataManager: ObservableObject {
 
     // MARK: - Economic Simulation
 
+    /// Simulates realistic economic changes across all levels (federal, state, local, world)
+    ///
+    /// **Economic Formulas:**
+    ///
+    /// **Federal GDP:**
+    /// - Annual growth: 1-3% (realistic US range)
+    /// - Weekly rate: annualRate / 52
+    /// - Formula: `newGDP = currentGDP × (1 + weeklyRate)`
+    ///
+    /// **Unemployment:**
+    /// - Random walk model: ±0.2% per week
+    /// - Federal bounds: 3-8%
+    /// - State bounds: 2.5-9%
+    /// - Local bounds: 2-10%
+    /// - Formula: `newRate = clamp(currentRate + random(-0.2, 0.2), min, max)`
+    ///
+    /// **Inflation:**
+    /// - Random walk: ±0.3% per week
+    /// - Bounds: 1-5% (target ~2%)
+    /// - Formula: `newRate = clamp(currentRate + random(-0.3, 0.3), 1.0, 5.0)`
+    ///
+    /// **Federal Interest Rate:**
+    /// - Taylor Rule inspired: targets inflation + 2%
+    /// - Gradual adjustment: 10% of gap each week
+    /// - Formula: `targetRate = inflation + 2.0; newRate = currentRate + 0.1 × (targetRate - currentRate)`
+    /// - Bounds: 0-10%
+    ///
+    /// **World GDPs:**
+    /// - Developed economies (GDP ≥ $2T): 1-3% annual growth
+    /// - Emerging economies (GDP < $2T): 3-7% annual growth
+    /// - Rankings automatically resort after each update
     func simulateEconomicChanges(character: Character) {
         let currentDate = character.currentDate
 
@@ -28,6 +59,9 @@ class EconomicDataManager: ObservableObject {
 
         // Simulate local economic changes
         simulateLocalEconomy(date: currentDate)
+
+        // Simulate world GDP changes
+        simulateWorldEconomy()
     }
 
     private func simulateFederalEconomy(date: Date) {
@@ -76,6 +110,26 @@ class EconomicDataManager: ObservableObject {
         let unemploymentChange = Double.random(in: -0.3...0.3)
         let newLocalUnemployment = max(2.0, min(10.0, economicData.local.unemploymentRate.current + unemploymentChange))
         economicData.local.unemploymentRate.addDataPoint(date: date, value: newLocalUnemployment)
+    }
+
+    private func simulateWorldEconomy() {
+        // Simulate GDP growth for each country
+        for i in 0..<economicData.worldGDPs.count {
+            // Different countries have different growth rates
+            // Developed economies: 1-3% annually
+            // Emerging economies: 3-7% annually
+            let isDeveloped = economicData.worldGDPs[i].gdp >= 2_000_000_000_000
+            let growthRange = isDeveloped ? (0.01...0.03) : (0.03...0.07)
+            let annualGrowthRate = Double.random(in: growthRange)
+            let weeklyGrowthRate = annualGrowthRate / 52.0
+
+            let currentGDP = economicData.worldGDPs[i].gdp
+            let newGDP = currentGDP * (1 + weeklyGrowthRate)
+            economicData.worldGDPs[i].gdp = newGDP
+        }
+
+        // Re-sort by GDP (descending) to maintain rankings
+        economicData.worldGDPs.sort { $0.gdp > $1.gdp }
     }
 
     // MARK: - Formatting Helpers
