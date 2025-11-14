@@ -163,7 +163,12 @@ struct NewHomeView: View {
 // MARK: - Country Stats Card
 
 struct CountryStatsCard: View {
+    @EnvironmentObject var gameManager: GameManager
     let character: Character
+
+    var countryData: WorldCountryGDP? {
+        gameManager.economicDataManager.economicData.worldGDPs.first { $0.countryName == character.country }
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -179,19 +184,35 @@ struct CountryStatsCard: View {
                     value: character.country
                 )
 
-                CountryStatRow(
-                    icon: "person.3.fill",
-                    iconColor: .blue,
-                    label: "Population",
-                    value: "328M" // TODO: Add to Character model
-                )
+                if let country = countryData {
+                    CountryStatRow(
+                        icon: "person.3.fill",
+                        iconColor: .blue,
+                        label: "Population",
+                        value: gameManager.economicDataManager.formatPopulation(country.population)
+                    )
 
-                CountryStatRow(
-                    icon: "chart.line.uptrend.xyaxis",
-                    iconColor: Constants.Colors.positive,
-                    label: "GDP",
-                    value: "$21.4T" // TODO: Add to Country model
-                )
+                    CountryStatRow(
+                        icon: "chart.line.uptrend.xyaxis",
+                        iconColor: Constants.Colors.positive,
+                        label: "GDP",
+                        value: gameManager.economicDataManager.formatGDP(country.gdp)
+                    )
+                } else {
+                    CountryStatRow(
+                        icon: "person.3.fill",
+                        iconColor: .blue,
+                        label: "Population",
+                        value: gameManager.economicDataManager.formatPopulation(335_000_000)
+                    )
+
+                    CountryStatRow(
+                        icon: "chart.line.uptrend.xyaxis",
+                        iconColor: Constants.Colors.positive,
+                        label: "GDP",
+                        value: gameManager.economicDataManager.formatGDP(gameManager.economicDataManager.economicData.federal.gdp.current)
+                    )
+                }
 
                 CountryStatRow(
                     icon: "percent",
