@@ -57,6 +57,15 @@ class EconomicDataManager: ObservableObject {
     /// - Size penalty: Economies >$20T GDP grow 0.2% slower
     /// - Reflects catch-up growth: poorer countries grow faster
     /// - Rankings automatically resort after each update
+    ///
+    /// **Population Growth (Demographic Transition Theory):**
+    /// - Growth rates decline as countries develop (inverse relationship with GDP per capita):
+    ///   - High income (>$40k/capita): 0.2-0.5% annual growth (mature, aging populations)
+    ///   - Upper-middle income ($13k-$40k): 0.3-0.8% growth (declining fertility)
+    ///   - Lower-middle income ($4k-$13k): 0.8-1.3% growth (demographic dividend)
+    ///   - Low income (<$4k): 1.5-2.5% growth (high fertility, young populations)
+    /// - Reflects demographic transition: developing countries have higher birth rates
+    /// - Population rankings update as countries grow at different rates
     func simulateEconomicChanges(character: Character) {
         let currentDate = character.currentDate
 
@@ -188,43 +197,72 @@ class EconomicDataManager: ObservableObject {
     }
 
     private func simulateWorldEconomy() {
-        // Simulate GDP growth based on economic convergence theory
-        // Smaller/developing economies grow faster (catch-up growth)
-        // Larger/developed economies grow slower (mature markets)
+        // Simulate GDP and population growth based on economic/demographic theories
+        // GDP: Smaller/developing economies grow faster (catch-up growth)
+        // Population: Developing countries have higher birth rates (demographic transition)
 
         for i in 0..<economicData.worldGDPs.count {
             let currentGDP = economicData.worldGDPs[i].gdp
+            let currentPopulation = economicData.worldGDPs[i].population
             let gdpPerCapita = economicData.worldGDPs[i].gdpPerCapita
 
-            // Determine growth potential based on development level (GDP per capita)
+            // === GDP GROWTH ===
+            // Determine GDP growth based on development level (GDP per capita)
             // High income (>$40k): 1.5-2.5% annual growth (mature economies)
             // Upper-middle income ($13k-$40k): 3-5% annual growth
             // Lower-middle income ($4k-$13k): 4-7% annual growth
             // Low income (<$4k): 5-8% annual growth (catch-up growth)
 
-            let annualGrowthRate: Double
+            let annualGDPGrowthRate: Double
             if gdpPerCapita >= 40_000 {
                 // Mature developed economies (USA, Germany, UK)
-                annualGrowthRate = Double.random(in: 0.015...0.025)
+                annualGDPGrowthRate = Double.random(in: 0.015...0.025)
             } else if gdpPerCapita >= 13_000 {
                 // Upper-middle income (China, some Eastern Europe)
-                annualGrowthRate = Double.random(in: 0.03...0.05)
+                annualGDPGrowthRate = Double.random(in: 0.03...0.05)
             } else if gdpPerCapita >= 4_000 {
                 // Lower-middle income (India, some emerging markets)
-                annualGrowthRate = Double.random(in: 0.04...0.07)
+                annualGDPGrowthRate = Double.random(in: 0.04...0.07)
             } else {
                 // Low income (frontier markets)
-                annualGrowthRate = Double.random(in: 0.05...0.08)
+                annualGDPGrowthRate = Double.random(in: 0.05...0.08)
             }
 
-            // Also add economic size factor: very large economies grow slightly slower
-            // due to diminishing returns to scale
+            // Economic size penalty: very large economies grow slightly slower
             let sizePenalty = currentGDP >= 20_000_000_000_000 ? 0.002 : 0.0
-            let adjustedGrowthRate = max(0.01, annualGrowthRate - sizePenalty)
+            let adjustedGDPGrowthRate = max(0.01, annualGDPGrowthRate - sizePenalty)
 
-            let weeklyGrowthRate = adjustedGrowthRate / 52.0
-            let newGDP = currentGDP * (1 + weeklyGrowthRate)
+            let weeklyGDPGrowthRate = adjustedGDPGrowthRate / 52.0
+            let newGDP = currentGDP * (1 + weeklyGDPGrowthRate)
+
+            // === POPULATION GROWTH (Demographic Transition Theory) ===
+            // Population growth DECLINES as countries develop (inverse of GDP growth)
+            // High income: 0.2-0.5% annual growth (aging populations, low fertility)
+            // Upper-middle: 0.3-0.8% growth (fertility declining)
+            // Lower-middle: 0.8-1.3% growth (demographic dividend phase)
+            // Low income: 1.5-2.5% growth (high fertility, young populations)
+
+            let annualPopulationGrowthRate: Double
+            if gdpPerCapita >= 40_000 {
+                // Developed countries: aging populations, low/negative growth
+                annualPopulationGrowthRate = Double.random(in: 0.002...0.005)
+            } else if gdpPerCapita >= 13_000 {
+                // Upper-middle: declining fertility as development increases
+                annualPopulationGrowthRate = Double.random(in: 0.003...0.008)
+            } else if gdpPerCapita >= 4_000 {
+                // Lower-middle: demographic dividend phase
+                annualPopulationGrowthRate = Double.random(in: 0.008...0.013)
+            } else {
+                // Low income: high fertility, young populations
+                annualPopulationGrowthRate = Double.random(in: 0.015...0.025)
+            }
+
+            let weeklyPopulationGrowthRate = annualPopulationGrowthRate / 52.0
+            let newPopulation = Int(Double(currentPopulation) * (1 + weeklyPopulationGrowthRate))
+
+            // Update both GDP and population
             economicData.worldGDPs[i].gdp = newGDP
+            economicData.worldGDPs[i].population = newPopulation
         }
 
         // Re-sort by GDP (descending) to maintain rankings
