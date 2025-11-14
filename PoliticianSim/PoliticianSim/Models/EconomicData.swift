@@ -133,7 +133,6 @@ struct EconomicData: Codable {
     static func defaultWorldGDPs() -> [WorldCountryGDP] {
         // 2024 GDP data (nominal, in USD) and population estimates
         return [
-            WorldCountryGDP(countryName: "United Kingdom", countryCode: "GBR", gdp: 3_100_000_000_000, population: 67_000_000),
             WorldCountryGDP(countryName: "United States", countryCode: "USA", gdp: 27_360_000_000_000, population: 335_000_000),
             WorldCountryGDP(countryName: "China", countryCode: "CHN", gdp: 17_960_000_000_000, population: 1_425_000_000),
             WorldCountryGDP(countryName: "Japan", countryCode: "JPN", gdp: 4_210_000_000_000, population: 123_000_000),
