@@ -34,6 +34,9 @@ class NavigationManager: ObservableObject {
         case diplomacy = "Diplomacy"
         case publicOpinion = "Public Opinion"
 
+        // Economy
+        case economy = "Economy"
+
         // Settings
         case settings = "Settings"
 
@@ -51,6 +54,7 @@ class NavigationManager: ObservableObject {
             case .laws: return "book.closed.fill"
             case .diplomacy: return "globe.americas.fill"
             case .publicOpinion: return "chart.line.uptrend.xyaxis"
+            case .economy: return "banknote.fill"
             case .settings: return "gearshape.fill"
             }
         }
@@ -62,6 +66,7 @@ class NavigationManager: ObservableObject {
             case .position, .elections, .campaigns: return .career
             case .policies, .budget, .laws: return .governance
             case .diplomacy, .publicOpinion: return .relations
+            case .economy: return .economy
             case .settings: return .settings
             }
         }
@@ -73,6 +78,7 @@ class NavigationManager: ObservableObject {
         case career = "POLITICAL CAREER"
         case governance = "GOVERNANCE"
         case relations = "RELATIONS"
+        case economy = "ECONOMY"
         case settings = "SETTINGS"
     }
 
@@ -114,7 +120,7 @@ class NavigationManager: ObservableObject {
         }
 
         // Return in desired order
-        let order: [MenuSection] = [.character, .career, .governance, .relations, .settings]
+        let order: [MenuSection] = [.character, .career, .governance, .relations, .economy, .settings]
         return order.compactMap { section in
             guard let items = grouped[section], !items.isEmpty else { return nil }
             return (section, items)

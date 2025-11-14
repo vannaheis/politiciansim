@@ -77,6 +77,11 @@
 		7C6E45432EC684D4005F7A3D /* EducationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E45422EC684D4005F7A3D /* EducationManager.swift */; };
 		7C6E45472EC684EA005F7A3D /* EnrollmentSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E45452EC684EA005F7A3D /* EnrollmentSheet.swift */; };
 		7C6E45482EC684EA005F7A3D /* EducationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E45442EC684EA005F7A3D /* EducationView.swift */; };
+		7C6E454C2EC6F15A005F7A3D /* EconomicDataView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E45492EC6F15A005F7A3D /* EconomicDataView.swift */; };
+		7C6E454D2EC6F15A005F7A3D /* IndicatorDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E454A2EC6F15A005F7A3D /* IndicatorDetailView.swift */; };
+		7C6E454F2EC6F17A005F7A3D /* EconomicDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E454E2EC6F17A005F7A3D /* EconomicDataManager.swift */; };
+		7C6E45512EC6F190005F7A3D /* EconomicData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E45502EC6F190005F7A3D /* EconomicData.swift */; };
+		7C6E45532EC6F1E2005F7A3D /* LineChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E45522EC6F1E2005F7A3D /* LineChartView.swift */; };
 		FB1BD9A2FE914F06F1F9D2BC /* CustomAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61D83AE85A5956CC2FFCB315 /* CustomAlert.swift */; };
 /* End PBXBuildFile section */
 
@@ -153,6 +158,11 @@
 		7C6E45422EC684D4005F7A3D /* EducationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EducationManager.swift; sourceTree = "<group>"; };
 		7C6E45442EC684EA005F7A3D /* EducationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EducationView.swift; sourceTree = "<group>"; };
 		7C6E45452EC684EA005F7A3D /* EnrollmentSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnrollmentSheet.swift; sourceTree = "<group>"; };
+		7C6E45492EC6F15A005F7A3D /* EconomicDataView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EconomicDataView.swift; sourceTree = "<group>"; };
+		7C6E454A2EC6F15A005F7A3D /* IndicatorDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndicatorDetailView.swift; sourceTree = "<group>"; };
+		7C6E454E2EC6F17A005F7A3D /* EconomicDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EconomicDataManager.swift; sourceTree = "<group>"; };
+		7C6E45502EC6F190005F7A3D /* EconomicData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EconomicData.swift; sourceTree = "<group>"; };
+		7C6E45522EC6F1E2005F7A3D /* LineChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineChartView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -222,6 +232,7 @@
 				7C6E45372EC5955F005F7A3D /* PublicOpinion.swift */,
 				7C6E453E2EC59BC8005F7A3D /* SaveGame.swift */,
 				7C6E45402EC684BF005F7A3D /* Education.swift */,
+				7C6E45502EC6F190005F7A3D /* EconomicData.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -244,6 +255,7 @@
 				7C6E45332EC58E41005F7A3D /* DiplomacyManager.swift */,
 				7C6E45352EC59552005F7A3D /* PublicOpinionManager.swift */,
 				7C6E453C2EC59BBC005F7A3D /* SaveManager.swift */,
+				7C6E454E2EC6F17A005F7A3D /* EconomicDataManager.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -251,6 +263,7 @@
 		313 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				7C6E454B2EC6F15A005F7A3D /* Economy */,
 				7C6E45462EC684EA005F7A3D /* Education */,
 				7C6E453A2EC59569005F7A3D /* PublicOpinion */,
 				7C6E452F2EC58E22005F7A3D /* Diplomacy */,
@@ -311,6 +324,7 @@
 				127 /* ChoiceButton.swift */,
 				138 /* SideMenuView.swift */,
 				61D83AE85A5956CC2FFCB315 /* CustomAlert.swift */,
+				7C6E45522EC6F1E2005F7A3D /* LineChartView.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -436,6 +450,15 @@
 			path = Education;
 			sourceTree = "<group>";
 		};
+		7C6E454B2EC6F15A005F7A3D /* Economy */ = {
+			isa = PBXGroup;
+			children = (
+				7C6E45492EC6F15A005F7A3D /* EconomicDataView.swift */,
+				7C6E454A2EC6F15A005F7A3D /* IndicatorDetailView.swift */,
+			);
+			path = Economy;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -538,13 +561,18 @@
 				7C6E45382EC5955F005F7A3D /* PublicOpinion.swift in Sources */,
 				021 /* SecondaryButton.swift in Sources */,
 				7C6E451F2EC55F37005F7A3D /* PoliciesView.swift in Sources */,
+				7C6E454C2EC6F15A005F7A3D /* EconomicDataView.swift in Sources */,
+				7C6E454D2EC6F15A005F7A3D /* IndicatorDetailView.swift in Sources */,
 				022 /* IconButton.swift in Sources */,
 				7C6E450C2EC54B25005F7A3D /* EventEngine.swift in Sources */,
+				7C6E454F2EC6F17A005F7A3D /* EconomicDataManager.swift in Sources */,
 				023 /* StatDisplay.swift in Sources */,
 				7C6E45242EC57F3C005F7A3D /* BudgetManager.swift in Sources */,
+				7C6E45532EC6F1E2005F7A3D /* LineChartView.swift in Sources */,
 				024 /* TimeControlBar.swift in Sources */,
 				025 /* NavigationBar.swift in Sources */,
 				7C6E45262EC57F4D005F7A3D /* Budget.swift in Sources */,
+				7C6E45512EC6F190005F7A3D /* EconomicData.swift in Sources */,
 				026 /* EventCard.swift in Sources */,
 				7C6E45322EC58E2C005F7A3D /* Diplomacy.swift in Sources */,
 				7C6E45362EC59553005F7A3D /* PublicOpinionManager.swift in Sources */,

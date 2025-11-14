@@ -24,6 +24,7 @@ class GameManager: ObservableObject {
     @Published var diplomacyManager = DiplomacyManager()
     @Published var publicOpinionManager = PublicOpinionManager()
     @Published var educationManager = EducationManager()
+    @Published var economicDataManager = EconomicDataManager()
     let saveManager = SaveManager.shared
 
     // Game state
@@ -121,6 +122,9 @@ class GameManager: ObservableObject {
             var charWithOpinion = updatedChar
             self.publicOpinionManager.processActiveActions(character: &charWithOpinion, currentDate: updatedChar.currentDate)
 
+            // Simulate economic changes
+            self.economicDataManager.simulateEconomicChanges(character: charWithOpinion)
+
             return charWithOpinion
         }
 
@@ -159,6 +163,9 @@ class GameManager: ObservableObject {
             // Process active opinion actions
             var charWithOpinion = updatedChar
             self.publicOpinionManager.processActiveActions(character: &charWithOpinion, currentDate: updatedChar.currentDate)
+
+            // Simulate economic changes
+            self.economicDataManager.simulateEconomicChanges(character: charWithOpinion)
 
             return charWithOpinion
         }
@@ -261,6 +268,7 @@ class GameManager: ObservableObject {
         diplomacyManager = DiplomacyManager()
         publicOpinionManager = PublicOpinionManager()
         educationManager = EducationManager()
+        economicDataManager = EconomicDataManager()
 
         // Reset game state
         gameState = GameState()
@@ -351,6 +359,12 @@ class GameManager: ObservableObject {
             .store(in: &cancellables)
 
         educationManager.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
+
+        economicDataManager.objectWillChange
             .sink { [weak self] _ in
                 self?.objectWillChange.send()
             }
