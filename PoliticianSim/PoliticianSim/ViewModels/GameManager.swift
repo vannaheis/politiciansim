@@ -149,6 +149,18 @@ class GameManager: ObservableObject {
         statManager.initializeHistory(for: character)
     }
 
+    // MARK: - Helper Methods
+
+    func getCharacterRole() -> Character.CharacterRole {
+        guard let character = character else { return .unemployed }
+
+        if educationManager.isEnrolled() {
+            return .student
+        }
+
+        return character.role
+    }
+
     // MARK: - Time Operations
 
     func skipDay() {
@@ -167,11 +179,15 @@ class GameManager: ObservableObject {
             // Check academic progress
             self.educationManager.checkAcademicProgress(character: &updatedChar)
 
+            // Process monthly loan payment (check every day, payment happens once per month)
+            self.educationManager.makeMonthlyLoanPayment(character: &updatedChar)
+
             // Record approval changes
             self.statManager.recordApprovalIfChanged(character: updatedChar)
 
-            // Check for random events
-            if let event = self.eventEngine.checkForEvent(character: updatedChar) {
+            // Check for random events (role-based)
+            let role = self.getCharacterRole()
+            if let event = self.eventEngine.checkForEvent(character: updatedChar, role: role) {
                 self.gameState.activeEvent = event
             }
 
@@ -203,10 +219,14 @@ class GameManager: ObservableObject {
             // Check academic progress
             self.educationManager.checkAcademicProgress(character: &updatedChar)
 
+            // Process monthly loan payment (check every day, payment happens once per month)
+            self.educationManager.makeMonthlyLoanPayment(character: &updatedChar)
+
             self.statManager.recordApprovalIfChanged(character: updatedChar)
 
-            // Check for random events
-            if let event = self.eventEngine.checkForEvent(character: updatedChar) {
+            // Check for random events (role-based)
+            let role = self.getCharacterRole()
+            if let event = self.eventEngine.checkForEvent(character: updatedChar, role: role) {
                 self.gameState.activeEvent = event
             }
 

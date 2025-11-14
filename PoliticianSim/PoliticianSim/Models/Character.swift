@@ -36,6 +36,21 @@ struct Character: Codable, Identifiable {
     var birthDate: Date
     var currentDate: Date
 
+    // Computed property for character role
+    var role: CharacterRole {
+        if currentPosition != nil {
+            return .politician
+        }
+        // Check if enrolled in education (will be checked by EducationManager)
+        return .unemployed
+    }
+
+    enum CharacterRole {
+        case student
+        case unemployed
+        case politician
+    }
+
     // Calculated properties
     var daysSinceBirth: Int {
         Calendar.current.dateComponents([.day], from: birthDate, to: currentDate).day ?? 0

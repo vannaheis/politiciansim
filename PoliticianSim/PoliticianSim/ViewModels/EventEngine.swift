@@ -29,11 +29,11 @@ class EventEngine: ObservableObject {
 
     // MARK: - Event Checking
 
-    func checkForEvent(character: Character) -> Event? {
+    func checkForEvent(character: Character, role: Character.CharacterRole) -> Event? {
         guard currentEvent == nil else { return nil }
 
         let eligibleEvents = allEvents.filter { event in
-            isEventEligible(event: event, character: character)
+            isEventEligible(event: event, character: character, role: role)
         }
 
         guard !eligibleEvents.isEmpty else { return nil }
@@ -50,10 +50,23 @@ class EventEngine: ObservableObject {
         return nil
     }
 
-    private func isEventEligible(event: Event, character: Character) -> Bool {
+    private func isEventEligible(event: Event, character: Character, role: Character.CharacterRole) -> Bool {
         // Check if already triggered (for one-time events)
         if triggeredEventIds.contains(event.eventId) {
             return false
+        }
+
+        // Filter events based on character role
+        switch role {
+        case .student:
+            // Students get education-related events primarily
+            guard event.category == .education || event.category == .personal else { return false }
+        case .unemployed:
+            // Unemployed get broad activities and personal events
+            guard event.category != .political && event.category != .education else { return false }
+        case .politician:
+            // Politicians get political events primarily
+            guard event.category == .political || event.category == .scandal || event.category == .personal else { return false }
         }
 
         // Check age range
@@ -287,6 +300,118 @@ class EventEngine: ObservableObject {
                 triggers: [],
                 ageRange: Event.AgeRange(min: 21, max: 100),
                 requiredPosition: "City Council Member"
+            ),
+
+            // Student Events
+            Event(
+                eventId: "student_001",
+                title: "Study Group Invitation",
+                description: "Classmates invite you to join their study group. It could help your grades but will take up free time.",
+                category: .education,
+                choices: [
+                    Event.Choice(
+                        text: "Join the study group",
+                        outcomePreview: "Better understanding, improved intelligence",
+                        effects: [
+                            Effect(type: .statChange, value: .statChange(stat: "intelligence", amount: 3)),
+                            Effect(type: .stressChange, value: .stressChange(amount: 5))
+                        ]
+                    ),
+                    Event.Choice(
+                        text: "Study alone",
+                        outcomePreview: "Less stress, maintain current pace",
+                        effects: [
+                            Effect(type: .stressChange, value: .stressChange(amount: -2))
+                        ]
+                    )
+                ],
+                triggers: [],
+                ageRange: Event.AgeRange(min: 18, max: 30)
+            ),
+
+            Event(
+                eventId: "student_002",
+                title: "Campus Organization Leadership",
+                description: "You're nominated to lead a student organization. It's great for your resume but demands significant time.",
+                category: .education,
+                choices: [
+                    Event.Choice(
+                        text: "Accept the leadership role",
+                        outcomePreview: "Gain charisma and reputation, but increased stress",
+                        effects: [
+                            Effect(type: .statChange, value: .statChange(stat: "charisma", amount: 5)),
+                            Effect(type: .statChange, value: .statChange(stat: "reputation", amount: 3)),
+                            Effect(type: .stressChange, value: .stressChange(amount: 10))
+                        ]
+                    ),
+                    Event.Choice(
+                        text: "Decline and focus on academics",
+                        outcomePreview: "More time for studies, less stress",
+                        effects: [
+                            Effect(type: .statChange, value: .statChange(stat: "intelligence", amount: 2)),
+                            Effect(type: .stressChange, value: .stressChange(amount: -5))
+                        ]
+                    )
+                ],
+                triggers: [],
+                ageRange: Event.AgeRange(min: 18, max: 30)
+            ),
+
+            Event(
+                eventId: "student_003",
+                title: "Part-Time Job Offer",
+                description: "A local business offers you part-time work. The income would help with expenses, but it may affect your studies.",
+                category: .education,
+                choices: [
+                    Event.Choice(
+                        text: "Take the job",
+                        outcomePreview: "Earn money but increase stress",
+                        effects: [
+                            Effect(type: .fundsChange, value: .fundsChange(amount: 2000)),
+                            Effect(type: .stressChange, value: .stressChange(amount: 10)),
+                            Effect(type: .statChange, value: .statChange(stat: "intelligence", amount: -2))
+                        ]
+                    ),
+                    Event.Choice(
+                        text: "Focus on school full-time",
+                        outcomePreview: "Better grades, less money",
+                        effects: [
+                            Effect(type: .statChange, value: .statChange(stat: "intelligence", amount: 3)),
+                            Effect(type: .stressChange, value: .stressChange(amount: -3))
+                        ]
+                    )
+                ],
+                triggers: [],
+                ageRange: Event.AgeRange(min: 18, max: 30)
+            ),
+
+            Event(
+                eventId: "student_004",
+                title: "Academic Internship Opportunity",
+                description: "A professor offers you a research internship. It's unpaid but could boost your reputation and knowledge.",
+                category: .education,
+                choices: [
+                    Event.Choice(
+                        text: "Accept the internship",
+                        outcomePreview: "Gain intelligence and reputation",
+                        effects: [
+                            Effect(type: .statChange, value: .statChange(stat: "intelligence", amount: 5)),
+                            Effect(type: .statChange, value: .statChange(stat: "reputation", amount: 5)),
+                            Effect(type: .stressChange, value: .stressChange(amount: 8))
+                        ]
+                    ),
+                    Event.Choice(
+                        text: "Decline politely",
+                        outcomePreview: "Keep current workload manageable",
+                        effects: [
+                            Effect(type: .stressChange, value: .stressChange(amount: -3))
+                        ]
+                    )
+                ],
+                triggers: [
+                    Trigger(type: .stat, condition: .statMinimum(stat: "intelligence", min: 60))
+                ],
+                ageRange: Event.AgeRange(min: 18, max: 30)
             ),
 
             // Personal Events

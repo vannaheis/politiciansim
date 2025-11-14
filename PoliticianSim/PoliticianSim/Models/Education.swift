@@ -286,6 +286,7 @@ struct EnrollmentStatus: Codable {
     var totalCostPaid: Decimal
     var scholarshipAmount: Decimal
     var studentLoanDebt: Decimal
+    var lastLoanPaymentDate: Date?
 
     init() {
         self.isEnrolled = false
@@ -294,6 +295,7 @@ struct EnrollmentStatus: Codable {
         self.totalCostPaid = 0
         self.scholarshipAmount = 0
         self.studentLoanDebt = 0
+        self.lastLoanPaymentDate = nil
     }
 
     func highestEducationLevel() -> EducationLevel {

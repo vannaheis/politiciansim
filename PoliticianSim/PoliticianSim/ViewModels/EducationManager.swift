@@ -209,14 +209,30 @@ class EducationManager: ObservableObject {
     func makeMonthlyLoanPayment(character: inout Character) {
         guard enrollmentStatus.studentLoanDebt > 0 else { return }
 
+        // Check if a month has passed since last payment
+        let calendar = Calendar.current
+        let shouldMakePayment: Bool
+
+        if let lastPayment = enrollmentStatus.lastLoanPaymentDate {
+            let monthsSincePayment = calendar.dateComponents([.month], from: lastPayment, to: character.currentDate).month ?? 0
+            shouldMakePayment = monthsSincePayment >= 1
+        } else {
+            // First payment
+            shouldMakePayment = true
+        }
+
+        guard shouldMakePayment else { return }
+
         let monthlyPayment = calculateMonthlyLoanPayment()
 
         if character.campaignFunds >= monthlyPayment {
             character.campaignFunds -= monthlyPayment
-            enrollmentStatus.studentLoanDebt -= monthlyPayment
+            enrollmentStatus.studentLoanDebt = max(0, enrollmentStatus.studentLoanDebt - monthlyPayment)
+            enrollmentStatus.lastLoanPaymentDate = character.currentDate
         } else {
-            // Missed payment - increase stress
+            // Missed payment - increase stress and still record the date
             character.stress = min(100, character.stress + 5)
+            enrollmentStatus.lastLoanPaymentDate = character.currentDate
         }
     }
 
@@ -248,6 +264,10 @@ class EducationManager: ObservableObject {
     }
 
     // MARK: - Queries
+
+    func isEnrolled() -> Bool {
+        return enrollmentStatus.isEnrolled
+    }
 
     func getAvailableInstitutions(for level: EducationLevel) -> [EducationalInstitution] {
         return EducationalInstitution.getInstitutions(forDegree: level)
