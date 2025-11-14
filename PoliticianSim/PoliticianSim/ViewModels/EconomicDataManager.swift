@@ -48,9 +48,14 @@ class EconomicDataManager: ObservableObject {
     /// - Momentum: Previous inflation inertia (0.7 weight)
     /// - Shock: Random supply/demand shocks (±0.2%)
     ///
-    /// **World GDPs:**
-    /// - Developed economies (GDP ≥ $2T): 1-3% annual growth
-    /// - Emerging economies (GDP < $2T): 3-7% annual growth
+    /// **World GDPs (Economic Convergence Theory):**
+    /// - Growth rates based on GDP per capita (development level):
+    ///   - High income (>$40k/capita): 1.5-2.5% growth (USA, Germany, UK)
+    ///   - Upper-middle income ($13k-$40k): 3-5% growth (China)
+    ///   - Lower-middle income ($4k-$13k): 4-7% growth (India)
+    ///   - Low income (<$4k): 5-8% growth (frontier markets)
+    /// - Size penalty: Economies >$20T GDP grow 0.2% slower
+    /// - Reflects catch-up growth: poorer countries grow faster
     /// - Rankings automatically resort after each update
     func simulateEconomicChanges(character: Character) {
         let currentDate = character.currentDate
@@ -179,17 +184,41 @@ class EconomicDataManager: ObservableObject {
     }
 
     private func simulateWorldEconomy() {
-        // Simulate GDP growth for each country
-        for i in 0..<economicData.worldGDPs.count {
-            // Different countries have different growth rates
-            // Developed economies: 1-3% annually
-            // Emerging economies: 3-7% annually
-            let isDeveloped = economicData.worldGDPs[i].gdp >= 2_000_000_000_000
-            let growthRange = isDeveloped ? (0.01...0.03) : (0.03...0.07)
-            let annualGrowthRate = Double.random(in: growthRange)
-            let weeklyGrowthRate = annualGrowthRate / 52.0
+        // Simulate GDP growth based on economic convergence theory
+        // Smaller/developing economies grow faster (catch-up growth)
+        // Larger/developed economies grow slower (mature markets)
 
+        for i in 0..<economicData.worldGDPs.count {
             let currentGDP = economicData.worldGDPs[i].gdp
+            let gdpPerCapita = economicData.worldGDPs[i].gdpPerCapita
+
+            // Determine growth potential based on development level (GDP per capita)
+            // High income (>$40k): 1.5-2.5% annual growth (mature economies)
+            // Upper-middle income ($13k-$40k): 3-5% annual growth
+            // Lower-middle income ($4k-$13k): 4-7% annual growth
+            // Low income (<$4k): 5-8% annual growth (catch-up growth)
+
+            let annualGrowthRate: Double
+            if gdpPerCapita >= 40_000 {
+                // Mature developed economies (USA, Germany, UK)
+                annualGrowthRate = Double.random(in: 0.015...0.025)
+            } else if gdpPerCapita >= 13_000 {
+                // Upper-middle income (China, some Eastern Europe)
+                annualGrowthRate = Double.random(in: 0.03...0.05)
+            } else if gdpPerCapita >= 4_000 {
+                // Lower-middle income (India, some emerging markets)
+                annualGrowthRate = Double.random(in: 0.04...0.07)
+            } else {
+                // Low income (frontier markets)
+                annualGrowthRate = Double.random(in: 0.05...0.08)
+            }
+
+            // Also add economic size factor: very large economies grow slightly slower
+            // due to diminishing returns to scale
+            let sizePenalty = currentGDP >= 20_000_000_000_000 ? 0.002 : 0.0
+            let adjustedGrowthRate = max(0.01, annualGrowthRate - sizePenalty)
+
+            let weeklyGrowthRate = adjustedGrowthRate / 52.0
             let newGDP = currentGDP * (1 + weeklyGrowthRate)
             economicData.worldGDPs[i].gdp = newGDP
         }
