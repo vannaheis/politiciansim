@@ -320,28 +320,69 @@ class GameManager: ObservableObject {
 
     func newGame() {
         // Clear all data for new game
+
+        // Character & Stats
         characterManager.character = nil
         statManager.clearHistory()
+
+        // Elections
         electionManager.activeCampaign = nil
         electionManager.upcomingElection = nil
         electionManager.electionHistory = []
+
+        // Events
+        eventEngine.currentEvent = nil
+        eventEngine.eventHistory = []
+        // Note: triggeredEventIds is private, will be reset when EventEngine is reinitialized
+
+        // Game State
+        gameState.character = nil
+        gameState.eventQueue = []
         gameState.activeEvent = nil
+        gameState.policies = []
+        gameState.scandalRisks = []
+        gameState.isPaused = false
+        gameState.timeSpeed = .day
+
+        // Policies
         policyManager.proposedPolicies = []
         policyManager.enactedPolicies = []
+
+        // Budget
         budgetManager.currentBudget = nil
         budgetManager.budgetHistory = []
+
+        // Laws
         lawsManager.draftLaws = []
         lawsManager.activeLaws = []
         lawsManager.enactedLaws = []
         lawsManager.rejectedLaws = []
         lawsManager.currentSession = nil
+
+        // Diplomacy
         diplomacyManager.relationships = []
         diplomacyManager.activeTreaties = []
         diplomacyManager.diplomaticEvents = []
+
+        // Public Opinion
         publicOpinionManager.pollHistory = []
         publicOpinionManager.mediaCoverage = []
         publicOpinionManager.currentPoll = nil
+        publicOpinionManager.activeActions = []
+        publicOpinionManager.socialMetrics = SocialMediaMetrics()
+
+        // Education
         educationManager.enrollmentStatus = EnrollmentStatus()
+
+        // Time
+        timeManager.timeSpeed = .day
+
+        // Navigation - reset to home
+        navigationManager.navigateTo(.home)
+        navigationManager.closeMenu()
+
+        // Reinitialize EventEngine to clear triggeredEventIds
+        eventEngine = EventEngine()
     }
 }
 
