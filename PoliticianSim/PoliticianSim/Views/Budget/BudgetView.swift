@@ -266,15 +266,15 @@ struct FiscalSummaryCard: View {
     }
 
     func formatMoney(_ amount: Decimal) -> String {
-        let value = Int(truncating: amount as NSDecimalNumber)
+        let value = Double(truncating: amount as NSDecimalNumber)
         if value >= 1_000_000_000 {
-            return String(format: "$%.1fB", Double(value) / 1_000_000_000.0)
+            return String(format: "$%.1fB", value / 1_000_000_000.0)
         } else if value >= 1_000_000 {
-            return String(format: "$%.1fM", Double(value) / 1_000_000.0)
+            return String(format: "$%.1fM", value / 1_000_000.0)
         } else if value >= 1_000 {
-            return String(format: "$%.0fK", Double(value) / 1_000.0)
+            return String(format: "$%.0fK", value / 1_000.0)
         } else {
-            return "$\(value)"
+            return String(format: "$%.0f", value)
         }
     }
 }
@@ -305,15 +305,15 @@ struct BudgetRow: View {
     }
 
     func formatMoney(_ amount: Decimal) -> String {
-        let value = Int(truncating: amount as NSDecimalNumber)
+        let value = Double(truncating: amount as NSDecimalNumber)
         if value >= 1_000_000_000 {
-            return String(format: "$%.1fB", Double(value) / 1_000_000_000.0)
+            return String(format: "$%.1fB", value / 1_000_000_000.0)
         } else if value >= 1_000_000 {
-            return String(format: "$%.1fM", Double(value) / 1_000_000.0)
+            return String(format: "$%.1fM", value / 1_000_000.0)
         } else if value >= 1_000 {
-            return String(format: "$%.0fK", Double(value) / 1_000.0)
+            return String(format: "$%.0fK", value / 1_000.0)
         } else {
-            return "$\(value)"
+            return String(format: "$%.0f", value)
         }
     }
 }
