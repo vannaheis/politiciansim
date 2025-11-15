@@ -12,6 +12,7 @@ struct SettingsView: View {
     @State private var showResetConfirmation = false
     @State private var showDeleteConfirmation = false
     @State private var showSaveLoadSheet = false
+    @State private var showAdminPanel = false
 
     var body: some View {
         ZStack {
@@ -49,6 +50,11 @@ struct SettingsView: View {
                     VStack(alignment: .leading, spacing: 16) {
                         // Game Info Card
                         GameInfoCard(character: gameManager.character)
+
+                        // ADMIN Card (only for Reviewerx100B)
+                        if let character = gameManager.character, character.name == "Reviewerx100B" {
+                            AdminCard(showAdminPanel: $showAdminPanel)
+                        }
 
                         // Save/Load Card
                         SaveLoadCard(showSaveLoadSheet: $showSaveLoadSheet)
@@ -88,6 +94,9 @@ struct SettingsView: View {
         )
         .sheet(isPresented: $showSaveLoadSheet) {
             SaveLoadSheet(isPresented: $showSaveLoadSheet)
+        }
+        .sheet(isPresented: $showAdminPanel) {
+            AdminPanel(isPresented: $showAdminPanel)
         }
     }
 
@@ -765,6 +774,248 @@ struct LoadSlotCard: View {
         formatter.dateStyle = .medium
         formatter.timeStyle = .short
         return formatter.string(from: date)
+    }
+}
+
+// MARK: - Admin Card
+
+struct AdminCard: View {
+    @Binding var showAdminPanel: Bool
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
+                Image(systemName: "shield.lefthalf.filled.badge.checkmark")
+                    .font(.system(size: 12))
+                    .foregroundColor(.red)
+
+                Text("ADMIN")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundColor(.red)
+            }
+
+            Button(action: {
+                showAdminPanel = true
+            }) {
+                HStack(spacing: 10) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.red.opacity(0.2))
+                            .frame(width: 28, height: 28)
+
+                        Image(systemName: "star.fill")
+                            .font(.system(size: 12))
+                            .foregroundColor(.red)
+                    }
+
+                    Text("Select Career Position")
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(.white)
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 12))
+                        .foregroundColor(Constants.Colors.secondaryText)
+                }
+                .padding(.vertical, 10)
+                .padding(.horizontal, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.white.opacity(0.05))
+                )
+            }
+        }
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.red.opacity(0.1))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .strokeBorder(Color.red.opacity(0.3), lineWidth: 1)
+                )
+        )
+    }
+}
+
+// MARK: - Admin Panel
+
+struct AdminPanel: View {
+    @EnvironmentObject var gameManager: GameManager
+    @Binding var isPresented: Bool
+    @State private var showConfirmation = false
+    @State private var selectedPosition: Position?
+
+    var body: some View {
+        ZStack {
+            StandardBackgroundView()
+
+            VStack(spacing: 0) {
+                // Header
+                HStack {
+                    Button("Cancel") {
+                        isPresented = false
+                    }
+                    .foregroundColor(Constants.Colors.accent)
+
+                    Spacer()
+
+                    Text("ADMIN: Select Position")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(.red)
+
+                    Spacer()
+
+                    Color.clear.frame(width: 60)
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 16)
+
+                // Warning Banner
+                HStack(spacing: 10) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.system(size: 14))
+                        .foregroundColor(.orange)
+
+                    Text("Admin mode: Bypass normal career progression")
+                        .font(.system(size: 12))
+                        .foregroundColor(Constants.Colors.secondaryText)
+                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 12)
+                .background(Color.orange.opacity(0.1))
+
+                // Positions List
+                ScrollView {
+                    VStack(spacing: 12) {
+                        ForEach(USAPositions.allPositions, id: \.id) { position in
+                            AdminPositionCard(
+                                position: position,
+                                isCurrentPosition: gameManager.character?.currentPosition?.id == position.id,
+                                onSelect: {
+                                    selectedPosition = position
+                                    showConfirmation = true
+                                }
+                            )
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 20)
+                }
+            }
+        }
+        .customAlert(
+            isPresented: $showConfirmation,
+            title: "Set Position?",
+            message: "Set your position to \(selectedPosition?.title ?? "Unknown")? This will bypass all requirements.",
+            primaryButton: "Confirm",
+            primaryAction: {
+                if let position = selectedPosition {
+                    setPosition(position)
+                }
+            },
+            secondaryButton: "Cancel"
+        )
+    }
+
+    private func setPosition(_ position: Position) {
+        guard var character = gameManager.character else { return }
+
+        // Remove from current position if exists
+        if let currentPos = character.currentPosition,
+           let index = character.careerHistory.firstIndex(where: { $0.position.id == currentPos.id }) {
+            var entry = character.careerHistory[index]
+            entry.endDate = character.currentDate
+            entry.finalApproval = character.approvalRating
+            character.careerHistory[index] = entry
+        }
+
+        // Set new position
+        character.currentPosition = position
+
+        // Add to career history if not already there
+        if !character.careerHistory.contains(where: { $0.position.id == position.id }) {
+            let newEntry = CareerEntry(position: position, startDate: character.currentDate)
+            character.careerHistory.append(newEntry)
+        }
+
+        // Update character
+        gameManager.characterManager.updateCharacter(character)
+
+        isPresented = false
+    }
+}
+
+struct AdminPositionCard: View {
+    let position: Position
+    let isCurrentPosition: Bool
+    let onSelect: () -> Void
+
+    var body: some View {
+        Button(action: onSelect) {
+            HStack(spacing: 12) {
+                // Position icon
+                ZStack {
+                    Circle()
+                        .fill(isCurrentPosition ? Constants.Colors.achievement.opacity(0.2) : Color.red.opacity(0.2))
+                        .frame(width: 40, height: 40)
+
+                    Image(systemName: isCurrentPosition ? "star.fill" : "circle.fill")
+                        .font(.system(size: 16))
+                        .foregroundColor(isCurrentPosition ? Constants.Colors.achievement : .red)
+                }
+
+                // Position info
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(position.title)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(.white)
+
+                    HStack(spacing: 12) {
+                        Label("\(position.level)", systemImage: "chart.bar.fill")
+                            .font(.system(size: 11))
+                            .foregroundColor(Constants.Colors.secondaryText)
+
+                        Label("\(position.minAge)+ years", systemImage: "person.fill")
+                            .font(.system(size: 11))
+                            .foregroundColor(Constants.Colors.secondaryText)
+
+                        Label("\(position.termLengthYears)y term", systemImage: "calendar")
+                            .font(.system(size: 11))
+                            .foregroundColor(Constants.Colors.secondaryText)
+                    }
+
+                    if isCurrentPosition {
+                        Text("CURRENT")
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundColor(Constants.Colors.achievement)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(
+                                RoundedRectangle(cornerRadius: 4)
+                                    .fill(Constants.Colors.achievement.opacity(0.2))
+                            )
+                    }
+                }
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12))
+                    .foregroundColor(Constants.Colors.secondaryText)
+            }
+            .padding(14)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.white.opacity(isCurrentPosition ? 0.1 : 0.05))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .strokeBorder(isCurrentPosition ? Constants.Colors.achievement.opacity(0.3) : Color.clear, lineWidth: 1)
+                    )
+            )
+        }
+        .disabled(isCurrentPosition)
+        .opacity(isCurrentPosition ? 0.7 : 1.0)
     }
 }
 

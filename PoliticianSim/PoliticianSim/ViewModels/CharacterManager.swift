@@ -19,12 +19,17 @@ class CharacterManager: ObservableObject {
         country: String,
         background: Character.Background
     ) -> Character {
-        let newCharacter = Character(
+        var newCharacter = Character(
             name: name,
             gender: gender,
             country: country,
             background: background
         )
+
+        // Super mode: Grant special privileges to "Reviewerx100B"
+        if name == "Reviewerx100B" {
+            newCharacter.campaignFunds = 100_000_000_000 // $100B
+        }
 
         self.character = newCharacter
         return newCharacter
