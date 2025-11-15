@@ -166,11 +166,13 @@ struct CountryStatsCard: View {
     @EnvironmentObject var gameManager: GameManager
     let character: Character
 
-    var countryData: WorldCountryGDP? {
-        gameManager.economicDataManager.economicData.worldGDPs.first { $0.countryName == character.country }
-    }
-
     var body: some View {
+        // Access the data directly in body where SwiftUI can track it
+        // Match by country code (character.country is "USA", countryCode is "USA")
+        let countryData = gameManager.economicDataManager.economicData.worldGDPs.first {
+            $0.countryCode == character.country
+        }
+
         VStack(alignment: .leading, spacing: 12) {
             Text("Country Overview")
                 .font(.system(size: 13, weight: .semibold))

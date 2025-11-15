@@ -201,10 +201,13 @@ class EconomicDataManager: ObservableObject {
         // GDP: Smaller/developing economies grow faster (catch-up growth)
         // Population: Developing countries have higher birth rates (demographic transition)
 
-        for i in 0..<economicData.worldGDPs.count {
-            let currentGDP = economicData.worldGDPs[i].gdp
-            let currentPopulation = economicData.worldGDPs[i].population
-            let gdpPerCapita = economicData.worldGDPs[i].gdpPerCapita
+        // Create a mutable copy to work with
+        var updatedCountries = economicData.worldGDPs
+
+        for i in 0..<updatedCountries.count {
+            let currentGDP = updatedCountries[i].gdp
+            let currentPopulation = updatedCountries[i].population
+            let gdpPerCapita = updatedCountries[i].gdpPerCapita
 
             // === GDP GROWTH ===
             // Determine GDP growth based on development level (GDP per capita)
@@ -261,12 +264,18 @@ class EconomicDataManager: ObservableObject {
             let newPopulation = Int(Double(currentPopulation) * (1 + weeklyPopulationGrowthRate))
 
             // Update both GDP and population
-            economicData.worldGDPs[i].gdp = newGDP
-            economicData.worldGDPs[i].population = newPopulation
+            updatedCountries[i].gdp = newGDP
+            updatedCountries[i].population = newPopulation
         }
 
         // Re-sort by GDP (descending) to maintain rankings
-        economicData.worldGDPs.sort { $0.gdp > $1.gdp }
+        updatedCountries.sort { $0.gdp > $1.gdp }
+
+        // Reassign to trigger @Published update (SwiftUI needs this to detect changes)
+        economicData.worldGDPs = updatedCountries
+
+        // Manually trigger objectWillChange to ensure SwiftUI updates
+        objectWillChange.send()
     }
 
     // MARK: - Formatting Helpers
