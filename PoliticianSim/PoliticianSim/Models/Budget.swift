@@ -213,12 +213,12 @@ struct BudgetProposal: Codable, Identifiable {
 // MARK: - Budget Templates
 
 extension Budget {
-    static func createInitialBudget(fiscalYear: Int, governmentLevel: Int, gdp: Double? = nil) -> Budget {
-        // Calculate base budget from GDP if available
-        let baseMultiplier: Decimal
+    static func createInitialBudget(fiscalYear: Int, governmentLevel: Int, gdp: Double? = nil, taxRates: TaxRates = TaxRates()) -> Budget {
+        // Calculate actual revenue from GDP and tax rates
+        let totalRevenue: Decimal
 
         if let gdpValue = gdp, gdpValue > 0 {
-            // Base budget on GDP (use government share percentage)
+            // Government share of GDP varies by level
             let governmentSharePercentage: Double
             switch governmentLevel {
             case 1: governmentSharePercentage = 0.015  // 1.5% for local (Mayor)
@@ -229,96 +229,101 @@ extension Budget {
             default: governmentSharePercentage = 0.15
             }
 
-            // Assume default tax rate of 25% and 87.5% efficiency for initial budget
-            let estimatedRevenue = gdpValue * governmentSharePercentage * 0.25 * 0.875
-            baseMultiplier = Decimal(estimatedRevenue)
+            // Calculate revenue: GDP × Government Share × Tax Rate × Efficiency
+            let averageTaxRate = taxRates.averageRate / 100.0
+            let taxEfficiency = 0.75 + (averageTaxRate * 0.25) // 75-100% efficiency
+            let theoreticalRevenue = gdpValue * governmentSharePercentage * averageTaxRate
+            let actualRevenue = theoreticalRevenue * taxEfficiency
+
+            totalRevenue = Decimal(actualRevenue)
         } else {
-            // Fallback to old method if GDP not available
-            baseMultiplier = Decimal(governmentLevel * 100_000_000) // $100M per level
+            // Fallback if GDP not available
+            totalRevenue = Decimal(governmentLevel * 100_000_000) // $100M per level
         }
 
+        // Set initial department allocations as reasonable defaults (% of revenue)
+        // User can adjust these in the Departments tab
         let departments = [
             Department(
                 name: "Education Department",
                 category: .education,
-                allocatedFunds: baseMultiplier * 0.20,
-                proposedFunds: baseMultiplier * 0.20,
+                allocatedFunds: totalRevenue * 0.20,
+                proposedFunds: totalRevenue * 0.20,
                 description: "K-12 schools, community colleges, and education programs"
             ),
             Department(
                 name: "Healthcare Services",
                 category: .healthcare,
-                allocatedFunds: baseMultiplier * 0.18,
-                proposedFunds: baseMultiplier * 0.18,
+                allocatedFunds: totalRevenue * 0.18,
+                proposedFunds: totalRevenue * 0.18,
                 description: "Public health programs and medical services"
             ),
             Department(
                 name: "Public Safety",
                 category: .defense,
-                allocatedFunds: baseMultiplier * 0.15,
-                proposedFunds: baseMultiplier * 0.15,
+                allocatedFunds: totalRevenue * 0.15,
+                proposedFunds: totalRevenue * 0.15,
                 description: "Police, fire departments, and emergency services"
             ),
             Department(
                 name: "Infrastructure & Transportation",
                 category: .infrastructure,
-                allocatedFunds: baseMultiplier * 0.15,
-                proposedFunds: baseMultiplier * 0.15,
+                allocatedFunds: totalRevenue * 0.15,
+                proposedFunds: totalRevenue * 0.15,
                 description: "Roads, bridges, public transit, and utilities"
             ),
             Department(
                 name: "Social Services",
                 category: .welfare,
-                allocatedFunds: baseMultiplier * 0.12,
-                proposedFunds: baseMultiplier * 0.12,
+                allocatedFunds: totalRevenue * 0.12,
+                proposedFunds: totalRevenue * 0.12,
                 description: "Housing assistance, food programs, and welfare"
             ),
             Department(
                 name: "Environmental Protection",
                 category: .environment,
-                allocatedFunds: baseMultiplier * 0.08,
-                proposedFunds: baseMultiplier * 0.08,
+                allocatedFunds: totalRevenue * 0.08,
+                proposedFunds: totalRevenue * 0.08,
                 description: "Parks, conservation, and environmental programs"
             ),
             Department(
                 name: "Justice & Courts",
                 category: .justice,
-                allocatedFunds: baseMultiplier * 0.05,
-                proposedFunds: baseMultiplier * 0.05,
+                allocatedFunds: totalRevenue * 0.05,
+                proposedFunds: totalRevenue * 0.05,
                 description: "Court system and legal services"
             ),
             Department(
                 name: "Science & Research",
                 category: .science,
-                allocatedFunds: baseMultiplier * 0.03,
-                proposedFunds: baseMultiplier * 0.03,
+                allocatedFunds: totalRevenue * 0.03,
+                proposedFunds: totalRevenue * 0.03,
                 description: "Research grants and innovation programs"
             ),
             Department(
                 name: "Arts & Culture",
                 category: .culture,
-                allocatedFunds: baseMultiplier * 0.02,
-                proposedFunds: baseMultiplier * 0.02,
+                allocatedFunds: totalRevenue * 0.02,
+                proposedFunds: totalRevenue * 0.02,
                 description: "Museums, libraries, and cultural programs"
             ),
             Department(
                 name: "Administration",
                 category: .administration,
-                allocatedFunds: baseMultiplier * 0.02,
-                proposedFunds: baseMultiplier * 0.02,
+                allocatedFunds: totalRevenue * 0.02,
+                proposedFunds: totalRevenue * 0.02,
                 description: "Government operations and administrative costs"
             )
         ]
 
         let totalExpenses = departments.reduce(Decimal(0)) { $0 + $1.allocatedFunds }
-        let totalRevenue = totalExpenses * 1.05 // Slight surplus by default
 
         return Budget(
             fiscalYear: fiscalYear,
             totalRevenue: totalRevenue,
             totalExpenses: totalExpenses,
             departments: departments,
-            taxRates: TaxRates(),
+            taxRates: taxRates,
             economicIndicators: EconomicIndicators()
         )
     }
