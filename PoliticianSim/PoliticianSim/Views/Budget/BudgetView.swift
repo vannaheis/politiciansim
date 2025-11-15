@@ -93,7 +93,9 @@ struct BudgetView: View {
             // Initialize budget if character has a position
             if gameManager.budgetManager.currentBudget == nil,
                let character = gameManager.character {
-                gameManager.budgetManager.initializeBudget(for: character)
+                // Get appropriate GDP based on position level
+                let gdp = getGDPForPosition(character: character)
+                gameManager.budgetManager.initializeBudget(for: character, gdp: gdp)
             }
         }
         .customAlert(
@@ -103,6 +105,21 @@ struct BudgetView: View {
             primaryButton: "OK",
             primaryAction: {}
         )
+    }
+
+    private func getGDPForPosition(character: Character) -> Double? {
+        guard let position = character.currentPosition else { return nil }
+
+        switch position.level {
+        case 1: // Mayor - use local GDP
+            return gameManager.economicDataManager.economicData.local.gdp.current
+        case 2: // Governor - use state GDP
+            return gameManager.economicDataManager.economicData.state.gdp.current
+        case 3, 4, 5: // Senator, VP, President - use federal GDP
+            return gameManager.economicDataManager.economicData.federal.gdp.current
+        default:
+            return nil
+        }
     }
 }
 
@@ -693,10 +710,29 @@ struct TaxRateCard: View {
 
     private func adjustTaxRate(newRate: Double) {
         guard var character = gameManager.character else { return }
+
+        // Get appropriate GDP based on position level
+        let gdp: Double?
+        if let position = character.currentPosition {
+            switch position.level {
+            case 1: // Mayor - use local GDP
+                gdp = gameManager.economicDataManager.economicData.local.gdp.current
+            case 2: // Governor - use state GDP
+                gdp = gameManager.economicDataManager.economicData.state.gdp.current
+            case 3, 4, 5: // Senator, VP, President - use federal GDP
+                gdp = gameManager.economicDataManager.economicData.federal.gdp.current
+            default:
+                gdp = nil
+            }
+        } else {
+            gdp = nil
+        }
+
         let _ = gameManager.budgetManager.adjustTaxRate(
             taxType: taxType,
             newRate: newRate,
-            character: &character
+            character: &character,
+            gdp: gdp
         )
         gameManager.characterManager.updateCharacter(character)
     }

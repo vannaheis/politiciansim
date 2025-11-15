@@ -23,9 +23,10 @@ class BudgetManager: ObservableObject {
         guard let position = character.currentPosition else { return }
 
         let fiscalYear = Calendar.current.component(.year, from: character.currentDate)
-        var budget = Budget.createInitialBudget(fiscalYear: fiscalYear, governmentLevel: position.level)
+        // Pass GDP to createInitialBudget so department allocations are properly sized
+        var budget = Budget.createInitialBudget(fiscalYear: fiscalYear, governmentLevel: position.level, gdp: gdp)
 
-        // Update revenue based on GDP if available
+        // Update revenue based on GDP and tax rates if available
         if let gdpValue = gdp {
             updateRevenue(budget: &budget, gdp: gdpValue, governmentLevel: position.level)
         }

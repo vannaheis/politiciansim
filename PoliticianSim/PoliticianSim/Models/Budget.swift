@@ -213,8 +213,29 @@ struct BudgetProposal: Codable, Identifiable {
 // MARK: - Budget Templates
 
 extension Budget {
-    static func createInitialBudget(fiscalYear: Int, governmentLevel: Int) -> Budget {
-        let baseMultiplier = Decimal(governmentLevel * 100_000_000) // $100M per level
+    static func createInitialBudget(fiscalYear: Int, governmentLevel: Int, gdp: Double? = nil) -> Budget {
+        // Calculate base budget from GDP if available
+        let baseMultiplier: Decimal
+
+        if let gdpValue = gdp, gdpValue > 0 {
+            // Base budget on GDP (use government share percentage)
+            let governmentSharePercentage: Double
+            switch governmentLevel {
+            case 1: governmentSharePercentage = 0.015  // 1.5% for local (Mayor)
+            case 2: governmentSharePercentage = 0.10   // 10% for state (Governor)
+            case 3: governmentSharePercentage = 0.04   // 4% for federal (Senator)
+            case 4: governmentSharePercentage = 0.175  // 17.5% for federal (VP)
+            case 5: governmentSharePercentage = 0.225  // 22.5% for federal (President)
+            default: governmentSharePercentage = 0.15
+            }
+
+            // Assume default tax rate of 25% and 87.5% efficiency for initial budget
+            let estimatedRevenue = gdpValue * governmentSharePercentage * 0.25 * 0.875
+            baseMultiplier = Decimal(estimatedRevenue)
+        } else {
+            // Fallback to old method if GDP not available
+            baseMultiplier = Decimal(governmentLevel * 100_000_000) // $100M per level
+        }
 
         let departments = [
             Department(
