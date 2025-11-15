@@ -544,41 +544,17 @@ struct PositionDetailRow: View {
 struct USAPositions {
     static let allPositions: [Position] = [
         Position(
-            title: "Community Organizer",
-            level: 1,
-            termLengthYears: 2,
-            minAge: 18
-        ),
-        Position(
-            title: "City Council Member",
-            level: 2,
-            termLengthYears: 4,
-            minAge: 21,
-            approvalRating: 30,
-            reputation: 20,
-            funds: 10000
-        ),
-        Position(
             title: "Mayor",
-            level: 3,
+            level: 1,
             termLengthYears: 4,
             minAge: 25,
-            approvalRating: 40,
-            reputation: 30,
+            approvalRating: 35,
+            reputation: 25,
             funds: 50000
         ),
         Position(
-            title: "State Representative",
-            level: 4,
-            termLengthYears: 2,
-            minAge: 25,
-            approvalRating: 45,
-            reputation: 40,
-            funds: 100000
-        ),
-        Position(
             title: "Governor",
-            level: 5,
+            level: 2,
             termLengthYears: 4,
             minAge: 30,
             approvalRating: 50,
@@ -587,7 +563,7 @@ struct USAPositions {
         ),
         Position(
             title: "U.S. Senator",
-            level: 6,
+            level: 3,
             termLengthYears: 6,
             minAge: 30,
             approvalRating: 55,
@@ -596,7 +572,7 @@ struct USAPositions {
         ),
         Position(
             title: "Vice President",
-            level: 7,
+            level: 4,
             termLengthYears: 4,
             minAge: 35,
             approvalRating: 60,
@@ -605,7 +581,7 @@ struct USAPositions {
         ),
         Position(
             title: "President",
-            level: 8,
+            level: 5,
             termLengthYears: 4,
             minAge: 35,
             approvalRating: 65,

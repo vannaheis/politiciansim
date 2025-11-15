@@ -19,11 +19,16 @@ class BudgetManager: ObservableObject {
 
     // MARK: - Budget Creation
 
-    func initializeBudget(for character: Character) {
+    func initializeBudget(for character: Character, gdp: Double? = nil) {
         guard let position = character.currentPosition else { return }
 
         let fiscalYear = Calendar.current.component(.year, from: character.currentDate)
-        let budget = Budget.createInitialBudget(fiscalYear: fiscalYear, governmentLevel: position.level)
+        var budget = Budget.createInitialBudget(fiscalYear: fiscalYear, governmentLevel: position.level)
+
+        // Update revenue based on GDP if available
+        if let gdpValue = gdp {
+            updateRevenue(budget: &budget, gdp: gdpValue, governmentLevel: position.level)
+        }
 
         currentBudget = budget
     }
@@ -104,7 +109,8 @@ class BudgetManager: ObservableObject {
     func adjustTaxRate(
         taxType: TaxType,
         newRate: Double,
-        character: inout Character
+        character: inout Character,
+        gdp: Double? = nil
     ) -> (success: Bool, message: String) {
         guard var budget = currentBudget else {
             return (false, "No budget available")
@@ -127,6 +133,9 @@ class BudgetManager: ObservableObject {
             return (false, "Tax rate out of valid range")
         }
 
+        // Store old rate for approval calculation
+        let oldRate = getCurrentRate(taxType: taxType, budget: budget)
+
         // Apply tax rate
         switch taxType {
         case .incomeLow:
@@ -141,11 +150,12 @@ class BudgetManager: ObservableObject {
             budget.taxRates.salesTax = newRate
         }
 
-        // Recalculate revenue
-        updateRevenue(budget: &budget)
+        // Recalculate revenue with GDP
+        let governmentLevel = character.currentPosition?.level ?? 1
+        updateRevenue(budget: &budget, gdp: gdp, governmentLevel: governmentLevel)
 
         // Calculate approval impact
-        let approvalChange = calculateTaxApprovalImpact(taxType: taxType, newRate: newRate, oldRate: getCurrentRate(taxType: taxType, budget: budget))
+        let approvalChange = calculateTaxApprovalImpact(taxType: taxType, newRate: newRate, oldRate: oldRate)
         character.approvalRating = max(0, min(100, character.approvalRating + approvalChange))
 
         currentBudget = budget
@@ -199,12 +209,45 @@ class BudgetManager: ObservableObject {
 
     // MARK: - Helper Methods
 
-    private func updateRevenue(budget: inout Budget) {
-        // Simple revenue calculation based on tax rates
-        let taxMultiplier = budget.taxRates.averageRate / 25.0 // Normalized around 25% average
-        let baseRevenue = budget.totalExpenses
+    private func updateRevenue(budget: inout Budget, gdp: Double? = nil, governmentLevel: Int = 1) {
+        // Calculate revenue based on GDP and tax rates
+        // Revenue = GDP × Tax Collection Rate × Government Share
 
-        budget.totalRevenue = baseRevenue * Decimal(taxMultiplier)
+        guard let gdpValue = gdp, gdpValue > 0 else {
+            // Fallback to simple calculation if GDP not available
+            let taxMultiplier = budget.taxRates.averageRate / 25.0
+            let baseRevenue = budget.totalExpenses
+            budget.totalRevenue = baseRevenue * Decimal(taxMultiplier)
+            return
+        }
+
+        // Government share of GDP varies by level:
+        // Level 1 (Mayor): ~1-2% of local GDP
+        // Level 2 (Governor): ~8-12% of state GDP
+        // Level 3 (Senator): ~3-5% of federal GDP (proportional)
+        // Level 4 (VP): ~15-20% of federal GDP
+        // Level 5 (President): ~20-25% of federal GDP
+
+        let governmentSharePercentage: Double
+        switch governmentLevel {
+        case 1: governmentSharePercentage = 0.015  // 1.5% for local (Mayor)
+        case 2: governmentSharePercentage = 0.10   // 10% for state (Governor)
+        case 3: governmentSharePercentage = 0.04   // 4% for federal (Senator)
+        case 4: governmentSharePercentage = 0.175  // 17.5% for federal (VP)
+        case 5: governmentSharePercentage = 0.225  // 22.5% for federal (President)
+        default: governmentSharePercentage = 0.15
+        }
+
+        // Tax efficiency: How much of theoretical revenue is actually collected
+        // Average tax rate affects collection efficiency
+        let averageTaxRate = budget.taxRates.averageRate / 100.0 // Convert to decimal
+        let taxEfficiency = 0.75 + (averageTaxRate * 0.25) // 75-100% efficiency
+
+        // Calculate total revenue
+        let theoreticalRevenue = gdpValue * governmentSharePercentage * averageTaxRate
+        let actualRevenue = theoreticalRevenue * taxEfficiency
+
+        budget.totalRevenue = Decimal(actualRevenue)
     }
 
     private func calculateDeficitApprovalImpact(budget: Budget) -> Double {
