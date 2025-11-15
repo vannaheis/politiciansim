@@ -57,10 +57,26 @@ struct CharacterCreationContainerView: View {
 
     private func createCharacter() {
         print("DEBUG: createCharacter() called")
-        let character = viewModel.createCharacter()
-        print("DEBUG: Character created - Name: \(character.name)")
-        gameManager.characterManager.character = character
-        print("DEBUG: Character set in manager")
+
+        // Create character using CharacterManager (handles admin mode)
+        var character = gameManager.characterManager.createCharacter(
+            name: viewModel.name.trimmingCharacters(in: .whitespaces),
+            gender: viewModel.gender,
+            country: viewModel.selectedCountry,
+            background: viewModel.background
+        )
+
+        // Apply custom attributes from character creation
+        character.charisma = viewModel.charisma
+        character.intelligence = viewModel.intelligence
+        character.reputation = viewModel.reputation
+        character.luck = viewModel.luck
+        character.diplomacy = viewModel.diplomacy
+
+        // Update character with custom attributes
+        gameManager.characterManager.updateCharacter(character)
+
+        print("DEBUG: Character created - Name: \(character.name), Funds: \(character.campaignFunds)")
         gameManager.statManager.initializeHistory(for: character)
         print("DEBUG: Stats initialized")
         gameManager.navigationManager.navigateTo(.home)
