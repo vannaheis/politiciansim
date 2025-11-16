@@ -93,9 +93,18 @@ struct BudgetView: View {
             // Initialize budget if character has a position
             // FORCE RE-INITIALIZATION to fix 10x expense bug from old calculations
             if let character = gameManager.character, character.currentPosition != nil {
+                // Initialize treasury if needed
+                if gameManager.treasuryManager.currentTreasury == nil {
+                    gameManager.treasuryManager.initializeTreasury(for: character)
+                }
+
                 // Get appropriate GDP based on position level
                 let gdp = getGDPForPosition(character: character)
-                gameManager.budgetManager.initializeBudget(for: character, gdp: gdp)
+                gameManager.budgetManager.initializeBudget(
+                    for: character,
+                    gdp: gdp,
+                    treasuryManager: gameManager.treasuryManager
+                )
             }
         }
         .customAlert(
@@ -232,13 +241,33 @@ struct FiscalSummaryCard: View {
                 color: Constants.Colors.positive
             )
 
-            // Expenses
+            // Department Expenses
             BudgetRow(
-                label: "Total Expenses",
+                label: "Department Expenses",
                 amount: budget.totalExpenses,
                 icon: "arrow.up.circle.fill",
                 color: Constants.Colors.negative
             )
+
+            // Interest Payment (if any)
+            if budget.interestPayment > 0 {
+                BudgetRow(
+                    label: "Debt Interest Payment",
+                    amount: budget.interestPayment,
+                    icon: "percent",
+                    color: .orange
+                )
+            }
+
+            // Total Expenses with Interest
+            if budget.interestPayment > 0 {
+                BudgetRow(
+                    label: "Total Expenses (incl. Interest)",
+                    amount: budget.totalExpensesWithInterest,
+                    icon: "sum",
+                    color: Constants.Colors.negative
+                )
+            }
 
             Divider().background(Color.white.opacity(0.2))
 

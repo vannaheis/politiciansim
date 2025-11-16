@@ -11,18 +11,23 @@ struct Budget: Codable, Identifiable {
     let id: UUID
     var fiscalYear: Int
     var totalRevenue: Decimal
-    var totalExpenses: Decimal
+    var totalExpenses: Decimal  // Department expenses only
+    var interestPayment: Decimal // Annual interest on debt
     var departments: [Department]
     var taxRates: TaxRates
     var economicIndicators: EconomicIndicators
 
+    var totalExpensesWithInterest: Decimal {
+        totalExpenses + interestPayment
+    }
+
     var surplus: Decimal {
-        totalRevenue - totalExpenses
+        totalRevenue - totalExpensesWithInterest
     }
 
     var deficitPercentage: Double {
         guard totalRevenue > 0 else { return 0 }
-        let deficit = totalExpenses - totalRevenue
+        let deficit = totalExpensesWithInterest - totalRevenue
         return Double(truncating: (deficit / totalRevenue * 100) as NSDecimalNumber)
     }
 
@@ -31,6 +36,7 @@ struct Budget: Codable, Identifiable {
         fiscalYear: Int,
         totalRevenue: Decimal = 0,
         totalExpenses: Decimal = 0,
+        interestPayment: Decimal = 0,
         departments: [Department] = [],
         taxRates: TaxRates = TaxRates(),
         economicIndicators: EconomicIndicators = EconomicIndicators()
@@ -39,6 +45,7 @@ struct Budget: Codable, Identifiable {
         self.fiscalYear = fiscalYear
         self.totalRevenue = totalRevenue
         self.totalExpenses = totalExpenses
+        self.interestPayment = interestPayment
         self.departments = departments
         self.taxRates = taxRates
         self.economicIndicators = economicIndicators

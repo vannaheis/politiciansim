@@ -19,19 +19,27 @@ class BudgetManager: ObservableObject {
 
     // MARK: - Budget Creation
 
-    func initializeBudget(for character: Character, gdp: Double? = nil) {
+    func initializeBudget(for character: Character, gdp: Double? = nil, treasuryManager: TreasuryManager? = nil) {
         guard let position = character.currentPosition else { return }
 
         let fiscalYear = Calendar.current.component(.year, from: character.currentDate)
 
         // Create budget with GDP-based revenue calculation
         // Revenue is calculated directly in createInitialBudget, no need to update it again
-        let budget = Budget.createInitialBudget(
+        var budget = Budget.createInitialBudget(
             fiscalYear: fiscalYear,
             governmentLevel: position.level,
             gdp: gdp,
             taxRates: TaxRates() // Use default tax rates
         )
+
+        // Calculate interest payment based on current debt
+        if let treasury = treasuryManager?.currentTreasury, treasury.cashOnHand < 0 {
+            let debt = abs(treasury.cashOnHand)
+            budget.interestPayment = Decimal(treasury.interestRate / 100.0) * debt
+        } else {
+            budget.interestPayment = 0
+        }
 
         currentBudget = budget
     }
