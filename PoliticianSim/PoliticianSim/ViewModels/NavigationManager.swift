@@ -30,6 +30,7 @@ class NavigationManager: ObservableObject {
         case budget = "Budget"
         case treasury = "Treasury"
         case laws = "Laws"
+        case governmentStats = "Performance"
 
         // Relations
         case diplomacy = "Diplomacy"
@@ -54,6 +55,7 @@ class NavigationManager: ObservableObject {
             case .budget: return "dollarsign.circle.fill"
             case .treasury: return "building.columns.fill"
             case .laws: return "book.closed.fill"
+            case .governmentStats: return "chart.bar.fill"
             case .diplomacy: return "globe.americas.fill"
             case .publicOpinion: return "chart.line.uptrend.xyaxis"
             case .economy: return "banknote.fill"
@@ -66,7 +68,7 @@ class NavigationManager: ObservableObject {
             case .home: return .none
             case .profile, .stats, .education: return .character
             case .position, .elections, .campaigns: return .career
-            case .policies, .budget, .treasury, .laws: return .governance
+            case .policies, .budget, .treasury, .laws, .governmentStats: return .governance
             case .diplomacy, .publicOpinion: return .relations
             case .economy: return .economy
             case .settings: return .settings

@@ -84,7 +84,7 @@ class BudgetManager: ObservableObject {
         return (true, "Department funding adjusted")
     }
 
-    func applyProposedBudget(character: inout Character, treasuryManager: TreasuryManager) -> (success: Bool, message: String) {
+    func applyProposedBudget(character: inout Character, treasuryManager: TreasuryManager, governmentStatsManager: GovernmentStatsManager? = nil, population: Int = 1) -> (success: Bool, message: String) {
         guard var budget = currentBudget else {
             return (false, "No budget available")
         }
@@ -118,6 +118,11 @@ class BudgetManager: ObservableObject {
         updateEconomicIndicators(budget: &budget, character: character)
 
         currentBudget = budget
+
+        // Update government performance stats (per-capita based)
+        if let statsManager = governmentStatsManager, population > 0 {
+            statsManager.updateStats(budget: budget, population: population, character: &character)
+        }
 
         // Add to history
         budgetHistory.append(budget)

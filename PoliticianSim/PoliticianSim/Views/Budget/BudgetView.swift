@@ -958,15 +958,45 @@ struct ApplyBudgetButton: View {
             gameManager.treasuryManager.initializeTreasury(for: character)
         }
 
+        // Initialize government stats if needed
+        if gameManager.governmentStatsManager.currentStats == nil {
+            gameManager.governmentStatsManager.initializeStats(for: character)
+        }
+
+        // Get population based on position level
+        let population = getPopulation(character: character)
+
         let result = gameManager.budgetManager.applyProposedBudget(
             character: &character,
-            treasuryManager: gameManager.treasuryManager
+            treasuryManager: gameManager.treasuryManager,
+            governmentStatsManager: gameManager.governmentStatsManager,
+            population: population
         )
 
         if result.success {
             gameManager.characterManager.updateCharacter(character)
             feedbackMessage = result.message
             showingFeedback = true
+        }
+    }
+
+    private func getPopulation(character: Character) -> Int {
+        guard let position = character.currentPosition else { return 1 }
+
+        switch position.level {
+        case 1: // Mayor - estimate from local GDP (assumes $50k per capita)
+            return gameManager.economicDataManager.economicData.local.gdp.current > 0 ?
+                Int(gameManager.economicDataManager.economicData.local.gdp.current / 50000) : 100_000
+        case 2: // Governor - estimate from state GDP (assumes ~$60k per capita for NY)
+            let stateGDP = gameManager.economicDataManager.economicData.state.gdp.current
+            return Int(stateGDP / 60000)
+        case 3, 4, 5: // Senator, VP, President - use federal population (USA)
+            if let usa = gameManager.economicDataManager.economicData.worldGDPs.first(where: { $0.countryCode == "USA" }) {
+                return usa.population
+            }
+            return 335_000_000
+        default:
+            return 1
         }
     }
 }

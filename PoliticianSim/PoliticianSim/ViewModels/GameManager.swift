@@ -26,6 +26,7 @@ class GameManager: ObservableObject {
     @Published var publicOpinionManager = PublicOpinionManager()
     @Published var educationManager = EducationManager()
     @Published var economicDataManager = EconomicDataManager()
+    @Published var governmentStatsManager = GovernmentStatsManager()
     let saveManager = SaveManager.shared
 
     // Game state
@@ -271,6 +272,7 @@ class GameManager: ObservableObject {
         publicOpinionManager = PublicOpinionManager()
         educationManager = EducationManager()
         economicDataManager = EconomicDataManager()
+        governmentStatsManager = GovernmentStatsManager()
 
         // Reset game state
         gameState = GameState()
@@ -373,6 +375,12 @@ class GameManager: ObservableObject {
             .store(in: &cancellables)
 
         economicDataManager.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
+
+        governmentStatsManager.objectWillChange
             .sink { [weak self] _ in
                 self?.objectWillChange.send()
             }
