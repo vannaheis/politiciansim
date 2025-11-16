@@ -91,8 +91,8 @@ struct BudgetView: View {
         }
         .onAppear {
             // Initialize budget if character has a position
-            if gameManager.budgetManager.currentBudget == nil,
-               let character = gameManager.character {
+            // FORCE RE-INITIALIZATION to fix 10x expense bug from old calculations
+            if let character = gameManager.character, character.currentPosition != nil {
                 // Get appropriate GDP based on position level
                 let gdp = getGDPForPosition(character: character)
                 gameManager.budgetManager.initializeBudget(for: character, gdp: gdp)
