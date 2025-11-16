@@ -82,6 +82,9 @@
 		7C6E454F2EC6F17A005F7A3D /* EconomicDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E454E2EC6F17A005F7A3D /* EconomicDataManager.swift */; };
 		7C6E45512EC6F190005F7A3D /* EconomicData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E45502EC6F190005F7A3D /* EconomicData.swift */; };
 		7C6E45532EC6F1E2005F7A3D /* LineChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E45522EC6F1E2005F7A3D /* LineChartView.swift */; };
+		7C6E46CF2EC965AF005F7A3D /* Treasury.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46CE2EC965AF005F7A3D /* Treasury.swift */; };
+		7C6E46D12EC965B7005F7A3D /* TreasuryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46D02EC965B7005F7A3D /* TreasuryManager.swift */; };
+		7C6E46D42EC965C4005F7A3D /* TreasuryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46D22EC965C4005F7A3D /* TreasuryView.swift */; };
 		FB1BD9A2FE914F06F1F9D2BC /* CustomAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61D83AE85A5956CC2FFCB315 /* CustomAlert.swift */; };
 /* End PBXBuildFile section */
 
@@ -163,6 +166,9 @@
 		7C6E454E2EC6F17A005F7A3D /* EconomicDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EconomicDataManager.swift; sourceTree = "<group>"; };
 		7C6E45502EC6F190005F7A3D /* EconomicData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EconomicData.swift; sourceTree = "<group>"; };
 		7C6E45522EC6F1E2005F7A3D /* LineChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineChartView.swift; sourceTree = "<group>"; };
+		7C6E46CE2EC965AF005F7A3D /* Treasury.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Treasury.swift; sourceTree = "<group>"; };
+		7C6E46D02EC965B7005F7A3D /* TreasuryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreasuryManager.swift; sourceTree = "<group>"; };
+		7C6E46D22EC965C4005F7A3D /* TreasuryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreasuryView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -233,6 +239,7 @@
 				7C6E453E2EC59BC8005F7A3D /* SaveGame.swift */,
 				7C6E45402EC684BF005F7A3D /* Education.swift */,
 				7C6E45502EC6F190005F7A3D /* EconomicData.swift */,
+				7C6E46CE2EC965AF005F7A3D /* Treasury.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -241,6 +248,7 @@
 			isa = PBXGroup;
 			children = (
 				108 /* GameManager.swift */,
+				7C6E46D02EC965B7005F7A3D /* TreasuryManager.swift */,
 				109 /* CharacterManager.swift */,
 				110 /* StatManager.swift */,
 				7C6E450B2EC54B25005F7A3D /* EventEngine.swift */,
@@ -263,6 +271,7 @@
 		313 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				7C6E46D32EC965C4005F7A3D /* Treasury */,
 				7C6E454B2EC6F15A005F7A3D /* Economy */,
 				7C6E45462EC684EA005F7A3D /* Education */,
 				7C6E453A2EC59569005F7A3D /* PublicOpinion */,
@@ -459,6 +468,14 @@
 			path = Economy;
 			sourceTree = "<group>";
 		};
+		7C6E46D32EC965C4005F7A3D /* Treasury */ = {
+			isa = PBXGroup;
+			children = (
+				7C6E46D22EC965C4005F7A3D /* TreasuryView.swift */,
+			);
+			path = Treasury;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -554,9 +571,11 @@
 				7C6E452D2EC5854E005F7A3D /* LawsView.swift in Sources */,
 				015 /* StandardBackgroundView.swift in Sources */,
 				016 /* StatCard.swift in Sources */,
+				7C6E46D42EC965C4005F7A3D /* TreasuryView.swift in Sources */,
 				017 /* InfoCard.swift in Sources */,
 				018 /* ProgressBar.swift in Sources */,
 				019 /* Badge.swift in Sources */,
+				7C6E46D12EC965B7005F7A3D /* TreasuryManager.swift in Sources */,
 				020 /* PrimaryButton.swift in Sources */,
 				7C6E45382EC5955F005F7A3D /* PublicOpinion.swift in Sources */,
 				021 /* SecondaryButton.swift in Sources */,
@@ -587,6 +606,7 @@
 				7C6E45342EC58E41005F7A3D /* DiplomacyManager.swift in Sources */,
 				034 /* HomeView.swift in Sources */,
 				7C6E45282EC58536005F7A3D /* Law.swift in Sources */,
+				7C6E46CF2EC965AF005F7A3D /* Treasury.swift in Sources */,
 				035 /* DateDisplayView.swift in Sources */,
 				036 /* CharacterOverviewCard.swift in Sources */,
 				7C6E453F2EC59BC8005F7A3D /* SaveGame.swift in Sources */,

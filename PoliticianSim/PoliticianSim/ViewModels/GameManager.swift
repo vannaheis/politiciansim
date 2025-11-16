@@ -20,6 +20,7 @@ class GameManager: ObservableObject {
     @Published var electionManager = ElectionManager()
     @Published var policyManager = PolicyManager()
     @Published var budgetManager = BudgetManager()
+    @Published var treasuryManager = TreasuryManager()
     @Published var lawsManager = LawsManager()
     @Published var diplomacyManager = DiplomacyManager()
     @Published var publicOpinionManager = PublicOpinionManager()
@@ -264,6 +265,7 @@ class GameManager: ObservableObject {
         electionManager = ElectionManager()
         policyManager = PolicyManager()
         budgetManager = BudgetManager()
+        treasuryManager = TreasuryManager()
         lawsManager = LawsManager()
         diplomacyManager = DiplomacyManager()
         publicOpinionManager = PublicOpinionManager()
@@ -335,6 +337,12 @@ class GameManager: ObservableObject {
             .store(in: &cancellables)
 
         budgetManager.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
+
+        treasuryManager.objectWillChange
             .sink { [weak self] _ in
                 self?.objectWillChange.send()
             }

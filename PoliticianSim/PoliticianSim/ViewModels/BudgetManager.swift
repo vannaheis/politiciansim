@@ -76,7 +76,7 @@ class BudgetManager: ObservableObject {
         return (true, "Department funding adjusted")
     }
 
-    func applyProposedBudget(character: inout Character) -> (success: Bool, message: String) {
+    func applyProposedBudget(character: inout Character, treasuryManager: TreasuryManager) -> (success: Bool, message: String) {
         guard var budget = currentBudget else {
             return (false, "No budget available")
         }
@@ -88,6 +88,16 @@ class BudgetManager: ObservableObject {
 
         // Recalculate total expenses
         budget.totalExpenses = budget.departments.reduce(Decimal(0)) { $0 + $1.allocatedFunds }
+
+        // Calculate surplus/deficit
+        let surplus = budget.surplus
+
+        // Apply to treasury
+        treasuryManager.applyBudgetResult(
+            surplus: surplus,
+            fiscalYear: budget.fiscalYear,
+            character: character
+        )
 
         // Calculate approval impact
         let deficitImpact = calculateDeficitApprovalImpact(budget: budget)
@@ -104,7 +114,21 @@ class BudgetManager: ObservableObject {
         // Add to history
         budgetHistory.append(budget)
 
-        return (true, "Budget enacted! Approval change: \(String(format: "%.1f", totalApprovalChange))%")
+        let surplusOrDeficit = surplus >= 0 ? "surplus" : "deficit"
+        return (true, "Budget enacted! \(surplusOrDeficit.capitalized): \(formatMoney(abs(surplus))). Approval change: \(String(format: "%.1f", totalApprovalChange))%")
+    }
+
+    private func formatMoney(_ amount: Decimal) -> String {
+        let value = Double(truncating: amount as NSDecimalNumber)
+        if value >= 1_000_000_000_000 {
+            return String(format: "$%.2fT", value / 1_000_000_000_000.0)
+        } else if value >= 1_000_000_000 {
+            return String(format: "$%.1fB", value / 1_000_000_000.0)
+        } else if value >= 1_000_000 {
+            return String(format: "$%.1fM", value / 1_000_000.0)
+        } else {
+            return String(format: "$%.0f", value)
+        }
     }
 
     // MARK: - Tax Management

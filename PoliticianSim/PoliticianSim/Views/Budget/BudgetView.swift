@@ -914,7 +914,15 @@ struct ApplyBudgetButton: View {
     private func applyBudget() {
         guard var character = gameManager.character else { return }
 
-        let result = gameManager.budgetManager.applyProposedBudget(character: &character)
+        // Initialize treasury if needed
+        if gameManager.treasuryManager.currentTreasury == nil {
+            gameManager.treasuryManager.initializeTreasury(for: character)
+        }
+
+        let result = gameManager.budgetManager.applyProposedBudget(
+            character: &character,
+            treasuryManager: gameManager.treasuryManager
+        )
 
         if result.success {
             gameManager.characterManager.updateCharacter(character)

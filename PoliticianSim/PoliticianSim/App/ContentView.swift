@@ -51,6 +51,8 @@ struct MainGameRouter: View {
                 PoliciesView()
             case .budget:
                 BudgetView()
+            case .treasury:
+                TreasuryView()
             case .laws:
                 LawsView()
             case .diplomacy:
