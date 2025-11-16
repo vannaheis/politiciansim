@@ -90,9 +90,10 @@ struct BudgetView: View {
             SideMenuView(isOpen: $gameManager.navigationManager.isMenuOpen)
         }
         .onAppear {
-            // Initialize budget if character has a position
-            // FORCE RE-INITIALIZATION to fix 10x expense bug from old calculations
-            if let character = gameManager.character, character.currentPosition != nil {
+            // Initialize budget if character has a position but no budget exists
+            if let character = gameManager.character,
+               character.currentPosition != nil,
+               gameManager.budgetManager.currentBudget == nil {
                 // Initialize treasury if needed
                 if gameManager.treasuryManager.currentTreasury == nil {
                     gameManager.treasuryManager.initializeTreasury(for: character)
@@ -105,6 +106,15 @@ struct BudgetView: View {
                     gdp: gdp,
                     treasuryManager: gameManager.treasuryManager
                 )
+            } else if let character = gameManager.character,
+                      character.currentPosition != nil,
+                      var budget = gameManager.budgetManager.currentBudget {
+                // Budget exists - just update interest payment based on current debt
+                if let treasury = gameManager.treasuryManager.currentTreasury, treasury.cashOnHand < 0 {
+                    let debt = abs(treasury.cashOnHand)
+                    budget.interestPayment = Decimal(treasury.interestRate / 100.0) * debt
+                    gameManager.budgetManager.currentBudget = budget
+                }
             }
         }
         .customAlert(
