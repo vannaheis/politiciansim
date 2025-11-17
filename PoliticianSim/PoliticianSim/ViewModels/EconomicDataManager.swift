@@ -45,6 +45,21 @@ class EconomicDataManager: ObservableObject {
         return fiscalCapitalStock.getTotalFiscalImpact(population: population)
     }
 
+    /// Apply a policy's direct GDP growth impact
+    /// This is called when a policy is enacted or repealed
+    func applyPolicyGDPImpact(_ annualGrowthImpact: Double) {
+        // Apply the annual growth impact to current GDP
+        // Convert annual impact to a one-time GDP level adjustment
+        let currentGDP = economicData.federal.gdp.current
+        let newGDP = currentGDP * (1.0 + annualGrowthImpact)
+
+        economicData.federal.gdp.current = newGDP
+
+        // Also add to fiscal capital stock's tax effect for ongoing impact
+        // This represents the structural change to the economy
+        fiscalCapitalStock.taxEffect += annualGrowthImpact
+    }
+
     // MARK: - Economic Simulation
 
     /// Simulates realistic economic changes with interdependent relationships

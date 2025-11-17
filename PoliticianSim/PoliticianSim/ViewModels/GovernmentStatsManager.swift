@@ -93,6 +93,38 @@ class GovernmentStatsManager: ObservableObject {
         character.approvalRating = max(0, min(100, character.approvalRating + approvalImpact))
     }
 
+    // MARK: - Policy Impact
+
+    /// Modifies a department's score directly (e.g., from policy effects)
+    func modifyDepartmentScore(department: Department.DepartmentCategory, change: Double) {
+        guard var stats = currentStats else { return }
+
+        switch department {
+        case .education:
+            stats.educationScore = min(100, max(0, stats.educationScore + change))
+        case .healthcare:
+            stats.healthcareScore = min(100, max(0, stats.healthcareScore + change))
+        case .defense:
+            stats.publicSafetyScore = min(100, max(0, stats.publicSafetyScore + change))
+        case .infrastructure:
+            stats.infrastructureScore = min(100, max(0, stats.infrastructureScore + change))
+        case .welfare:
+            stats.socialWelfareScore = min(100, max(0, stats.socialWelfareScore + change))
+        case .environment:
+            stats.environmentScore = min(100, max(0, stats.environmentScore + change))
+        case .justice:
+            stats.justiceScore = min(100, max(0, stats.justiceScore + change))
+        case .science:
+            stats.scienceScore = min(100, max(0, stats.scienceScore + change))
+        case .culture:
+            stats.cultureScore = min(100, max(0, stats.cultureScore + change))
+        case .administration:
+            stats.administrationScore = min(100, max(0, stats.administrationScore + change))
+        }
+
+        currentStats = stats
+    }
+
     // MARK: - Scoring Logic
 
     private func calculateDepartmentScore(

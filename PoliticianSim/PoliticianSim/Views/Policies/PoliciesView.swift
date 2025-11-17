@@ -344,6 +344,14 @@ struct PolicyCard: View {
 
                 // Effects preview
                 HStack(spacing: 16) {
+                    if policy.effects.gdpGrowthImpact != 0 {
+                        EffectPreview(
+                            icon: "chart.line.uptrend.xyaxis",
+                            value: formatGDPChange(policy.effects.gdpGrowthImpact),
+                            color: policy.effects.gdpGrowthImpact > 0 ? Constants.Colors.positive : Constants.Colors.negative
+                        )
+                    }
+
                     if policy.effects.approvalChange != 0 {
                         EffectPreview(
                             icon: "hand.thumbsup.fill",
@@ -352,19 +360,11 @@ struct PolicyCard: View {
                         )
                     }
 
-                    if policy.effects.reputationChange != 0 {
+                    if policy.effects.fundsChange != 0 {
                         EffectPreview(
-                            icon: "star.fill",
-                            value: formatChange(Double(policy.effects.reputationChange)),
-                            color: policy.effects.reputationChange > 0 ? Constants.Colors.positive : Constants.Colors.negative
-                        )
-                    }
-
-                    if policy.requirements.costToEnact > 0 {
-                        EffectPreview(
-                            icon: "dollarsign.circle.fill",
-                            value: "-$\(formatMoney(policy.requirements.costToEnact))",
-                            color: Constants.Colors.money
+                            icon: "banknote.fill",
+                            value: formatFundsChange(policy.effects.fundsChange),
+                            color: policy.effects.fundsChange > 0 ? Constants.Colors.positive : Constants.Colors.negative
                         )
                     }
 
@@ -404,12 +404,35 @@ struct PolicyCard: View {
 
     private func formatMoney(_ amount: Decimal) -> String {
         let value = Int(truncating: amount as NSDecimalNumber)
-        if value >= 1_000_000 {
+        if value >= 1_000_000_000 {
+            return String(format: "%.1fB", Double(value) / 1_000_000_000.0)
+        } else if value >= 1_000_000 {
             return String(format: "%.1fM", Double(value) / 1_000_000.0)
         } else if value >= 1_000 {
             return String(format: "%.0fK", Double(value) / 1_000.0)
         } else {
             return "\(value)"
+        }
+    }
+
+    private func formatGDPChange(_ value: Double) -> String {
+        let sign = value > 0 ? "+" : ""
+        return "\(sign)\(String(format: "%.1f", value * 100))%"
+    }
+
+    private func formatFundsChange(_ amount: Decimal) -> String {
+        let value = Int(truncating: amount as NSDecimalNumber)
+        let absValue = abs(value)
+        let sign = value > 0 ? "+" : ""
+
+        if absValue >= 1_000_000_000 {
+            return "\(sign)$\(String(format: "%.1fB", Double(value) / 1_000_000_000.0))"
+        } else if absValue >= 1_000_000 {
+            return "\(sign)$\(String(format: "%.1fM", Double(value) / 1_000_000.0))"
+        } else if absValue >= 1_000 {
+            return "\(sign)$\(String(format: "%.0fK", Double(value) / 1_000.0))"
+        } else {
+            return "\(sign)$\(value)"
         }
     }
 }
@@ -511,12 +534,22 @@ struct ActionButton: View {
         case .propose:
             result = gameManager.policyManager.proposePolicy(policy, character: character)
         case .enact:
-            result = gameManager.policyManager.enactPolicy(policy.id, character: &updatedCharacter)
+            result = gameManager.policyManager.enactPolicy(
+                policy.id,
+                character: &updatedCharacter,
+                economicDataManager: gameManager.economicDataManager,
+                governmentStatsManager: gameManager.governmentStatsManager
+            )
             if result.success {
                 gameManager.characterManager.updateCharacter(updatedCharacter)
             }
         case .repeal:
-            result = gameManager.policyManager.repealPolicy(policy.id, character: &updatedCharacter)
+            result = gameManager.policyManager.repealPolicy(
+                policy.id,
+                character: &updatedCharacter,
+                economicDataManager: gameManager.economicDataManager,
+                governmentStatsManager: gameManager.governmentStatsManager
+            )
             if result.success {
                 gameManager.characterManager.updateCharacter(updatedCharacter)
             }
@@ -633,6 +666,33 @@ struct PolicyDetailView: View {
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundColor(Constants.Colors.secondaryText)
 
+                        if policy.effects.gdpGrowthImpact != 0 {
+                            EffectRow(
+                                icon: "chart.line.uptrend.xyaxis",
+                                label: "GDP Growth Impact",
+                                value: formatGDPChange(policy.effects.gdpGrowthImpact),
+                                color: policy.effects.gdpGrowthImpact > 0 ? Constants.Colors.positive : Constants.Colors.negative
+                            )
+                        }
+
+                        if policy.effects.fundsChange != 0 {
+                            EffectRow(
+                                icon: "banknote.fill",
+                                label: "Annual Revenue Impact",
+                                value: formatFundsChange(policy.effects.fundsChange),
+                                color: policy.effects.fundsChange > 0 ? Constants.Colors.positive : Constants.Colors.negative
+                            )
+                        }
+
+                        if policy.requirements.costToEnact > 0 {
+                            EffectRow(
+                                icon: "dollarsign.circle.fill",
+                                label: "Implementation Cost",
+                                value: "$\(formatMoney(policy.requirements.costToEnact))",
+                                color: Constants.Colors.money
+                            )
+                        }
+
                         if policy.effects.approvalChange != 0 {
                             EffectRow(
                                 icon: "hand.thumbsup.fill",
@@ -660,22 +720,23 @@ struct PolicyDetailView: View {
                             )
                         }
 
-                        if policy.effects.economicImpact != 0 {
-                            EffectRow(
-                                icon: "chart.line.uptrend.xyaxis",
-                                label: "Economic Impact",
-                                value: formatChange(policy.effects.economicImpact) + "%",
-                                color: policy.effects.economicImpact > 0 ? Constants.Colors.positive : Constants.Colors.negative
-                            )
-                        }
+                        // Government Stats Impacts
+                        if !policy.effects.governmentStatsImpacts.isEmpty {
+                            Divider().background(Color.white.opacity(0.2))
+                                .padding(.vertical, 4)
 
-                        if policy.requirements.costToEnact > 0 {
-                            EffectRow(
-                                icon: "dollarsign.circle.fill",
-                                label: "Cost to Enact",
-                                value: "$\(formatMoney(policy.requirements.costToEnact))",
-                                color: Constants.Colors.money
-                            )
+                            Text("Department Improvements")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(Constants.Colors.secondaryText)
+
+                            ForEach(Array(policy.effects.governmentStatsImpacts.sorted(by: { $0.value > $1.value })), id: \.key) { dept, impact in
+                                EffectRow(
+                                    icon: departmentIcon(dept),
+                                    label: departmentName(dept),
+                                    value: formatChange(impact),
+                                    color: impact > 0 ? Constants.Colors.positive : Constants.Colors.negative
+                                )
+                            }
                         }
                     }
 
@@ -747,12 +808,65 @@ struct PolicyDetailView: View {
 
     private func formatMoney(_ amount: Decimal) -> String {
         let value = Int(truncating: amount as NSDecimalNumber)
-        if value >= 1_000_000 {
+        if value >= 1_000_000_000 {
+            return String(format: "%.1fB", Double(value) / 1_000_000_000.0)
+        } else if value >= 1_000_000 {
             return String(format: "%.1fM", Double(value) / 1_000_000.0)
         } else if value >= 1_000 {
             return String(format: "%.0fK", Double(value) / 1_000.0)
         } else {
             return "\(value)"
+        }
+    }
+
+    private func formatGDPChange(_ value: Double) -> String {
+        let sign = value > 0 ? "+" : ""
+        return "\(sign)\(String(format: "%.1f", value * 100))%"
+    }
+
+    private func formatFundsChange(_ amount: Decimal) -> String {
+        let value = Int(truncating: amount as NSDecimalNumber)
+        let absValue = abs(value)
+        let sign = value > 0 ? "+" : ""
+
+        if absValue >= 1_000_000_000 {
+            return "\(sign)$\(String(format: "%.1fB", Double(value) / 1_000_000_000.0))"
+        } else if absValue >= 1_000_000 {
+            return "\(sign)$\(String(format: "%.1fM", Double(value) / 1_000_000.0))"
+        } else if absValue >= 1_000 {
+            return "\(sign)$\(String(format: "%.0fK", Double(value) / 1_000.0))"
+        } else {
+            return "\(sign)$\(value)"
+        }
+    }
+
+    private func departmentIcon(_ dept: Department.DepartmentCategory) -> String {
+        switch dept {
+        case .education: return "book.fill"
+        case .healthcare: return "cross.case.fill"
+        case .defense: return "shield.fill"
+        case .infrastructure: return "building.2.fill"
+        case .welfare: return "heart.fill"
+        case .environment: return "leaf.fill"
+        case .justice: return "scales"
+        case .science: return "atom"
+        case .culture: return "theatermasks.fill"
+        case .administration: return "building.columns.fill"
+        }
+    }
+
+    private func departmentName(_ dept: Department.DepartmentCategory) -> String {
+        switch dept {
+        case .education: return "Education"
+        case .healthcare: return "Healthcare"
+        case .defense: return "Public Safety"
+        case .infrastructure: return "Infrastructure"
+        case .welfare: return "Social Welfare"
+        case .environment: return "Environment"
+        case .justice: return "Justice"
+        case .science: return "Science & Research"
+        case .culture: return "Culture & Arts"
+        case .administration: return "Administration"
         }
     }
 }

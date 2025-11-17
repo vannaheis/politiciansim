@@ -45,7 +45,7 @@ class PolicyManager: ObservableObject {
         return (true, "Policy proposed successfully!")
     }
 
-    func enactPolicy(_ policyId: UUID, character: inout Character) -> (success: Bool, message: String) {
+    func enactPolicy(_ policyId: UUID, character: inout Character, economicDataManager: EconomicDataManager, governmentStatsManager: GovernmentStatsManager) -> (success: Bool, message: String) {
         guard let index = proposedPolicies.firstIndex(where: { $0.id == policyId }) else {
             return (false, "Policy not found in proposals.")
         }
@@ -63,7 +63,7 @@ class PolicyManager: ObservableObject {
         }
 
         // Apply effects
-        applyPolicyEffects(policy: policy, character: &character)
+        applyPolicyEffects(policy: policy, character: &character, economicDataManager: economicDataManager, governmentStatsManager: governmentStatsManager)
 
         // Move to enacted
         policy.status = .enacted
@@ -74,7 +74,7 @@ class PolicyManager: ObservableObject {
         return (true, "\(policy.title) has been enacted!")
     }
 
-    func repealPolicy(_ policyId: UUID, character: inout Character) -> (success: Bool, message: String) {
+    func repealPolicy(_ policyId: UUID, character: inout Character, economicDataManager: EconomicDataManager, governmentStatsManager: GovernmentStatsManager) -> (success: Bool, message: String) {
         guard let index = enactedPolicies.firstIndex(where: { $0.id == policyId }) else {
             return (false, "Policy not found in enacted policies.")
         }
@@ -88,6 +88,14 @@ class PolicyManager: ObservableObject {
         reversedEffects.reputationChange = -(policy.effects.reputationChange / 2)
         reversedEffects.stressChange = 8 // Repealing causes stress
         reversedEffects.fundsChange = 0
+        reversedEffects.gdpGrowthImpact = -(policy.effects.gdpGrowthImpact / 2.0) // Reverse half the GDP impact
+
+        // Reverse government stats impacts (half)
+        var reversedStatsImpacts: [Department.DepartmentCategory: Double] = [:]
+        for (dept, impact) in policy.effects.governmentStatsImpacts {
+            reversedStatsImpacts[dept] = -(impact / 2.0)
+        }
+        reversedEffects.governmentStatsImpacts = reversedStatsImpacts
 
         let tempPolicy = Policy(
             title: policy.title,
@@ -97,7 +105,7 @@ class PolicyManager: ObservableObject {
             requirements: policy.requirements
         )
 
-        applyPolicyEffects(policy: tempPolicy, character: &character)
+        applyPolicyEffects(policy: tempPolicy, character: &character, economicDataManager: economicDataManager, governmentStatsManager: governmentStatsManager)
 
         // Remove from enacted
         policy.status = .repealed
@@ -131,7 +139,7 @@ class PolicyManager: ObservableObject {
         return true
     }
 
-    private func applyPolicyEffects(policy: Policy, character: inout Character) {
+    private func applyPolicyEffects(policy: Policy, character: inout Character, economicDataManager: EconomicDataManager, governmentStatsManager: GovernmentStatsManager) {
         // Apply approval change
         character.approvalRating = max(0, min(100, character.approvalRating + policy.effects.approvalChange))
 
@@ -144,6 +152,16 @@ class PolicyManager: ObservableObject {
         // Apply funds change
         character.campaignFunds -= policy.requirements.costToEnact
         character.campaignFunds += policy.effects.fundsChange
+
+        // Apply GDP growth impact
+        if policy.effects.gdpGrowthImpact != 0 {
+            economicDataManager.applyPolicyGDPImpact(policy.effects.gdpGrowthImpact)
+        }
+
+        // Apply government stats impacts
+        for (department, scoreChange) in policy.effects.governmentStatsImpacts {
+            governmentStatsManager.modifyDepartmentScore(department: department, change: scoreChange)
+        }
     }
 
     func getAvailablePolicies(for character: Character) -> [Policy] {
