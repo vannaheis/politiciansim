@@ -63,4 +63,47 @@ class CharacterManager: ObservableObject {
         guard let character = character else { return false }
         return character.age >= Constants.Game.maxAge || character.health == 0
     }
+
+    func getDeathCause() -> GameOverData.DeathCause {
+        guard let character = character else { return .healthFailure }
+
+        if character.age >= Constants.Game.maxAge {
+            return .oldAge
+        } else if character.health == 0 {
+            // Determine if death was stress-related or general health failure
+            if character.stress >= 80 {
+                return .stress
+            } else {
+                return .healthFailure
+            }
+        }
+
+        return .healthFailure
+    }
+
+    func createGameOverData() -> GameOverData? {
+        guard let character = character else { return nil }
+
+        // Get role string from position title or character role
+        let role: String
+        if let position = character.currentPosition {
+            role = position.title
+        } else {
+            switch character.role {
+            case .student:
+                role = "Student"
+            case .unemployed:
+                role = "Unemployed"
+            case .politician:
+                role = "Politician"
+            }
+        }
+
+        return GameOverData(
+            deathCause: getDeathCause(),
+            age: character.age,
+            role: role,
+            characterName: character.name
+        )
+    }
 }

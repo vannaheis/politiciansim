@@ -96,38 +96,48 @@ class GameManager: ObservableObject {
             guard let self = self else { return char }
             var updatedChar = self.timeManager.performDailyChecks(for: char)
 
-            // Check for death
-            if self.characterManager.isDead() {
+            // Check for health and stress warnings BEFORE checking death
+            self.checkHealthWarning(character: updatedChar)
+            self.checkStressWarning(character: updatedChar)
+
+            // Check for death (but allow economic simulation to continue)
+            let isDead = self.characterManager.isDead()
+            if isDead {
                 self.characterManager.handleDeath()
-                return updatedChar
+                // Trigger game over
+                if let gameOverData = self.characterManager.createGameOverData() {
+                    self.gameState.gameOverData = gameOverData
+                }
             }
 
-            // Check academic progress
-            self.educationManager.checkAcademicProgress(character: &updatedChar)
+            // Skip character-specific actions if dead, but continue economic simulation
+            if !isDead {
+                // Check academic progress
+                self.educationManager.checkAcademicProgress(character: &updatedChar)
 
-            // Process monthly loan payment (check every day, payment happens once per month)
-            self.educationManager.makeMonthlyLoanPayment(character: &updatedChar)
+                // Process monthly loan payment (check every day, payment happens once per month)
+                self.educationManager.makeMonthlyLoanPayment(character: &updatedChar)
 
-            // Record approval changes
-            self.statManager.recordApprovalIfChanged(character: updatedChar)
+                // Record approval changes
+                self.statManager.recordApprovalIfChanged(character: updatedChar)
 
-            // Check for random events (role-based)
-            let role = self.getCharacterRole()
-            if let event = self.eventEngine.checkForEvent(character: updatedChar, role: role) {
-                self.gameState.activeEvent = event
+                // Check for random events (role-based)
+                let role = self.getCharacterRole()
+                if let event = self.eventEngine.checkForEvent(character: updatedChar, role: role) {
+                    self.gameState.activeEvent = event
+                }
+
+                // Check for election day
+                self.checkForElectionDay(character: updatedChar)
+
+                // Process active opinion actions
+                self.publicOpinionManager.processActiveActions(character: &updatedChar, currentDate: updatedChar.currentDate)
             }
 
-            // Check for election day
-            self.checkForElectionDay(character: updatedChar)
+            // ALWAYS simulate economic changes (even if character is dead)
+            self.economicDataManager.simulateEconomicChanges(character: updatedChar)
 
-            // Process active opinion actions
-            var charWithOpinion = updatedChar
-            self.publicOpinionManager.processActiveActions(character: &charWithOpinion, currentDate: updatedChar.currentDate)
-
-            // Simulate economic changes
-            self.economicDataManager.simulateEconomicChanges(character: charWithOpinion)
-
-            return charWithOpinion
+            return updatedChar
         }
 
         characterManager.updateCharacter(character)
@@ -140,36 +150,47 @@ class GameManager: ObservableObject {
             guard let self = self else { return char }
             var updatedChar = self.timeManager.performDailyChecks(for: char)
 
-            if self.characterManager.isDead() {
+            // Check for health and stress warnings BEFORE checking death
+            self.checkHealthWarning(character: updatedChar)
+            self.checkStressWarning(character: updatedChar)
+
+            // Check for death (but allow economic simulation to continue)
+            let isDead = self.characterManager.isDead()
+            if isDead {
                 self.characterManager.handleDeath()
-                return updatedChar
+                // Trigger game over
+                if let gameOverData = self.characterManager.createGameOverData() {
+                    self.gameState.gameOverData = gameOverData
+                }
             }
 
-            // Check academic progress
-            self.educationManager.checkAcademicProgress(character: &updatedChar)
+            // Skip character-specific actions if dead, but continue economic simulation
+            if !isDead {
+                // Check academic progress
+                self.educationManager.checkAcademicProgress(character: &updatedChar)
 
-            // Process monthly loan payment (check every day, payment happens once per month)
-            self.educationManager.makeMonthlyLoanPayment(character: &updatedChar)
+                // Process monthly loan payment (check every day, payment happens once per month)
+                self.educationManager.makeMonthlyLoanPayment(character: &updatedChar)
 
-            self.statManager.recordApprovalIfChanged(character: updatedChar)
+                self.statManager.recordApprovalIfChanged(character: updatedChar)
 
-            // Check for random events (role-based)
-            let role = self.getCharacterRole()
-            if let event = self.eventEngine.checkForEvent(character: updatedChar, role: role) {
-                self.gameState.activeEvent = event
+                // Check for random events (role-based)
+                let role = self.getCharacterRole()
+                if let event = self.eventEngine.checkForEvent(character: updatedChar, role: role) {
+                    self.gameState.activeEvent = event
+                }
+
+                // Check for election day
+                self.checkForElectionDay(character: updatedChar)
+
+                // Process active opinion actions
+                self.publicOpinionManager.processActiveActions(character: &updatedChar, currentDate: updatedChar.currentDate)
             }
 
-            // Check for election day
-            self.checkForElectionDay(character: updatedChar)
+            // ALWAYS simulate economic changes (even if character is dead)
+            self.economicDataManager.simulateEconomicChanges(character: updatedChar)
 
-            // Process active opinion actions
-            var charWithOpinion = updatedChar
-            self.publicOpinionManager.processActiveActions(character: &charWithOpinion, currentDate: updatedChar.currentDate)
-
-            // Simulate economic changes
-            self.economicDataManager.simulateEconomicChanges(character: charWithOpinion)
-
-            return charWithOpinion
+            return updatedChar
         }
 
         characterManager.updateCharacter(character)
@@ -385,6 +406,24 @@ class GameManager: ObservableObject {
                 self?.objectWillChange.send()
             }
             .store(in: &cancellables)
+    }
+
+    // MARK: - Health and Stress Warnings
+
+    private func checkHealthWarning(character: Character) {
+        // Warn when health drops below 30 for the first time
+        if character.health <= 30 && !gameState.healthWarningShown {
+            gameState.healthWarningShown = true
+            // Warning will be shown in UI
+        }
+    }
+
+    private func checkStressWarning(character: Character) {
+        // Warn when stress exceeds 80 for the first time
+        if character.stress >= 80 && !gameState.stressWarningShown {
+            gameState.stressWarningShown = true
+            // Warning will be shown in UI
+        }
     }
 }
 

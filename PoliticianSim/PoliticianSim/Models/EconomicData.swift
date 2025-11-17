@@ -37,9 +37,9 @@ struct EconomicIndicator: Codable {
         history.append(point)
         current = value
 
-        // Keep only last 100 data points
-        if history.count > 100 {
-            history.removeFirst(history.count - 100)
+        // Keep only last 520 data points (10 years of weekly data)
+        if history.count > 520 {
+            history.removeFirst(history.count - 520)
         }
     }
 }

@@ -22,6 +22,11 @@ class GameState: ObservableObject, Codable {
     // Game progress
     @Published var hasCompletedTutorial: Bool = false
 
+    // Death and warnings
+    @Published var gameOverData: GameOverData?
+    @Published var healthWarningShown: Bool = false
+    @Published var stressWarningShown: Bool = false
+
     enum TimeSpeed: String, Codable {
         case day = "Day"
         case week = "Week"
@@ -38,6 +43,8 @@ class GameState: ObservableObject, Codable {
         case isPaused
         case timeSpeed
         case hasCompletedTutorial
+        case healthWarningShown
+        case stressWarningShown
     }
 
     init() {
@@ -49,6 +56,9 @@ class GameState: ObservableObject, Codable {
         self.isPaused = false
         self.timeSpeed = .day
         self.hasCompletedTutorial = false
+        self.gameOverData = nil
+        self.healthWarningShown = false
+        self.stressWarningShown = false
     }
 
     required init(from decoder: Decoder) throws {
@@ -61,6 +71,9 @@ class GameState: ObservableObject, Codable {
         isPaused = try container.decode(Bool.self, forKey: .isPaused)
         timeSpeed = try container.decode(TimeSpeed.self, forKey: .timeSpeed)
         hasCompletedTutorial = try container.decode(Bool.self, forKey: .hasCompletedTutorial)
+        gameOverData = nil
+        healthWarningShown = try container.decodeIfPresent(Bool.self, forKey: .healthWarningShown) ?? false
+        stressWarningShown = try container.decodeIfPresent(Bool.self, forKey: .stressWarningShown) ?? false
     }
 
     func encode(to encoder: Encoder) throws {
@@ -73,6 +86,8 @@ class GameState: ObservableObject, Codable {
         try container.encode(isPaused, forKey: .isPaused)
         try container.encode(timeSpeed, forKey: .timeSpeed)
         try container.encode(hasCompletedTutorial, forKey: .hasCompletedTutorial)
+        try container.encode(healthWarningShown, forKey: .healthWarningShown)
+        try container.encode(stressWarningShown, forKey: .stressWarningShown)
     }
 
     // MARK: - Game Actions
@@ -111,6 +126,48 @@ class GameState: ObservableObject, Codable {
 
     func addScandalRisk(_ risk: ScandalRisk) {
         scandalRisks.append(risk)
+    }
+}
+
+// MARK: - Game Over Data
+
+struct GameOverData {
+    let deathCause: DeathCause
+    let age: Int
+    let role: String
+    let characterName: String
+
+    enum DeathCause {
+        case oldAge
+        case healthFailure
+        case stress
+
+        var title: String {
+            switch self {
+            case .oldAge: return "Natural Causes"
+            case .healthFailure: return "Health Failure"
+            case .stress: return "Fatal Stress"
+            }
+        }
+
+        var message: String {
+            switch self {
+            case .oldAge:
+                return "lived a full life and passed away peacefully from natural causes."
+            case .healthFailure:
+                return "succumbed to severe health complications. Their health had deteriorated beyond recovery."
+            case .stress:
+                return "suffered a fatal stress-related incident. The pressures of their position proved too much to bear."
+            }
+        }
+
+        var icon: String {
+            switch self {
+            case .oldAge: return "clock.fill"
+            case .healthFailure: return "heart.fill"
+            case .stress: return "exclamationmark.triangle.fill"
+            }
+        }
     }
 }
 
