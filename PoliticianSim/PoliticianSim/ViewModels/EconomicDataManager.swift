@@ -110,11 +110,12 @@ class EconomicDataManager: ObservableObject {
         // Process pending fiscal investments (capital stocks maturing)
         fiscalCapitalStock.processPendingInvestments(currentDate: currentDate)
 
-        // Check if it's been a year since last depreciation to apply annual effects
-        if let lastYear = economicData.lastDepreciationDate {
-            let calendar = Calendar.current
-            let yearsSince = calendar.dateComponents([.year], from: lastYear, to: currentDate).year ?? 0
-            if yearsSince >= 1 {
+        // Check if it's been a full year (365 days) since last depreciation to apply annual effects
+        if let lastDepreciation = economicData.lastDepreciationDate {
+            let daysSinceLastDepreciation = Calendar.current.dateComponents([.day], from: lastDepreciation, to: currentDate).day ?? 0
+
+            // Apply depreciation once per 365 days
+            if daysSinceLastDepreciation >= 365 {
                 // Apply annual depreciation to capital stocks
                 fiscalCapitalStock.applyAnnualDepreciation()
                 economicData.lastDepreciationDate = currentDate
