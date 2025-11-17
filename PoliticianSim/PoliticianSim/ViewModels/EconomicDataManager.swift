@@ -11,8 +11,8 @@ import Combine
 class EconomicDataManager: ObservableObject {
     @Published var economicData: EconomicData
 
-    // Track fiscal policy impact on GDP
-    var fiscalGrowthModifier: Double = 0.0
+    // Track accumulated capital stocks from government spending
+    var fiscalCapitalStock: FiscalCapitalStock = FiscalCapitalStock()
 
     init() {
         self.economicData = EconomicData()
@@ -20,32 +20,29 @@ class EconomicDataManager: ObservableObject {
 
     // MARK: - Fiscal Policy Integration
 
-    /// Apply fiscal policy effects to GDP growth
-    /// Called when budget is enacted to update economic growth projections
+    /// Apply fiscal policy effects when budget is enacted
+    /// Processes spending into capital stocks with time lags
     func applyFiscalPolicy(
         budget: Budget,
         population: Int,
         governmentLevel: Int,
-        debtToGDPRatio: Double
+        debtToGDPRatio: Double,
+        currentDate: Date
     ) {
-        let gdp: Double
-
-        // Get appropriate GDP based on government level
-        switch governmentLevel {
-        case 1: gdp = economicData.local.gdp.current
-        case 2: gdp = economicData.state.gdp.current
-        case 3, 4, 5: gdp = economicData.federal.gdp.current
-        default: gdp = economicData.federal.gdp.current
-        }
-
-        // Calculate total fiscal impact on GDP growth
-        fiscalGrowthModifier = FiscalImpactCalculator.calculateTotalFiscalImpact(
+        // Process budget into capital stock system
+        _ = FiscalImpactCalculator.processBudget(
             budget: budget,
-            gdp: gdp,
+            capitalStock: &fiscalCapitalStock,
+            currentDate: currentDate,
             population: population,
-            governmentLevel: governmentLevel,
             debtToGDPRatio: debtToGDPRatio
         )
+    }
+
+    /// Get current fiscal impact on GDP growth
+    /// This is called every week during economic simulation
+    func getFiscalGrowthModifier(population: Int) -> Double {
+        return fiscalCapitalStock.getTotalFiscalImpact(population: population)
     }
 
     // MARK: - Economic Simulation
@@ -110,8 +107,27 @@ class EconomicDataManager: ObservableObject {
     func simulateEconomicChanges(character: Character) {
         let currentDate = character.currentDate
 
+        // Process pending fiscal investments (capital stocks maturing)
+        fiscalCapitalStock.processPendingInvestments(currentDate: currentDate)
+
+        // Check if it's been a year since last depreciation to apply annual effects
+        if let lastYear = economicData.lastDepreciationDate {
+            let calendar = Calendar.current
+            let yearsSince = calendar.dateComponents([.year], from: lastYear, to: currentDate).year ?? 0
+            if yearsSince >= 1 {
+                // Apply annual depreciation to capital stocks
+                fiscalCapitalStock.applyAnnualDepreciation()
+                economicData.lastDepreciationDate = currentDate
+            }
+        } else {
+            economicData.lastDepreciationDate = currentDate
+        }
+
+        // Get US population for fiscal growth calculations
+        let usPopulation = getUSPopulation()
+
         // Simulate federal economic changes
-        simulateFederalEconomy(date: currentDate)
+        simulateFederalEconomy(date: currentDate, population: usPopulation)
 
         // Simulate state economic changes
         simulateStateEconomy(date: currentDate)
@@ -123,7 +139,14 @@ class EconomicDataManager: ObservableObject {
         simulateWorldEconomy()
     }
 
-    private func simulateFederalEconomy(date: Date) {
+    private func getUSPopulation() -> Int {
+        if let usa = economicData.worldGDPs.first(where: { $0.countryCode == "USA" }) {
+            return usa.population
+        }
+        return 335_000_000 // Default
+    }
+
+    private func simulateFederalEconomy(date: Date, population: Int) {
         let currentGDP = economicData.federal.gdp.current
         let currentUnemployment = economicData.federal.unemploymentRate.current
         let currentInflation = economicData.federal.inflationRate.current
@@ -142,8 +165,9 @@ class EconomicDataManager: ObservableObject {
         let baseGrowthRate = Double.random(in: 0.015...0.025) // 1.5-2.5% base
         let rateEffect = (currentInterestRate - neutralRate) * 0.003 // ±0.3% per 1% rate deviation
 
-        // Add fiscal policy impact (government spending, taxes, deficit effects)
-        let annualGrowthRate = baseGrowthRate - rateEffect + fiscalGrowthModifier
+        // Add fiscal policy impact (government spending, taxes, deficit effects from capital stocks)
+        let fiscalModifier = getFiscalGrowthModifier(population: population)
+        let annualGrowthRate = baseGrowthRate - rateEffect + fiscalModifier
         let weeklyGrowthRate = annualGrowthRate / 52.0
         let newGDP = currentGDP * (1 + weeklyGrowthRate)
 

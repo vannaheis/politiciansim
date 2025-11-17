@@ -122,12 +122,14 @@ struct EconomicData: Codable {
     var state: StateEconomicData
     var federal: FederalEconomicData
     var worldGDPs: [WorldCountryGDP]
+    var lastDepreciationDate: Date? // Track when last annual depreciation was applied
 
     init() {
         self.local = LocalEconomicData(cityName: "New York")
         self.state = StateEconomicData(stateName: "New York")
         self.federal = FederalEconomicData()
         self.worldGDPs = Self.defaultWorldGDPs()
+        self.lastDepreciationDate = nil
     }
 
     static func defaultWorldGDPs() -> [WorldCountryGDP] {

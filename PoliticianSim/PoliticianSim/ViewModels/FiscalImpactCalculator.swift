@@ -3,148 +3,88 @@
 //  PoliticianSim
 //
 //  Calculates how government fiscal policy (spending, taxes, deficits) affects GDP growth
+//  Uses capital stock approach with time lags and depreciation
 //
 
 import Foundation
 
 struct FiscalImpactCalculator {
 
-    // MARK: - Fiscal Multiplier Effects
+    // MARK: - Capital Stock Investment
 
-    /// Calculates GDP growth impact from government spending by department
-    ///
-    /// **Fiscal Multiplier Theory:**
-    /// - Different spending categories have different economic multipliers
-    /// - Infrastructure: 1.5x (creates jobs, boosts private investment, long-term productivity)
-    /// - Education: 1.3x (human capital development, productivity gains)
-    /// - Healthcare: 1.2x (healthier workforce, reduced absenteeism)
-    /// - Social Welfare: 1.4x (high marginal propensity to consume, immediate demand boost)
-    /// - Public Safety: 1.0x (neutral, maintains order but no productivity gain)
-    /// - Environment: 1.1x (sustainable growth, prevents future costs)
-    /// - Justice: 0.9x (necessary but not productive)
-    /// - Science/R&D: 1.8x (innovation, patents, future growth)
-    /// - Culture: 0.8x (quality of life but low economic impact)
-    /// - Administration: 0.6x (overhead, bureaucracy, low productivity)
-    ///
-    /// **Formula:**
-    /// GDP Impact = Σ(Department Spending × Multiplier) / Total GDP
-    static func calculateSpendingMultiplierEffect(
+    /// Processes new budget spending into capital stock investments
+    /// - Stock-building departments (infrastructure, education, science, healthcare) build capital over time
+    /// - Flow departments (welfare, defense, etc.) have immediate multiplier effects
+    static func processSpendingIntoCapitalStock(
         budget: Budget,
-        gdp: Double,
-        governmentLevel: Int
+        capitalStock: inout FiscalCapitalStock,
+        currentDate: Date,
+        population: Int
     ) -> Double {
-        guard gdp > 0 else { return 0 }
+        guard population > 0 else { return 0 }
 
-        var totalWeightedSpending: Double = 0
+        var immediateFlowEffect: Double = 0
 
         for department in budget.departments {
             let spending = Double(truncating: department.allocatedFunds as NSDecimalNumber)
-            let multiplier = getMultiplier(for: department.category, level: governmentLevel)
-            totalWeightedSpending += spending * multiplier
+            let perCapita = spending / Double(population)
+
+            switch department.category {
+            // STOCK-BUILDING DEPARTMENTS (time lags apply)
+            case .infrastructure, .education, .science, .healthcare:
+                // Add to pending capital stock (will mature after time lag)
+                // Convert per-capita spending to capital stock contribution
+                let capitalContribution = perCapita * Double(population) * 0.5 // 50% converts to lasting capital
+                capitalStock.addSpending(
+                    category: department.category,
+                    amount: capitalContribution,
+                    currentDate: currentDate
+                )
+
+            // FLOW DEPARTMENTS (immediate multiplier effects)
+            case .welfare:
+                // High marginal propensity to consume → immediate demand boost
+                immediateFlowEffect += (spending / 1_000_000_000_000) * 0.0008 // 0.08% per $1T spending
+
+            case .defense:
+                // Neutral multiplier
+                immediateFlowEffect += (spending / 1_000_000_000_000) * 0.0004 // 0.04% per $1T
+
+            case .environment:
+                // Modest productivity from pollution reduction
+                immediateFlowEffect += (spending / 1_000_000_000_000) * 0.0005 // 0.05% per $1T
+
+            case .justice:
+                // Minimal productivity (maintains order)
+                immediateFlowEffect += (spending / 1_000_000_000_000) * 0.0002 // 0.02% per $1T
+
+            case .culture:
+                // Quality of life, minimal GDP impact
+                immediateFlowEffect += (spending / 1_000_000_000_000) * 0.0001 // 0.01% per $1T
+
+            case .administration:
+                // Overhead/bureaucracy (negative productivity)
+                immediateFlowEffect += (spending / 1_000_000_000_000) * 0.00005 // 0.005% per $1T
+            }
         }
 
-        // Convert to GDP growth impact (annualized)
-        // Base formula: (weighted spending / GDP) × efficiency factor
-        let spendingRatio = totalWeightedSpending / gdp
-        let efficiencyFactor = 0.01 // 1% of weighted spending flows through to GDP growth annually
-
-        // Cap the effect to prevent extreme values
-        let rawEffect = spendingRatio * efficiencyFactor
-        return min(0.01, max(-0.01, rawEffect)) // Cap at ±1% GDP growth
+        // Cap immediate flow effects
+        return min(0.005, max(-0.001, immediateFlowEffect))
     }
 
-    private static func getMultiplier(for category: Department.DepartmentCategory, level: Int) -> Double {
-        // Base multipliers by department type
-        let baseMultiplier: Double
+    // MARK: - Flow Effects (Immediate Impact with Decay)
 
-        switch category {
-        case .infrastructure:
-            baseMultiplier = 1.5
-        case .education:
-            baseMultiplier = 1.3
-        case .healthcare:
-            baseMultiplier = 1.2
-        case .welfare:
-            baseMultiplier = 1.4
-        case .defense:
-            baseMultiplier = 1.0
-        case .environment:
-            baseMultiplier = 1.1
-        case .justice:
-            baseMultiplier = 0.9
-        case .science:
-            baseMultiplier = 1.8
-        case .culture:
-            baseMultiplier = 0.8
-        case .administration:
-            baseMultiplier = 0.6
-        }
-
-        // Regional multiplier adjustment (local spending has higher multiplier due to less leakage)
-        let regionalAdjustment: Double
-        switch level {
-        case 1: // Mayor - local spending, high multiplier
-            regionalAdjustment = 1.2
-        case 2: // Governor - state spending, moderate multiplier
-            regionalAdjustment = 1.1
-        case 3, 4, 5: // Federal - leakage to imports
-            regionalAdjustment = 1.0
-        default:
-            regionalAdjustment = 1.0
-        }
-
-        return baseMultiplier * regionalAdjustment
-    }
-
-    // MARK: - Crowding Out Effect
-
-    /// Calculates negative GDP impact from excessive deficit spending
-    ///
-    /// **Crowding Out Theory:**
-    /// - Large deficits consume available capital and raise interest rates
-    /// - This "crowds out" private investment, reducing GDP growth
-    /// - Effect is non-linear: small deficits have minimal impact, large deficits are severe
-    ///
-    /// **Thresholds:**
-    /// - Deficit < 3% of GDP: Minimal crowding out (-0.05% growth)
-    /// - Deficit 3-5%: Moderate (-0.15% growth)
-    /// - Deficit 5-8%: Significant (-0.35% growth)
-    /// - Deficit > 8%: Severe (-0.60% growth)
-    static func calculateCrowdingOutEffect(deficitPercentage: Double) -> Double {
-        if deficitPercentage < 3.0 {
-            return -0.00005 * deficitPercentage // Minimal impact
-        } else if deficitPercentage < 5.0 {
-            return -0.0015 * (deficitPercentage - 3.0) - 0.00015 // Moderate
-        } else if deficitPercentage < 8.0 {
-            return -0.0035 * (deficitPercentage - 5.0) - 0.00315 // Significant
-        } else {
-            return -0.006 * (deficitPercentage - 8.0) - 0.01365 // Severe
-        }
-    }
-
-    // MARK: - Tax Effects on Growth
-
-    /// Calculates GDP growth impact from tax policy
-    ///
-    /// **Tax Burden Theory:**
-    /// - Income taxes affect labor supply and consumption
-    /// - Corporate taxes affect business investment
-    /// - Sales taxes affect consumption directly
-    /// - Effects are non-linear (Laffer curve: very high taxes reduce growth AND revenue)
-    ///
-    /// **Optimal tax rates (minimize growth drag):**
-    /// - Income (low): 10-15%
-    /// - Income (middle): 20-25%
-    /// - Income (high): 30-40%
-    /// - Corporate: 18-25%
-    /// - Sales: 5-8%
-    static func calculateTaxDragEffect(taxRates: TaxRates) -> Double {
+    /// Updates tax drag effect (immediate impact, decays 50% per year)
+    static func updateTaxEffect(
+        taxRates: TaxRates,
+        capitalStock: inout FiscalCapitalStock
+    ) {
         var totalDrag: Double = 0
 
         // Income tax on low earners (affects consumption heavily)
         let lowIncomeDrag: Double
         if taxRates.incomeTaxLow < 10 {
-            lowIncomeDrag = 0.0001 // Minimal tax = slight boost
+            lowIncomeDrag = 0.0001
         } else if taxRates.incomeTaxLow < 15 {
             lowIncomeDrag = 0
         } else if taxRates.incomeTaxLow < 25 {
@@ -152,9 +92,9 @@ struct FiscalImpactCalculator {
         } else {
             lowIncomeDrag = -0.0004 * (taxRates.incomeTaxLow - 25) - 0.002
         }
-        totalDrag += lowIncomeDrag * 0.3 // 30% weight (large population)
+        totalDrag += lowIncomeDrag * 0.3
 
-        // Income tax on middle class (affects labor supply and consumption)
+        // Income tax on middle class
         let middleIncomeDrag: Double
         if taxRates.incomeTaxMiddle < 20 {
             middleIncomeDrag = 0.00005
@@ -165,9 +105,9 @@ struct FiscalImpactCalculator {
         } else {
             middleIncomeDrag = -0.0005 * (taxRates.incomeTaxMiddle - 35) - 0.003
         }
-        totalDrag += middleIncomeDrag * 0.4 // 40% weight (largest tax base)
+        totalDrag += middleIncomeDrag * 0.4
 
-        // Income tax on high earners (affects investment and entrepreneurship)
+        // Income tax on high earners
         let highIncomeDrag: Double
         if taxRates.incomeTaxHigh < 30 {
             highIncomeDrag = 0.0001
@@ -178,12 +118,12 @@ struct FiscalImpactCalculator {
         } else {
             highIncomeDrag = -0.0004 * (taxRates.incomeTaxHigh - 50) - 0.003
         }
-        totalDrag += highIncomeDrag * 0.2 // 20% weight
+        totalDrag += highIncomeDrag * 0.2
 
-        // Corporate tax (affects business investment heavily)
+        // Corporate tax
         let corporateDrag: Double
         if taxRates.corporateTax < 18 {
-            corporateDrag = 0.0002 * (18 - taxRates.corporateTax) // Boost investment
+            corporateDrag = 0.0002 * (18 - taxRates.corporateTax)
         } else if taxRates.corporateTax < 25 {
             corporateDrag = 0
         } else if taxRates.corporateTax < 35 {
@@ -191,9 +131,9 @@ struct FiscalImpactCalculator {
         } else {
             corporateDrag = -0.0006 * (taxRates.corporateTax - 35) - 0.004
         }
-        totalDrag += corporateDrag * 0.5 // 50% weight (crucial for investment)
+        totalDrag += corporateDrag * 0.5
 
-        // Sales tax (affects consumption directly)
+        // Sales tax
         let salesDrag: Double
         if taxRates.salesTax < 5 {
             salesDrag = 0
@@ -202,167 +142,79 @@ struct FiscalImpactCalculator {
         } else {
             salesDrag = -0.0003 * (taxRates.salesTax - 10) - 0.0005
         }
-        totalDrag += salesDrag * 0.3 // 30% weight
+        totalDrag += salesDrag * 0.3
 
-        // Cap total tax drag to prevent extreme values
-        return min(0.005, max(-0.015, totalDrag)) // Cap at ±0.5-1.5%
+        // Update capital stock with new tax effect (replaces old, decays over time)
+        capitalStock.taxEffect = min(0.005, max(-0.015, totalDrag))
+        capitalStock.taxEffectAge = 0 // Reset age
     }
 
-    // MARK: - Debt-to-GDP Feedback
+    /// Updates crowding-out effect from deficit (decays 20% per year)
+    static func updateCrowdingOutEffect(
+        deficitPercentage: Double,
+        capitalStock: inout FiscalCapitalStock
+    ) {
+        let effect: Double
+        if deficitPercentage < 3.0 {
+            effect = -0.00005 * deficitPercentage
+        } else if deficitPercentage < 5.0 {
+            effect = -0.0015 * (deficitPercentage - 3.0) - 0.00015
+        } else if deficitPercentage < 8.0 {
+            effect = -0.0035 * (deficitPercentage - 5.0) - 0.00315
+        } else {
+            effect = -0.006 * (deficitPercentage - 8.0) - 0.01365
+        }
 
-    /// Calculates GDP growth penalty from high debt-to-GDP ratio
-    ///
-    /// **Debt Sustainability Theory:**
-    /// - Low debt (<60% GDP): Minimal impact
-    /// - Moderate debt (60-90%): Interest payments crowd out productive spending
-    /// - High debt (>90%): Debt spiral, market confidence loss, growth drag
-    ///
-    /// **Empirical thresholds (Reinhart-Rogoff):**
-    /// - <60%: Safe zone
-    /// - 60-90%: Caution zone (-0.1% per 10% increase)
-    /// - >90%: Danger zone (-0.3% per 10% increase)
-    static func calculateDebtDragEffect(debtToGDPRatio: Double) -> Double {
+        capitalStock.crowdingOutEffect = effect
+        capitalStock.crowdingOutAge = 0
+    }
+
+    /// Updates debt drag effect (decays 5% per year, very persistent)
+    static func updateDebtDragEffect(
+        debtToGDPRatio: Double,
+        capitalStock: inout FiscalCapitalStock
+    ) {
+        let effect: Double
         if debtToGDPRatio < 60 {
-            return 0 // Safe zone
+            effect = 0
         } else if debtToGDPRatio < 90 {
             let excessDebt = debtToGDPRatio - 60
-            return -0.0001 * excessDebt // -0.01% per 10% excess
+            effect = -0.0001 * excessDebt
         } else {
-            let moderateDebt = 30.0 // 60-90% range
+            let moderateDebt = 30.0
             let severeDebt = debtToGDPRatio - 90
-            return -0.0001 * moderateDebt - 0.0003 * severeDebt // -0.03% per 10% above 90%
+            effect = -0.0001 * moderateDebt - 0.0003 * severeDebt
         }
+
+        capitalStock.debtDragEffect = effect
+        capitalStock.debtDragAge = 0
     }
 
-    // MARK: - Per-Capita Spending Effects
+    // MARK: - Main Entry Point
 
-    /// Calculates GDP growth impact from optimal vs. suboptimal per-capita spending
-    ///
-    /// **Threshold Theory:**
-    /// - Underfunding critical departments (education, infrastructure) hurts long-term growth
-    /// - Overfunding creates waste and inefficiency
-    /// - Optimal spending levels maximize productivity
-    static func calculatePerCapitaSpendingEffect(
+    /// Processes budget into capital stock system and updates all fiscal effects
+    /// This is the main function called when a new budget is enacted
+    static func processBudget(
         budget: Budget,
-        population: Int
-    ) -> Double {
-        guard population > 0 else { return 0 }
-
-        var growthImpact: Double = 0
-
-        for department in budget.departments {
-            let perCapita = Double(truncating: department.allocatedFunds as NSDecimalNumber) / Double(population)
-            let impact = getPerCapitaImpact(category: department.category, perCapita: perCapita)
-            growthImpact += impact
-        }
-
-        return growthImpact / 10.0 // Average across departments
-    }
-
-    private static func getPerCapitaImpact(category: Department.DepartmentCategory, perCapita: Double) -> Double {
-        // Define optimal ranges and calculate deviation penalty
-        switch category {
-        case .infrastructure:
-            // Optimal: $1,000-$1,500/capita
-            if perCapita < 500 {
-                return -0.0003 // Severe underfunding hurts growth
-            } else if perCapita < 1000 {
-                return -0.0001 // Underfunding
-            } else if perCapita <= 1500 {
-                return 0.0002 // Optimal range (growth boost)
-            } else if perCapita <= 2500 {
-                return 0.0001 // Slight overfunding (diminishing returns)
-            } else {
-                return -0.0001 // Waste
-            }
-
-        case .education:
-            // Optimal: $2,000-$3,000/capita
-            if perCapita < 1000 {
-                return -0.0004 // Human capital degradation
-            } else if perCapita < 2000 {
-                return -0.0002
-            } else if perCapita <= 3000 {
-                return 0.0003 // Optimal (strong long-term growth)
-            } else if perCapita <= 4000 {
-                return 0.0001
-            } else {
-                return -0.0001 // Bureaucracy
-            }
-
-        case .science:
-            // Optimal: $500-$800/capita
-            if perCapita < 300 {
-                return -0.0002 // Innovation deficit
-            } else if perCapita < 500 {
-                return -0.0001
-            } else if perCapita <= 800 {
-                return 0.0004 // Innovation boost (highest multiplier)
-            } else if perCapita <= 1200 {
-                return 0.0002
-            } else {
-                return 0 // Diminishing returns
-            }
-
-        case .healthcare:
-            // Optimal: $2,500-$4,000/capita
-            if perCapita < 1500 {
-                return -0.0002 // Productivity loss (sick workers)
-            } else if perCapita < 2500 {
-                return -0.0001
-            } else if perCapita <= 4000 {
-                return 0.0002 // Healthy workforce
-            } else if perCapita <= 6000 {
-                return 0.0001
-            } else {
-                return -0.0001 // Over-medicalization
-            }
-
-        default:
-            // Other departments have neutral long-term growth impact
-            return 0
-        }
-    }
-
-    // MARK: - Combined Fiscal Impact
-
-    /// Calculates total GDP growth impact from all fiscal policy effects
-    static func calculateTotalFiscalImpact(
-        budget: Budget,
-        gdp: Double,
+        capitalStock: inout FiscalCapitalStock,
+        currentDate: Date,
         population: Int,
-        governmentLevel: Int,
         debtToGDPRatio: Double
     ) -> Double {
-        // 1. Fiscal multiplier effect (positive from government spending)
-        let spendingEffect = calculateSpendingMultiplierEffect(
+        // 1. Process spending into capital stocks (with time lags) and get immediate flow effects
+        let immediateFlowEffect = processSpendingIntoCapitalStock(
             budget: budget,
-            gdp: gdp,
-            governmentLevel: governmentLevel
-        )
-
-        // 2. Crowding out effect (negative from deficit spending)
-        let crowdingOutEffect = calculateCrowdingOutEffect(
-            deficitPercentage: budget.deficitPercentage
-        )
-
-        // 3. Tax drag effect (negative from high taxes)
-        let taxEffect = calculateTaxDragEffect(taxRates: budget.taxRates)
-
-        // 4. Debt drag effect (negative from high debt)
-        let debtEffect = calculateDebtDragEffect(debtToGDPRatio: debtToGDPRatio)
-
-        // 5. Per-capita spending optimization effect
-        let perCapitaEffect = calculatePerCapitaSpendingEffect(
-            budget: budget,
+            capitalStock: &capitalStock,
+            currentDate: currentDate,
             population: population
         )
 
-        // Combine all effects
-        let totalEffect = spendingEffect + crowdingOutEffect + taxEffect + debtEffect + perCapitaEffect
+        // 2. Update flow effects (tax, deficit, debt)
+        updateTaxEffect(taxRates: budget.taxRates, capitalStock: &capitalStock)
+        updateCrowdingOutEffect(deficitPercentage: budget.deficitPercentage, capitalStock: &capitalStock)
+        updateDebtDragEffect(debtToGDPRatio: debtToGDPRatio, capitalStock: &capitalStock)
 
-        // Apply final safety cap to prevent extreme GDP swings
-        // Fiscal policy can boost or drag growth by at most ±2% annually
-        return min(0.02, max(-0.02, totalEffect))
+        // 3. Return total current fiscal impact (stocks + flows + immediate)
+        return capitalStock.getTotalFiscalImpact(population: population) + immediateFlowEffect
     }
 }

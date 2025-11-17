@@ -150,7 +150,8 @@ class BudgetManager: ObservableObject {
                 budget: budget,
                 population: population,
                 governmentLevel: position.level,
-                debtToGDPRatio: debtToGDPRatio
+                debtToGDPRatio: debtToGDPRatio,
+                currentDate: character.currentDate
             )
         }
 

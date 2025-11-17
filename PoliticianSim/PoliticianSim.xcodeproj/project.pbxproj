@@ -89,6 +89,7 @@
 		7C6E46DF2ECAB841005F7A3D /* FiscalImpactCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46DC2ECAB841005F7A3D /* FiscalImpactCalculator.swift */; };
 		7C6E46E42ECAB919005F7A3D /* GovernmentStatsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46E32ECAB919005F7A3D /* GovernmentStatsManager.swift */; };
 		7C6E46E72ECAB931005F7A3D /* GovernmentStatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46E52ECAB931005F7A3D /* GovernmentStatsView.swift */; };
+		7C6E46E92ECACD92005F7A3D /* FiscalCapitalStock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46E82ECACD92005F7A3D /* FiscalCapitalStock.swift */; };
 		FB1BD9A2FE914F06F1F9D2BC /* CustomAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61D83AE85A5956CC2FFCB315 /* CustomAlert.swift */; };
 /* End PBXBuildFile section */
 
@@ -177,6 +178,7 @@
 		7C6E46DC2ECAB841005F7A3D /* FiscalImpactCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiscalImpactCalculator.swift; sourceTree = "<group>"; };
 		7C6E46E32ECAB919005F7A3D /* GovernmentStatsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GovernmentStatsManager.swift; sourceTree = "<group>"; };
 		7C6E46E52ECAB931005F7A3D /* GovernmentStatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GovernmentStatsView.swift; sourceTree = "<group>"; };
+		7C6E46E82ECACD92005F7A3D /* FiscalCapitalStock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiscalCapitalStock.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -249,6 +251,7 @@
 				7C6E45502EC6F190005F7A3D /* EconomicData.swift */,
 				7C6E46CE2EC965AF005F7A3D /* Treasury.swift */,
 				7C6E46DA2EC9AFBB005F7A3D /* GovernmentStats.swift */,
+				7C6E46E82ECACD92005F7A3D /* FiscalCapitalStock.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -619,6 +622,7 @@
 				7C6E45362EC59553005F7A3D /* PublicOpinionManager.swift in Sources */,
 				027 /* ChoiceButton.swift in Sources */,
 				7C6E451C2EC55F20005F7A3D /* PolicyManager.swift in Sources */,
+				7C6E46E92ECACD92005F7A3D /* FiscalCapitalStock.swift in Sources */,
 				028 /* CharacterCreationViewModel.swift in Sources */,
 				029 /* CountrySelectionView.swift in Sources */,
 				030 /* CharacterDetailsView.swift in Sources */,
