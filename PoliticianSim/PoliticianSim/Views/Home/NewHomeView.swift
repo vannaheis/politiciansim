@@ -276,6 +276,20 @@ struct CharacterAttributesCard: View {
 
             VStack(spacing: 10) {
                 AttributeStatRow(
+                    icon: "heart.fill",
+                    iconColor: Constants.Colors.health,
+                    label: "Health",
+                    value: character.health
+                )
+
+                AttributeStatRow(
+                    icon: "bolt.fill",
+                    iconColor: .orange,
+                    label: "Stress",
+                    value: character.stress
+                )
+
+                AttributeStatRow(
                     icon: Constants.Icons.Attributes.charisma,
                     iconColor: Constants.Colors.charisma,
                     label: "Charisma",
@@ -350,12 +364,34 @@ struct AttributeStatRow: View {
     }
 
     private func valueColor(for value: Int) -> Color {
-        if value >= 70 {
-            return Constants.Colors.positive
-        } else if value >= 40 {
-            return .white
+        // Special handling for health and stress
+        if label == "Health" {
+            // Health: green when high, red when low
+            if value >= 70 {
+                return Constants.Colors.positive
+            } else if value >= 40 {
+                return .yellow
+            } else {
+                return Constants.Colors.negative
+            }
+        } else if label == "Stress" {
+            // Stress: green when low, red when high (inverted)
+            if value >= 80 {
+                return Constants.Colors.negative
+            } else if value >= 60 {
+                return .yellow
+            } else {
+                return Constants.Colors.positive
+            }
         } else {
-            return Constants.Colors.negative
+            // Default coloring for other attributes
+            if value >= 70 {
+                return Constants.Colors.positive
+            } else if value >= 40 {
+                return .white
+            } else {
+                return Constants.Colors.negative
+            }
         }
     }
 }
