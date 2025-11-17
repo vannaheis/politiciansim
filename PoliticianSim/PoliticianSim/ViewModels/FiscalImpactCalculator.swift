@@ -46,9 +46,11 @@ struct FiscalImpactCalculator {
         // Convert to GDP growth impact (annualized)
         // Base formula: (weighted spending / GDP) × efficiency factor
         let spendingRatio = totalWeightedSpending / gdp
-        let efficiencyFactor = 0.15 // 15% of spending flows through to GDP growth annually
+        let efficiencyFactor = 0.01 // 1% of weighted spending flows through to GDP growth annually
 
-        return spendingRatio * efficiencyFactor
+        // Cap the effect to prevent extreme values
+        let rawEffect = spendingRatio * efficiencyFactor
+        return min(0.01, max(-0.01, rawEffect)) // Cap at ±1% GDP growth
     }
 
     private static func getMultiplier(for category: Department.DepartmentCategory, level: Int) -> Double {
@@ -110,13 +112,13 @@ struct FiscalImpactCalculator {
     /// - Deficit > 8%: Severe (-0.60% growth)
     static func calculateCrowdingOutEffect(deficitPercentage: Double) -> Double {
         if deficitPercentage < 3.0 {
-            return -0.0005 * deficitPercentage // Minimal impact
+            return -0.00005 * deficitPercentage // Minimal impact
         } else if deficitPercentage < 5.0 {
-            return -0.015 * (deficitPercentage - 3.0) - 0.0015 // Moderate
+            return -0.0015 * (deficitPercentage - 3.0) - 0.00015 // Moderate
         } else if deficitPercentage < 8.0 {
-            return -0.035 * (deficitPercentage - 5.0) - 0.045 // Significant
+            return -0.0035 * (deficitPercentage - 5.0) - 0.00315 // Significant
         } else {
-            return -0.06 * (deficitPercentage - 8.0) - 0.15 // Severe
+            return -0.006 * (deficitPercentage - 8.0) - 0.01365 // Severe
         }
     }
 
@@ -142,52 +144,52 @@ struct FiscalImpactCalculator {
         // Income tax on low earners (affects consumption heavily)
         let lowIncomeDrag: Double
         if taxRates.incomeTaxLow < 10 {
-            lowIncomeDrag = 0.001 // Minimal tax = slight boost
+            lowIncomeDrag = 0.0001 // Minimal tax = slight boost
         } else if taxRates.incomeTaxLow < 15 {
             lowIncomeDrag = 0
         } else if taxRates.incomeTaxLow < 25 {
-            lowIncomeDrag = -0.002 * (taxRates.incomeTaxLow - 15)
+            lowIncomeDrag = -0.0002 * (taxRates.incomeTaxLow - 15)
         } else {
-            lowIncomeDrag = -0.004 * (taxRates.incomeTaxLow - 25) - 0.02
+            lowIncomeDrag = -0.0004 * (taxRates.incomeTaxLow - 25) - 0.002
         }
         totalDrag += lowIncomeDrag * 0.3 // 30% weight (large population)
 
         // Income tax on middle class (affects labor supply and consumption)
         let middleIncomeDrag: Double
         if taxRates.incomeTaxMiddle < 20 {
-            middleIncomeDrag = 0.0005
+            middleIncomeDrag = 0.00005
         } else if taxRates.incomeTaxMiddle < 25 {
             middleIncomeDrag = 0
         } else if taxRates.incomeTaxMiddle < 35 {
-            middleIncomeDrag = -0.003 * (taxRates.incomeTaxMiddle - 25)
+            middleIncomeDrag = -0.0003 * (taxRates.incomeTaxMiddle - 25)
         } else {
-            middleIncomeDrag = -0.005 * (taxRates.incomeTaxMiddle - 35) - 0.03
+            middleIncomeDrag = -0.0005 * (taxRates.incomeTaxMiddle - 35) - 0.003
         }
         totalDrag += middleIncomeDrag * 0.4 // 40% weight (largest tax base)
 
         // Income tax on high earners (affects investment and entrepreneurship)
         let highIncomeDrag: Double
         if taxRates.incomeTaxHigh < 30 {
-            highIncomeDrag = 0.001
+            highIncomeDrag = 0.0001
         } else if taxRates.incomeTaxHigh < 40 {
-            highIncomeDrag = -0.001 * (taxRates.incomeTaxHigh - 30)
+            highIncomeDrag = -0.0001 * (taxRates.incomeTaxHigh - 30)
         } else if taxRates.incomeTaxHigh < 50 {
-            highIncomeDrag = -0.002 * (taxRates.incomeTaxHigh - 40) - 0.01
+            highIncomeDrag = -0.0002 * (taxRates.incomeTaxHigh - 40) - 0.001
         } else {
-            highIncomeDrag = -0.004 * (taxRates.incomeTaxHigh - 50) - 0.03
+            highIncomeDrag = -0.0004 * (taxRates.incomeTaxHigh - 50) - 0.003
         }
         totalDrag += highIncomeDrag * 0.2 // 20% weight
 
         // Corporate tax (affects business investment heavily)
         let corporateDrag: Double
         if taxRates.corporateTax < 18 {
-            corporateDrag = 0.002 * (18 - taxRates.corporateTax) // Boost investment
+            corporateDrag = 0.0002 * (18 - taxRates.corporateTax) // Boost investment
         } else if taxRates.corporateTax < 25 {
             corporateDrag = 0
         } else if taxRates.corporateTax < 35 {
-            corporateDrag = -0.004 * (taxRates.corporateTax - 25)
+            corporateDrag = -0.0004 * (taxRates.corporateTax - 25)
         } else {
-            corporateDrag = -0.006 * (taxRates.corporateTax - 35) - 0.04
+            corporateDrag = -0.0006 * (taxRates.corporateTax - 35) - 0.004
         }
         totalDrag += corporateDrag * 0.5 // 50% weight (crucial for investment)
 
@@ -196,13 +198,14 @@ struct FiscalImpactCalculator {
         if taxRates.salesTax < 5 {
             salesDrag = 0
         } else if taxRates.salesTax < 10 {
-            salesDrag = -0.001 * (taxRates.salesTax - 5)
+            salesDrag = -0.0001 * (taxRates.salesTax - 5)
         } else {
-            salesDrag = -0.003 * (taxRates.salesTax - 10) - 0.005
+            salesDrag = -0.0003 * (taxRates.salesTax - 10) - 0.0005
         }
         totalDrag += salesDrag * 0.3 // 30% weight
 
-        return totalDrag
+        // Cap total tax drag to prevent extreme values
+        return min(0.005, max(-0.015, totalDrag)) // Cap at ±0.5-1.5%
     }
 
     // MARK: - Debt-to-GDP Feedback
@@ -223,11 +226,11 @@ struct FiscalImpactCalculator {
             return 0 // Safe zone
         } else if debtToGDPRatio < 90 {
             let excessDebt = debtToGDPRatio - 60
-            return -0.001 * excessDebt // -0.1% per 10% excess
+            return -0.0001 * excessDebt // -0.01% per 10% excess
         } else {
             let moderateDebt = 30.0 // 60-90% range
             let severeDebt = debtToGDPRatio - 90
-            return -0.001 * moderateDebt - 0.003 * severeDebt // -0.3% per 10% above 90%
+            return -0.0001 * moderateDebt - 0.0003 * severeDebt // -0.03% per 10% above 90%
         }
     }
 
@@ -262,41 +265,41 @@ struct FiscalImpactCalculator {
         case .infrastructure:
             // Optimal: $1,000-$1,500/capita
             if perCapita < 500 {
-                return -0.003 // Severe underfunding hurts growth
+                return -0.0003 // Severe underfunding hurts growth
             } else if perCapita < 1000 {
-                return -0.001 // Underfunding
+                return -0.0001 // Underfunding
             } else if perCapita <= 1500 {
-                return 0.002 // Optimal range (growth boost)
+                return 0.0002 // Optimal range (growth boost)
             } else if perCapita <= 2500 {
-                return 0.001 // Slight overfunding (diminishing returns)
+                return 0.0001 // Slight overfunding (diminishing returns)
             } else {
-                return -0.001 // Waste
+                return -0.0001 // Waste
             }
 
         case .education:
             // Optimal: $2,000-$3,000/capita
             if perCapita < 1000 {
-                return -0.004 // Human capital degradation
+                return -0.0004 // Human capital degradation
             } else if perCapita < 2000 {
-                return -0.002
+                return -0.0002
             } else if perCapita <= 3000 {
-                return 0.003 // Optimal (strong long-term growth)
+                return 0.0003 // Optimal (strong long-term growth)
             } else if perCapita <= 4000 {
-                return 0.001
+                return 0.0001
             } else {
-                return -0.001 // Bureaucracy
+                return -0.0001 // Bureaucracy
             }
 
         case .science:
             // Optimal: $500-$800/capita
             if perCapita < 300 {
-                return -0.002 // Innovation deficit
+                return -0.0002 // Innovation deficit
             } else if perCapita < 500 {
-                return -0.001
+                return -0.0001
             } else if perCapita <= 800 {
-                return 0.004 // Innovation boost (highest multiplier)
+                return 0.0004 // Innovation boost (highest multiplier)
             } else if perCapita <= 1200 {
-                return 0.002
+                return 0.0002
             } else {
                 return 0 // Diminishing returns
             }
@@ -304,15 +307,15 @@ struct FiscalImpactCalculator {
         case .healthcare:
             // Optimal: $2,500-$4,000/capita
             if perCapita < 1500 {
-                return -0.002 // Productivity loss (sick workers)
+                return -0.0002 // Productivity loss (sick workers)
             } else if perCapita < 2500 {
-                return -0.001
+                return -0.0001
             } else if perCapita <= 4000 {
-                return 0.002 // Healthy workforce
+                return 0.0002 // Healthy workforce
             } else if perCapita <= 6000 {
-                return 0.001
+                return 0.0001
             } else {
-                return -0.001 // Over-medicalization
+                return -0.0001 // Over-medicalization
             }
 
         default:
@@ -358,6 +361,8 @@ struct FiscalImpactCalculator {
         // Combine all effects
         let totalEffect = spendingEffect + crowdingOutEffect + taxEffect + debtEffect + perCapitaEffect
 
-        return totalEffect
+        // Apply final safety cap to prevent extreme GDP swings
+        // Fiscal policy can boost or drag growth by at most ±2% annually
+        return min(0.02, max(-0.02, totalEffect))
     }
 }
