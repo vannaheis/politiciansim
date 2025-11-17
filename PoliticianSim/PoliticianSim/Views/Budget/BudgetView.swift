@@ -970,6 +970,7 @@ struct ApplyBudgetButton: View {
             character: &character,
             treasuryManager: gameManager.treasuryManager,
             governmentStatsManager: gameManager.governmentStatsManager,
+            economicDataManager: gameManager.economicDataManager,
             population: population
         )
 

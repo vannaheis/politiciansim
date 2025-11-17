@@ -85,9 +85,10 @@
 		7C6E46CF2EC965AF005F7A3D /* Treasury.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46CE2EC965AF005F7A3D /* Treasury.swift */; };
 		7C6E46D12EC965B7005F7A3D /* TreasuryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46D02EC965B7005F7A3D /* TreasuryManager.swift */; };
 		7C6E46D42EC965C4005F7A3D /* TreasuryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46D22EC965C4005F7A3D /* TreasuryView.swift */; };
-		7C6E46D72EC9AF9C005F7A3D /* GovernmentStatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46D52EC9AF9C005F7A3D /* GovernmentStatsView.swift */; };
-		7C6E46D92EC9AFAC005F7A3D /* GovernmentStatsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46D82EC9AFAC005F7A3D /* GovernmentStatsManager.swift */; };
 		7C6E46DB2EC9AFBB005F7A3D /* GovernmentStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46DA2EC9AFBB005F7A3D /* GovernmentStats.swift */; };
+		7C6E46DF2ECAB841005F7A3D /* FiscalImpactCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46DC2ECAB841005F7A3D /* FiscalImpactCalculator.swift */; };
+		7C6E46E42ECAB919005F7A3D /* GovernmentStatsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46E32ECAB919005F7A3D /* GovernmentStatsManager.swift */; };
+		7C6E46E72ECAB931005F7A3D /* GovernmentStatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46E52ECAB931005F7A3D /* GovernmentStatsView.swift */; };
 		FB1BD9A2FE914F06F1F9D2BC /* CustomAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61D83AE85A5956CC2FFCB315 /* CustomAlert.swift */; };
 /* End PBXBuildFile section */
 
@@ -172,9 +173,10 @@
 		7C6E46CE2EC965AF005F7A3D /* Treasury.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Treasury.swift; sourceTree = "<group>"; };
 		7C6E46D02EC965B7005F7A3D /* TreasuryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreasuryManager.swift; sourceTree = "<group>"; };
 		7C6E46D22EC965C4005F7A3D /* TreasuryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreasuryView.swift; sourceTree = "<group>"; };
-		7C6E46D52EC9AF9C005F7A3D /* GovernmentStatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GovernmentStatsView.swift; sourceTree = "<group>"; };
-		7C6E46D82EC9AFAC005F7A3D /* GovernmentStatsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GovernmentStatsManager.swift; sourceTree = "<group>"; };
 		7C6E46DA2EC9AFBB005F7A3D /* GovernmentStats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GovernmentStats.swift; sourceTree = "<group>"; };
+		7C6E46DC2ECAB841005F7A3D /* FiscalImpactCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiscalImpactCalculator.swift; sourceTree = "<group>"; };
+		7C6E46E32ECAB919005F7A3D /* GovernmentStatsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GovernmentStatsManager.swift; sourceTree = "<group>"; };
+		7C6E46E52ECAB931005F7A3D /* GovernmentStatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GovernmentStatsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -254,6 +256,8 @@
 		312 /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
+				7C6E46E32ECAB919005F7A3D /* GovernmentStatsManager.swift */,
+				7C6E46DC2ECAB841005F7A3D /* FiscalImpactCalculator.swift */,
 				108 /* GameManager.swift */,
 				7C6E46D02EC965B7005F7A3D /* TreasuryManager.swift */,
 				109 /* CharacterManager.swift */,
@@ -271,7 +275,6 @@
 				7C6E45352EC59552005F7A3D /* PublicOpinionManager.swift */,
 				7C6E453C2EC59BBC005F7A3D /* SaveManager.swift */,
 				7C6E454E2EC6F17A005F7A3D /* EconomicDataManager.swift */,
-				7C6E46D82EC9AFAC005F7A3D /* GovernmentStatsManager.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -279,7 +282,7 @@
 		313 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				7C6E46D62EC9AF9C005F7A3D /* GovernmentStats */,
+				7C6E46E62ECAB931005F7A3D /* GovernmentStats */,
 				7C6E46D32EC965C4005F7A3D /* Treasury */,
 				7C6E454B2EC6F15A005F7A3D /* Economy */,
 				7C6E45462EC684EA005F7A3D /* Education */,
@@ -485,10 +488,10 @@
 			path = Treasury;
 			sourceTree = "<group>";
 		};
-		7C6E46D62EC9AF9C005F7A3D /* GovernmentStats */ = {
+		7C6E46E62ECAB931005F7A3D /* GovernmentStats */ = {
 			isa = PBXGroup;
 			children = (
-				7C6E46D52EC9AF9C005F7A3D /* GovernmentStatsView.swift */,
+				7C6E46E52ECAB931005F7A3D /* GovernmentStatsView.swift */,
 			);
 			path = GovernmentStats;
 			sourceTree = "<group>";
@@ -588,7 +591,6 @@
 				7C6E452D2EC5854E005F7A3D /* LawsView.swift in Sources */,
 				015 /* StandardBackgroundView.swift in Sources */,
 				016 /* StatCard.swift in Sources */,
-				7C6E46D72EC9AF9C005F7A3D /* GovernmentStatsView.swift in Sources */,
 				7C6E46D42EC965C4005F7A3D /* TreasuryView.swift in Sources */,
 				017 /* InfoCard.swift in Sources */,
 				018 /* ProgressBar.swift in Sources */,
@@ -606,6 +608,7 @@
 				023 /* StatDisplay.swift in Sources */,
 				7C6E45242EC57F3C005F7A3D /* BudgetManager.swift in Sources */,
 				7C6E45532EC6F1E2005F7A3D /* LineChartView.swift in Sources */,
+				7C6E46DF2ECAB841005F7A3D /* FiscalImpactCalculator.swift in Sources */,
 				024 /* TimeControlBar.swift in Sources */,
 				025 /* NavigationBar.swift in Sources */,
 				7C6E45262EC57F4D005F7A3D /* Budget.swift in Sources */,
@@ -632,7 +635,6 @@
 				037 /* QuickStatsView.swift in Sources */,
 				7C6E453D2EC59BBC005F7A3D /* SaveManager.swift in Sources */,
 				038 /* SideMenuView.swift in Sources */,
-				7C6E46D92EC9AFAC005F7A3D /* GovernmentStatsManager.swift in Sources */,
 				039 /* NewHomeView.swift in Sources */,
 				040 /* ProfileView.swift in Sources */,
 				041 /* StatsView.swift in Sources */,
@@ -640,6 +642,8 @@
 				7C6E45102EC552FB005F7A3D /* Campaign.swift in Sources */,
 				043 /* SettingsView.swift in Sources */,
 				7C6E453B2EC59569005F7A3D /* PublicOpinionView.swift in Sources */,
+				7C6E46E42ECAB919005F7A3D /* GovernmentStatsManager.swift in Sources */,
+				7C6E46E72ECAB931005F7A3D /* GovernmentStatsView.swift in Sources */,
 				7C6E45182EC55337005F7A3D /* ElectionsView.swift in Sources */,
 				FB1BD9A2FE914F06F1F9D2BC /* CustomAlert.swift in Sources */,
 			);

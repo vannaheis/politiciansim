@@ -11,8 +11,41 @@ import Combine
 class EconomicDataManager: ObservableObject {
     @Published var economicData: EconomicData
 
+    // Track fiscal policy impact on GDP
+    var fiscalGrowthModifier: Double = 0.0
+
     init() {
         self.economicData = EconomicData()
+    }
+
+    // MARK: - Fiscal Policy Integration
+
+    /// Apply fiscal policy effects to GDP growth
+    /// Called when budget is enacted to update economic growth projections
+    func applyFiscalPolicy(
+        budget: Budget,
+        population: Int,
+        governmentLevel: Int,
+        debtToGDPRatio: Double
+    ) {
+        let gdp: Double
+
+        // Get appropriate GDP based on government level
+        switch governmentLevel {
+        case 1: gdp = economicData.local.gdp.current
+        case 2: gdp = economicData.state.gdp.current
+        case 3, 4, 5: gdp = economicData.federal.gdp.current
+        default: gdp = economicData.federal.gdp.current
+        }
+
+        // Calculate total fiscal impact on GDP growth
+        fiscalGrowthModifier = FiscalImpactCalculator.calculateTotalFiscalImpact(
+            budget: budget,
+            gdp: gdp,
+            population: population,
+            governmentLevel: governmentLevel,
+            debtToGDPRatio: debtToGDPRatio
+        )
     }
 
     // MARK: - Economic Simulation
@@ -42,6 +75,14 @@ class EconomicDataManager: ObservableObject {
     /// - Rates below 5% → Higher GDP growth (monetary stimulus)
     /// - Each 1% rate deviation changes GDP growth by ±0.3%
     /// - Example: 0% rates boost growth by +1.5%, 10% rates slow growth by -1.5%
+    ///
+    /// **Fiscal Policy Impact on GDP:**
+    /// - Government spending affects GDP through fiscal multipliers
+    /// - Different departments have different multipliers (infrastructure 1.5x, R&D 1.8x, etc.)
+    /// - Deficits cause "crowding out" that reduces private investment
+    /// - High taxes create drag on growth through reduced incentives
+    /// - High debt-to-GDP ratios (>90%) severely harm growth
+    /// - Per-capita spending thresholds optimize productivity
     ///
     /// **Inflation Dynamics:**
     /// - Base: Phillips curve effect from unemployment
@@ -93,14 +134,16 @@ class EconomicDataManager: ObservableObject {
         let naturalUnemployment = 4.5 // NAIRU (Non-Accelerating Inflation Rate of Unemployment)
         let inflationTarget = 2.0
 
-        // 1. Calculate GDP growth with interest rate impact
+        // 1. Calculate GDP growth with interest rate impact + fiscal policy
         // Interest rates affect GDP growth symmetrically:
         // - Rates above neutral (5%) slow growth (monetary tightening)
         // - Rates below neutral (5%) boost growth (monetary stimulus)
         let neutralRate = 5.0
         let baseGrowthRate = Double.random(in: 0.015...0.025) // 1.5-2.5% base
         let rateEffect = (currentInterestRate - neutralRate) * 0.003 // ±0.3% per 1% rate deviation
-        let annualGrowthRate = baseGrowthRate - rateEffect
+
+        // Add fiscal policy impact (government spending, taxes, deficit effects)
+        let annualGrowthRate = baseGrowthRate - rateEffect + fiscalGrowthModifier
         let weeklyGrowthRate = annualGrowthRate / 52.0
         let newGDP = currentGDP * (1 + weeklyGrowthRate)
 

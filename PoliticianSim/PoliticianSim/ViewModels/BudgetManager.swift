@@ -84,7 +84,7 @@ class BudgetManager: ObservableObject {
         return (true, "Department funding adjusted")
     }
 
-    func applyProposedBudget(character: inout Character, treasuryManager: TreasuryManager, governmentStatsManager: GovernmentStatsManager? = nil, population: Int = 1) -> (success: Bool, message: String) {
+    func applyProposedBudget(character: inout Character, treasuryManager: TreasuryManager, governmentStatsManager: GovernmentStatsManager? = nil, economicDataManager: EconomicDataManager? = nil, population: Int = 1) -> (success: Bool, message: String) {
         guard var budget = currentBudget else {
             return (false, "No budget available")
         }
@@ -122,6 +122,36 @@ class BudgetManager: ObservableObject {
         // Update government performance stats (per-capita based)
         if let statsManager = governmentStatsManager, population > 0 {
             statsManager.updateStats(budget: budget, population: population, character: &character)
+        }
+
+        // Apply fiscal policy effects to GDP growth
+        if let economicManager = economicDataManager,
+           let position = character.currentPosition,
+           population > 0 {
+            // Calculate debt-to-GDP ratio
+            let gdp: Double
+            switch position.level {
+            case 1: gdp = economicManager.economicData.local.gdp.current
+            case 2: gdp = economicManager.economicData.state.gdp.current
+            case 3, 4, 5: gdp = economicManager.economicData.federal.gdp.current
+            default: gdp = 1.0
+            }
+
+            let debtToGDPRatio: Double
+            if let treasury = treasuryManager.currentTreasury, treasury.cashOnHand < 0 {
+                let debt = abs(Double(truncating: treasury.cashOnHand as NSDecimalNumber))
+                debtToGDPRatio = (debt / gdp) * 100.0
+            } else {
+                debtToGDPRatio = 0.0
+            }
+
+            // Apply fiscal impact to economic growth
+            economicManager.applyFiscalPolicy(
+                budget: budget,
+                population: population,
+                governmentLevel: position.level,
+                debtToGDPRatio: debtToGDPRatio
+            )
         }
 
         // Add to history
