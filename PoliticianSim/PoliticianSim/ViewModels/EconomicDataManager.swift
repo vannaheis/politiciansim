@@ -181,6 +181,12 @@ class EconomicDataManager: ObservableObject {
         economicData.federal.unemploymentRate.addDataPoint(date: date, value: newUnemployment)
         economicData.federal.inflationRate.addDataPoint(date: date, value: newInflation)
         economicData.federal.federalInterestRate.addDataPoint(date: date, value: newRate)
+
+        // Synchronize federal GDP with USA entry in worldGDPs
+        // This ensures home view and world rankings show the same GDP (including fiscal effects)
+        if let usaIndex = economicData.worldGDPs.firstIndex(where: { $0.countryCode == "USA" }) {
+            economicData.worldGDPs[usaIndex].gdp = newGDP
+        }
     }
 
     private func simulateStateEconomy(date: Date) {
