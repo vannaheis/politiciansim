@@ -47,6 +47,14 @@ struct SaveGame: Codable {
     let enrollmentStatus: EnrollmentStatus
     let economicData: EconomicData
 
+    // Military (President only)
+    let activeResearch: [TechnologyResearch]
+    let activeWars: [War]
+    let warHistory: [War]
+    let territories: [Territory]
+    let activeRebellions: [Rebellion]
+    let rebellionHistory: [Rebellion]
+
     init(gameManager: GameManager) {
         self.id = UUID()
         self.saveDate = Date()
@@ -104,6 +112,14 @@ struct SaveGame: Codable {
 
         // Economic Data
         self.economicData = gameManager.economicDataManager.economicData
+
+        // Military
+        self.activeResearch = gameManager.militaryManager.activeResearch
+        self.activeWars = gameManager.warEngine.activeWars
+        self.warHistory = gameManager.warEngine.warHistory
+        self.territories = gameManager.territoryManager.territories
+        self.activeRebellions = gameManager.territoryManager.activeRebellions
+        self.rebellionHistory = gameManager.territoryManager.rebellionHistory
     }
 
     func restore(to gameManager: GameManager) {
@@ -157,6 +173,14 @@ struct SaveGame: Codable {
 
         // Restore economic data
         gameManager.economicDataManager.economicData = economicData
+
+        // Restore military
+        gameManager.militaryManager.activeResearch = activeResearch
+        gameManager.warEngine.activeWars = activeWars
+        gameManager.warEngine.warHistory = warHistory
+        gameManager.territoryManager.territories = territories
+        gameManager.territoryManager.activeRebellions = activeRebellions
+        gameManager.territoryManager.rebellionHistory = rebellionHistory
     }
 }
 
