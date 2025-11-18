@@ -32,6 +32,9 @@ class NavigationManager: ObservableObject {
         case laws = "Laws"
         case governmentStats = "Performance"
 
+        // Military
+        case warRoom = "War Room"
+
         // Relations
         case diplomacy = "Diplomacy"
         case publicOpinion = "Public Opinion"
@@ -56,6 +59,7 @@ class NavigationManager: ObservableObject {
             case .treasury: return "building.columns.fill"
             case .laws: return "book.closed.fill"
             case .governmentStats: return "chart.bar.fill"
+            case .warRoom: return "shield.fill"
             case .diplomacy: return "globe.americas.fill"
             case .publicOpinion: return "chart.line.uptrend.xyaxis"
             case .economy: return "banknote.fill"
@@ -69,6 +73,7 @@ class NavigationManager: ObservableObject {
             case .profile, .stats, .education: return .character
             case .position, .elections, .campaigns: return .career
             case .policies, .budget, .treasury, .laws, .governmentStats: return .governance
+            case .warRoom: return .military
             case .diplomacy, .publicOpinion: return .relations
             case .economy: return .economy
             case .settings: return .settings
@@ -81,6 +86,7 @@ class NavigationManager: ObservableObject {
         case character = "CHARACTER"
         case career = "POLITICAL CAREER"
         case governance = "GOVERNANCE"
+        case military = "MILITARY"
         case relations = "RELATIONS"
         case economy = "ECONOMY"
         case settings = "SETTINGS"
@@ -124,7 +130,7 @@ class NavigationManager: ObservableObject {
         }
 
         // Return in desired order
-        let order: [MenuSection] = [.character, .career, .governance, .relations, .economy, .settings]
+        let order: [MenuSection] = [.character, .career, .governance, .military, .relations, .economy, .settings]
         return order.compactMap { section in
             guard let items = grouped[section], !items.isEmpty else { return nil }
             return (section, items)

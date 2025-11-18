@@ -97,6 +97,7 @@
 		7C6E46F32ECC4970005F7A3D /* Territory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46EE2ECC4970005F7A3D /* Territory.swift */; };
 		7C6E46F62ECC4AA6005F7A3D /* WarEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46F52ECC4AA6005F7A3D /* WarEngine.swift */; };
 		7C6E46F72ECC4AA6005F7A3D /* MilitaryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46F42ECC4AA6005F7A3D /* MilitaryManager.swift */; };
+		7C6E46F92ECD09F2005F7A3D /* TerritoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46F82ECD09F2005F7A3D /* TerritoryManager.swift */; };
 		FB1BD9A2FE914F06F1F9D2BC /* CustomAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61D83AE85A5956CC2FFCB315 /* CustomAlert.swift */; };
 /* End PBXBuildFile section */
 
@@ -193,6 +194,7 @@
 		7C6E46EF2ECC4970005F7A3D /* War.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = War.swift; sourceTree = "<group>"; };
 		7C6E46F42ECC4AA6005F7A3D /* MilitaryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MilitaryManager.swift; sourceTree = "<group>"; };
 		7C6E46F52ECC4AA6005F7A3D /* WarEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarEngine.swift; sourceTree = "<group>"; };
+		7C6E46F82ECD09F2005F7A3D /* TerritoryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerritoryManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -277,6 +279,7 @@
 		312 /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
+				7C6E46F82ECD09F2005F7A3D /* TerritoryManager.swift */,
 				7C6E46F42ECC4AA6005F7A3D /* MilitaryManager.swift */,
 				7C6E46F52ECC4AA6005F7A3D /* WarEngine.swift */,
 				7C6E46E32ECAB919005F7A3D /* GovernmentStatsManager.swift */,
@@ -617,6 +620,7 @@
 				016 /* StatCard.swift in Sources */,
 				7C6E46D42EC965C4005F7A3D /* TreasuryView.swift in Sources */,
 				017 /* InfoCard.swift in Sources */,
+				7C6E46F92ECD09F2005F7A3D /* TerritoryManager.swift in Sources */,
 				018 /* ProgressBar.swift in Sources */,
 				019 /* Badge.swift in Sources */,
 				7C6E46D12EC965B7005F7A3D /* TreasuryManager.swift in Sources */,
