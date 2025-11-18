@@ -98,6 +98,11 @@
 		7C6E46F62ECC4AA6005F7A3D /* WarEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46F52ECC4AA6005F7A3D /* WarEngine.swift */; };
 		7C6E46F72ECC4AA6005F7A3D /* MilitaryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46F42ECC4AA6005F7A3D /* MilitaryManager.swift */; };
 		7C6E46F92ECD09F2005F7A3D /* TerritoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46F82ECD09F2005F7A3D /* TerritoryManager.swift */; };
+		7C6E47002ECD0F04005F7A3D /* WarRoomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46FE2ECD0F04005F7A3D /* WarRoomView.swift */; };
+		7C6E47012ECD0F04005F7A3D /* TerritoryManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46FD2ECD0F04005F7A3D /* TerritoryManagementView.swift */; };
+		7C6E47022ECD0F04005F7A3D /* TechnologyResearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46FC2ECD0F04005F7A3D /* TechnologyResearchView.swift */; };
+		7C6E47032ECD0F04005F7A3D /* ActiveWarsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46FA2ECD0F04005F7A3D /* ActiveWarsView.swift */; };
+		7C6E47042ECD0F04005F7A3D /* MilitaryOverviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46FB2ECD0F04005F7A3D /* MilitaryOverviewView.swift */; };
 		FB1BD9A2FE914F06F1F9D2BC /* CustomAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61D83AE85A5956CC2FFCB315 /* CustomAlert.swift */; };
 /* End PBXBuildFile section */
 
@@ -195,6 +200,11 @@
 		7C6E46F42ECC4AA6005F7A3D /* MilitaryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MilitaryManager.swift; sourceTree = "<group>"; };
 		7C6E46F52ECC4AA6005F7A3D /* WarEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarEngine.swift; sourceTree = "<group>"; };
 		7C6E46F82ECD09F2005F7A3D /* TerritoryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerritoryManager.swift; sourceTree = "<group>"; };
+		7C6E46FA2ECD0F04005F7A3D /* ActiveWarsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveWarsView.swift; sourceTree = "<group>"; };
+		7C6E46FB2ECD0F04005F7A3D /* MilitaryOverviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MilitaryOverviewView.swift; sourceTree = "<group>"; };
+		7C6E46FC2ECD0F04005F7A3D /* TechnologyResearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TechnologyResearchView.swift; sourceTree = "<group>"; };
+		7C6E46FD2ECD0F04005F7A3D /* TerritoryManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerritoryManagementView.swift; sourceTree = "<group>"; };
+		7C6E46FE2ECD0F04005F7A3D /* WarRoomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarRoomView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -308,6 +318,7 @@
 		313 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				7C6E46FF2ECD0F04005F7A3D /* WarRoom */,
 				7C6E46EA2ECAD875005F7A3D /* GameOverView.swift */,
 				7C6E46E62ECAB931005F7A3D /* GovernmentStats */,
 				7C6E46D32EC965C4005F7A3D /* Treasury */,
@@ -523,6 +534,18 @@
 			path = GovernmentStats;
 			sourceTree = "<group>";
 		};
+		7C6E46FF2ECD0F04005F7A3D /* WarRoom */ = {
+			isa = PBXGroup;
+			children = (
+				7C6E46FA2ECD0F04005F7A3D /* ActiveWarsView.swift */,
+				7C6E46FB2ECD0F04005F7A3D /* MilitaryOverviewView.swift */,
+				7C6E46FC2ECD0F04005F7A3D /* TechnologyResearchView.swift */,
+				7C6E46FD2ECD0F04005F7A3D /* TerritoryManagementView.swift */,
+				7C6E46FE2ECD0F04005F7A3D /* WarRoomView.swift */,
+			);
+			path = WarRoom;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -613,6 +636,11 @@
 				012 /* NavigationManager.swift in Sources */,
 				013 /* Constants.swift in Sources */,
 				7C6E45122EC5530A005F7A3D /* ElectionManager.swift in Sources */,
+				7C6E47002ECD0F04005F7A3D /* WarRoomView.swift in Sources */,
+				7C6E47012ECD0F04005F7A3D /* TerritoryManagementView.swift in Sources */,
+				7C6E47022ECD0F04005F7A3D /* TechnologyResearchView.swift in Sources */,
+				7C6E47032ECD0F04005F7A3D /* ActiveWarsView.swift in Sources */,
+				7C6E47042ECD0F04005F7A3D /* MilitaryOverviewView.swift in Sources */,
 				7C6E45472EC684EA005F7A3D /* EnrollmentSheet.swift in Sources */,
 				7C6E45482EC684EA005F7A3D /* EducationView.swift in Sources */,
 				7C6E452D2EC5854E005F7A3D /* LawsView.swift in Sources */,

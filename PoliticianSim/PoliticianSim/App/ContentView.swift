@@ -66,6 +66,8 @@ struct MainGameRouter: View {
                     PublicOpinionView()
                 case .economy:
                     EconomicDataView()
+                case .warRoom:
+                    WarRoomView()
                 default:
                     // Placeholder for other views
                     PlaceholderView(viewName: gameManager.navigationManager.currentView.rawValue)
