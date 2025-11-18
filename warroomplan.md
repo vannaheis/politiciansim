@@ -2,1013 +2,1233 @@
 
 ## 🎯 Overview
 
-The War Room is a strategic command center feature where players manage crises, coordinate emergency responses, and make critical decisions under time pressure. It combines crisis management, strategic planning, and executive decision-making into a high-stakes gameplay system.
+The War Room is a comprehensive military warfare and defense system exclusively for **Presidents**. It encompasses offensive and defensive wars, proxy conflicts, counter-insurgency operations, military technology research, territory conquest, nuclear weapons, and civil war suppression.
+
+This system transforms the game into a full geopolitical strategy simulator where military power, technological advancement, and territorial expansion become central to presidential gameplay.
 
 ---
 
-## 📋 Complete Implementation Phases
+## 📋 Core Design Principles
 
-### **Phase 1: Core Data Models**
+### Access Control
+- **President-only feature** - Only accessible at position level 6
+- Governors cannot access (no state independence wars in this version)
+- Lower positions have no military authority
 
-#### 1.1 Create `Crisis.swift`
-**Location**: `PoliticianSim/PoliticianSim/Models/Crisis.swift`
+### War Types
+1. **Defensive Wars** - Nation is attacked, must respond
+2. **Offensive Wars** - Player declares war on another nation
+3. **Proxy Wars** - Support allies without direct involvement
+4. **Counter-Insurgency** - Suppress internal rebellions and civil wars
+
+### Military Management
+Players control:
+- **Troop Levels** (manpower count)
+- **Military Budget** (determines overall strength)
+- **Draft/Conscription** (volunteer vs. mandatory service)
+- **Technology Research** (10 military tech categories)
+- **Nuclear Arsenal** (ICBMs, warheads, deterrence)
+
+---
+
+## 🏗️ Complete Implementation Phases
+
+### **Phase 1: Military & Technology Foundation**
+
+#### 1.1 Military Stats Model
+**Location**: `PoliticianSim/PoliticianSim/Models/MilitaryStats.swift`
 
 ```swift
 //
-//  Crisis.swift
+//  MilitaryStats.swift
 //  PoliticianSim
 //
-//  Crisis model for War Room system
+//  Military statistics and capabilities
 //
 
 import Foundation
 
-struct Crisis: Codable, Identifiable {
+struct MilitaryStats: Codable {
+    var strength: Int              // Abstract military power (0-1,000,000)
+    var manpower: Int              // Active duty personnel
+    var recruitmentType: RecruitmentType
+    var technologyLevels: [TechCategory: Int] = [:]  // 1-10 per category
+    var nuclearArsenal: NuclearArsenal
+
+    enum RecruitmentType: String, Codable {
+        case volunteer = "Volunteer"
+        case conscription = "Conscription"
+
+        var manpowerBonus: Double {
+            switch self {
+            case .volunteer: return 1.0
+            case .conscription: return 2.5  // 2.5x more troops with draft
+            }
+        }
+
+        var approvalPenalty: Double {
+            switch self {
+            case .volunteer: return 0
+            case .conscription: return -15  // -15 approval for draft
+            }
+        }
+    }
+
+    init(
+        strength: Int = 100000,
+        manpower: Int = 500000,
+        recruitmentType: RecruitmentType = .volunteer,
+        technologyLevels: [TechCategory: Int] = [:],
+        nuclearArsenal: NuclearArsenal = NuclearArsenal()
+    ) {
+        self.strength = strength
+        self.manpower = manpower
+        self.recruitmentType = recruitmentType
+        self.technologyLevels = technologyLevels
+        self.nuclearArsenal = nuclearArsenal
+    }
+}
+
+enum TechCategory: String, Codable, CaseIterable {
+    case infantryWeapons = "Infantry Weapons"
+    case armoredVehicles = "Armored Vehicles"
+    case navalPower = "Naval Power"
+    case airSuperiority = "Air Superiority"
+    case missileSystems = "Missile Systems"
+    case cyberWarfare = "Cyber Warfare"
+    case logistics = "Logistics"
+    case medicalTech = "Medical Tech"
+    case intelligence = "Intelligence"
+    case nuclearWeapons = "Nuclear Weapons"
+
+    var icon: String {
+        switch self {
+        case .infantryWeapons: return "rifle.fill"
+        case .armoredVehicles: return "tank.fill"
+        case .navalPower: return "ferry.fill"
+        case .airSuperiority: return "airplane"
+        case .missileSystems: return "rocket.fill"
+        case .cyberWarfare: return "network"
+        case .logistics: return "shippingbox.fill"
+        case .medicalTech: return "cross.case.fill"
+        case .intelligence: return "eye.fill"
+        case .nuclearWeapons: return "atom"
+        }
+    }
+
+    var strengthMultiplier: Double {
+        switch self {
+        case .infantryWeapons: return 1.2
+        case .armoredVehicles: return 1.5
+        case .navalPower: return 1.3
+        case .airSuperiority: return 1.8
+        case .missileSystems: return 1.6
+        case .cyberWarfare: return 1.1
+        case .logistics: return 1.4
+        case .medicalTech: return 1.0
+        case .intelligence: return 1.2
+        case .nuclearWeapons: return 3.0
+        }
+    }
+}
+
+struct NuclearArsenal: Codable {
+    var warheadCount: Int = 0
+    var icbmCount: Int = 0
+    var hasFirstStrikeCapability: Bool = false
+    var hasSecondStrikeCapability: Bool = false  // Submarine-based
+
+    var deterrenceValue: Int {
+        return warheadCount * 100 + (hasSecondStrikeCapability ? 50000 : 0)
+    }
+}
+```
+
+#### 1.2 Technology Research Model
+**Location**: `PoliticianSim/PoliticianSim/Models/TechnologyResearch.swift`
+
+```swift
+//
+//  TechnologyResearch.swift
+//  PoliticianSim
+//
+//  Military technology research system
+//
+
+import Foundation
+
+struct TechResearch: Codable, Identifiable {
     let id: UUID
-    var title: String
-    var description: String
-    var category: CrisisCategory
-    var severity: CrisisSeverity
-    var startDate: Date
-    var expiryDate: Date?  // Deadline for action (nil = no deadline)
-    var status: CrisisStatus
-    var affectedDepartments: [Department.DepartmentCategory]
-    var potentialImpacts: CrisisImpacts
-    var availableResponses: [CrisisResponse]
-    var chosenResponse: CrisisResponse?
-    var responseStartDate: Date?
-    var progressPercentage: Double  // 0-100 (for active responses)
+    let category: TechCategory
+    let currentLevel: Int          // 1-10
+    let targetLevel: Int
+    var progress: Double           // 0.0-1.0
+    var researchStartDate: Date?
+    var estimatedCompletion: Date?
+
+    var isComplete: Bool {
+        return progress >= 1.0
+    }
+
+    var costToNextLevel: Decimal {
+        // Cost increases exponentially
+        let baseCost: Decimal = 50_000_000_000  // $50B base
+        let levelMultiplier = Decimal(pow(1.5, Double(targetLevel)))
+        return baseCost * levelMultiplier
+    }
+
+    var timeToComplete: Int {
+        // Days required (180-540 days based on level)
+        return 180 + (targetLevel * 36)
+    }
 
     init(
         id: UUID = UUID(),
-        title: String,
-        description: String,
-        category: CrisisCategory,
-        severity: CrisisSeverity,
-        startDate: Date,
-        expiryDate: Date? = nil,
-        status: CrisisStatus = .developing,
-        affectedDepartments: [Department.DepartmentCategory],
-        potentialImpacts: CrisisImpacts,
-        availableResponses: [CrisisResponse],
-        chosenResponse: CrisisResponse? = nil,
-        responseStartDate: Date? = nil,
-        progressPercentage: Double = 0.0
+        category: TechCategory,
+        currentLevel: Int,
+        targetLevel: Int,
+        progress: Double = 0.0,
+        researchStartDate: Date? = nil,
+        estimatedCompletion: Date? = nil
     ) {
         self.id = id
-        self.title = title
-        self.description = description
         self.category = category
-        self.severity = severity
-        self.startDate = startDate
-        self.expiryDate = expiryDate
-        self.status = status
-        self.affectedDepartments = affectedDepartments
-        self.potentialImpacts = potentialImpacts
-        self.availableResponses = availableResponses
-        self.chosenResponse = chosenResponse
-        self.responseStartDate = responseStartDate
-        self.progressPercentage = progressPercentage
-    }
-
-    enum CrisisCategory: String, Codable, CaseIterable {
-        case economic = "Economic"
-        case health = "Health"
-        case natural = "Natural Disaster"
-        case security = "Security"
-        case diplomatic = "Diplomatic"
-        case social = "Social"
-        case environmental = "Environmental"
-        case infrastructure = "Infrastructure"
-
-        var icon: String {
-            switch self {
-            case .economic: return "chart.line.downtrend.xyaxis"
-            case .health: return "cross.case.fill"
-            case .natural: return "cloud.bolt.rain.fill"
-            case .security: return "shield.slash.fill"
-            case .diplomatic: return "globe.americas.fill"
-            case .social: return "person.3.fill"
-            case .environmental: return "leaf.fill"
-            case .infrastructure: return "building.2.fill"
-            }
-        }
-
-        var color: (red: Double, green: Double, blue: Double) {
-            switch self {
-            case .economic: return (1.0, 0.3, 0.3)
-            case .health: return (1.0, 0.3, 0.3)
-            case .natural: return (0.3, 0.6, 1.0)
-            case .security: return (0.7, 0.2, 0.2)
-            case .diplomatic: return (0.6, 0.4, 0.8)
-            case .social: return (1.0, 0.6, 0.8)
-            case .environmental: return (0.2, 0.8, 0.2)
-            case .infrastructure: return (0.8, 0.5, 0.2)
-            }
-        }
-    }
-
-    enum CrisisSeverity: String, Codable {
-        case minor = "Minor"
-        case moderate = "Moderate"
-        case severe = "Severe"
-        case critical = "Critical"
-
-        var icon: String {
-            switch self {
-            case .minor: return "exclamationmark.circle.fill"
-            case .moderate: return "exclamationmark.triangle.fill"
-            case .severe: return "exclamationmark.octagon.fill"
-            case .critical: return "exclamationmark.shield.fill"
-            }
-        }
-
-        var color: (red: Double, green: Double, blue: Double) {
-            switch self {
-            case .minor: return (0.9, 0.9, 0.2)      // Yellow
-            case .moderate: return (1.0, 0.6, 0.0)   // Orange
-            case .severe: return (1.0, 0.3, 0.3)     // Red
-            case .critical: return (0.6, 0.0, 0.0)   // Dark Red
-            }
-        }
-    }
-
-    enum CrisisStatus: String, Codable {
-        case developing = "Developing"
-        case active = "Active Response"
-        case contained = "Contained"
-        case resolved = "Resolved"
-        case failed = "Failed"
-    }
-}
-
-struct CrisisImpacts: Codable {
-    var gdpImpact: Double              // Negative percentage (e.g., -0.05 = -5%)
-    var approvalImpact: Double         // Negative points (e.g., -15)
-    var departmentImpacts: [Department.DepartmentCategory: Double]  // Score changes
-    var casualties: Int?               // For severe crises (deaths)
-    var economicCost: Decimal          // Dollar cost in billions
-    var internationalRelationsImpact: Double  // -20 to 0
-}
-
-struct CrisisResponse: Codable, Identifiable {
-    let id: UUID
-    var title: String
-    var description: String
-    var requiredFunds: Decimal         // Implementation cost
-    var requiredDepartments: [Department.DepartmentCategory]
-    var executionTime: Int             // Days to complete
-    var baseProbability: Double        // Base success rate (0-1)
-    var outcomes: ResponseOutcomes
-
-    init(
-        id: UUID = UUID(),
-        title: String,
-        description: String,
-        requiredFunds: Decimal,
-        requiredDepartments: [Department.DepartmentCategory],
-        executionTime: Int,
-        baseProbability: Double,
-        outcomes: ResponseOutcomes
-    ) {
-        self.id = id
-        self.title = title
-        self.description = description
-        self.requiredFunds = requiredFunds
-        self.requiredDepartments = requiredDepartments
-        self.executionTime = executionTime
-        self.baseProbability = baseProbability
-        self.outcomes = outcomes
-    }
-
-    struct ResponseOutcomes: Codable {
-        var bestCase: OutcomeEffects
-        var expectedCase: OutcomeEffects
-        var worstCase: OutcomeEffects
-    }
-}
-
-struct OutcomeEffects: Codable {
-    var approvalChange: Double
-    var reputationChange: Int
-    var gdpImpact: Double
-    var stressChange: Int
-    var fundsChange: Decimal
-    var departmentImpacts: [Department.DepartmentCategory: Double]
-    var casualties: Int  // Lives saved/lost
-}
-```
-
-#### 1.2 Create `WarRoomState.swift`
-**Location**: `PoliticianSim/PoliticianSim/Models/WarRoomState.swift`
-
-```swift
-//
-//  WarRoomState.swift
-//  PoliticianSim
-//
-//  War Room state tracking
-//
-
-import Foundation
-
-struct WarRoomState: Codable {
-    var activeCrises: [Crisis] = []
-    var resolvedCrises: [Crisis] = []
-    var failedCrises: [Crisis] = []
-    var totalCrisesHandled: Int = 0
-    var successfulResolutions: Int = 0
-    var lastCrisisDate: Date?
-
-    // Alert levels
-    var nationalThreatLevel: ThreatLevel = .green
-
-    var successRate: Double {
-        guard totalCrisesHandled > 0 else { return 0.0 }
-        return (Double(successfulResolutions) / Double(totalCrisesHandled)) * 100.0
-    }
-
-    enum ThreatLevel: String, Codable {
-        case green = "Normal"
-        case yellow = "Elevated"
-        case orange = "High"
-        case red = "Severe"
-        case black = "Critical"
-
-        var icon: String {
-            switch self {
-            case .green: return "checkmark.shield.fill"
-            case .yellow: return "exclamationmark.shield.fill"
-            case .orange: return "exclamationmark.triangle.fill"
-            case .red: return "exclamationmark.octagon.fill"
-            case .black: return "xmark.shield.fill"
-            }
-        }
-
-        var color: (red: Double, green: Double, blue: Double) {
-            switch self {
-            case .green: return (0.2, 0.8, 0.2)
-            case .yellow: return (0.9, 0.9, 0.2)
-            case .orange: return (1.0, 0.6, 0.0)
-            case .red: return (1.0, 0.3, 0.3)
-            case .black: return (0.6, 0.0, 0.0)
-            }
-        }
+        self.currentLevel = currentLevel
+        self.targetLevel = targetLevel
+        self.progress = progress
+        self.researchStartDate = researchStartDate
+        self.estimatedCompletion = estimatedCompletion
     }
 }
 ```
 
----
-
-### **Phase 2: Business Logic Manager**
-
-#### 2.1 Create `WarRoomManager.swift`
-**Location**: `PoliticianSim/PoliticianSim/ViewModels/WarRoomManager.swift`
-
-**Key Responsibilities**:
-- Generate crises based on position level and game state
-- Manage crisis lifecycle (developing → active → resolved/failed)
-- Calculate success probabilities based on character attributes
-- Apply crisis effects to game systems
-- Track threat levels
-
-**Implementation Details**:
+#### 1.3 Military Manager
+**Location**: `PoliticianSim/PoliticianSim/ViewModels/MilitaryManager.swift`
 
 ```swift
 //
-//  WarRoomManager.swift
+//  MilitaryManager.swift
 //  PoliticianSim
 //
-//  Manages crisis generation, responses, and resolution
+//  Manages military stats, technology research, and strength calculation
 //
 
 import Foundation
 import Combine
 
-class WarRoomManager: ObservableObject {
-    @Published var warRoomState: WarRoomState
+class MilitaryManager: ObservableObject {
+    @Published var militaryStats: MilitaryStats
+    @Published var activeResearch: [TechResearch] = []
+    @Published var completedResearch: [TechResearch] = []
 
     init() {
-        self.warRoomState = WarRoomState()
-    }
+        // Initialize with base military stats
+        self.militaryStats = MilitaryStats()
 
-    // MARK: - Crisis Generation
-
-    /// Checks if a crisis should be generated based on position and time
-    func checkForCrisisOpportunity(character: Character) -> Crisis? {
-        // Crisis frequency based on position level
-        let crisisChance = getCrisisChance(position: character.currentPosition)
-
-        // Random check
-        if Double.random(in: 0...1) > crisisChance {
-            return nil
-        }
-
-        // Generate random crisis
-        return generateRandomCrisis(character: character)
-    }
-
-    private func getCrisisChance(position: Position?) -> Double {
-        guard let position = position else { return 0.001 } // Very low for non-officials
-
-        // Weekly crisis probability by position level
-        switch position.level {
-        case 1: return 0.01  // ~1 crisis per 2 years (local)
-        case 2: return 0.02  // ~1 crisis per year (local)
-        case 3: return 0.04  // ~2 crises per year (state)
-        case 4: return 0.08  // ~4 crises per year (governor)
-        case 5: return 0.12  // ~6 crises per year (senator)
-        case 6: return 0.20  // ~10 crises per year (president)
-        default: return 0.05
+        // Initialize all tech categories at level 1
+        for category in TechCategory.allCases {
+            militaryStats.technologyLevels[category] = 1
         }
     }
 
-    func generateRandomCrisis(character: Character) -> Crisis {
-        // Randomly select severity (weighted)
-        let severity = randomSeverity()
-        let category = Crisis.CrisisCategory.allCases.randomElement()!
+    // MARK: - Strength Calculation
 
-        // Get template based on category and severity
-        let template = getCrisisTemplate(category: category, severity: severity)
+    /// Calculates total military strength based on manpower, tech, and budget
+    func calculateMilitaryStrength(
+        manpower: Int,
+        techLevels: [TechCategory: Int],
+        militaryBudget: Decimal
+    ) -> Int {
+        // Base strength from manpower
+        let manpowerStrength = Double(manpower) * 0.5
 
-        // Set start date and expiry based on severity
-        let startDate = character.currentDate
-        let expiryDate = getExpiryDate(severity: severity, startDate: startDate)
+        // Tech bonus (average tech level × 10000)
+        let avgTechLevel = techLevels.values.reduce(0, +) / max(1, techLevels.count)
+        let techBonus = Double(avgTechLevel) * 10000.0
 
-        return Crisis(
-            title: template.title,
-            description: template.description,
-            category: category,
-            severity: severity,
-            startDate: startDate,
-            expiryDate: expiryDate,
-            affectedDepartments: template.affectedDepartments,
-            potentialImpacts: template.potentialImpacts,
-            availableResponses: template.availableResponses
+        // Budget bonus ($100B = +10000 strength)
+        let budgetBonus = Double(truncating: militaryBudget as NSNumber) / 10_000_000_000.0
+
+        // Tech multipliers for advanced categories
+        var techMultiplier = 1.0
+        for (category, level) in techLevels {
+            let categoryBonus = (Double(level) / 10.0) * (category.strengthMultiplier - 1.0)
+            techMultiplier += categoryBonus
+        }
+
+        let totalStrength = (manpowerStrength + techBonus + budgetBonus) * techMultiplier
+
+        return Int(totalStrength)
+    }
+
+    func updateMilitaryStrength(militaryBudget: Decimal) {
+        militaryStats.strength = calculateMilitaryStrength(
+            manpower: militaryStats.manpower,
+            techLevels: militaryStats.technologyLevels,
+            militaryBudget: militaryBudget
         )
     }
 
-    private func randomSeverity() -> Crisis.CrisisSeverity {
-        let rand = Double.random(in: 0...1)
-        if rand < 0.60 {
-            return .minor
-        } else if rand < 0.85 {
-            return .moderate
-        } else if rand < 0.97 {
-            return .severe
+    // MARK: - Recruitment
+
+    func toggleConscription(character: inout Character) {
+        if militaryStats.recruitmentType == .volunteer {
+            militaryStats.recruitmentType = .conscription
+            // 2.5x manpower increase
+            militaryStats.manpower = Int(Double(militaryStats.manpower) * 2.5)
+            // Apply approval penalty
+            character.approvalRating = max(0, character.approvalRating - 15)
         } else {
-            return .critical
+            militaryStats.recruitmentType = .volunteer
+            // Return to base manpower
+            militaryStats.manpower = Int(Double(militaryStats.manpower) / 2.5)
+            // Restore approval
+            character.approvalRating = min(100, character.approvalRating + 10)
         }
     }
 
-    private func getExpiryDate(severity: Crisis.CrisisSeverity, startDate: Date) -> Date? {
-        let calendar = Calendar.current
+    // MARK: - Technology Research
 
-        switch severity {
-        case .minor:
-            return nil  // No deadline
-        case .moderate:
-            return calendar.date(byAdding: .day, value: 21, to: startDate)  // 3 weeks
-        case .severe:
-            return calendar.date(byAdding: .day, value: 5, to: startDate)  // 5 days
-        case .critical:
-            return calendar.date(byAdding: .day, value: 2, to: startDate)  // 2 days
+    func startResearch(
+        category: TechCategory,
+        character: Character
+    ) -> (success: Bool, message: String) {
+        let currentLevel = militaryStats.technologyLevels[category] ?? 1
+
+        guard currentLevel < 10 else {
+            return (false, "Technology already at maximum level.")
+        }
+
+        // Check if already researching this category
+        if activeResearch.contains(where: { $0.category == category }) {
+            return (false, "Already researching this technology.")
+        }
+
+        let research = TechResearch(
+            category: category,
+            currentLevel: currentLevel,
+            targetLevel: currentLevel + 1
+        )
+
+        // Check funds
+        guard character.campaignFunds >= research.costToNextLevel else {
+            return (false, "Insufficient funds. Need $\(research.costToNextLevel)B")
+        }
+
+        var newResearch = research
+        newResearch.researchStartDate = character.currentDate
+        newResearch.estimatedCompletion = Calendar.current.date(
+            byAdding: .day,
+            value: research.timeToComplete,
+            to: character.currentDate
+        )
+
+        activeResearch.append(newResearch)
+
+        return (true, "Research started: \(category.rawValue) Level \(research.targetLevel)")
+    }
+
+    func updateResearchProgress(currentDate: Date) {
+        for i in 0..<activeResearch.count {
+            guard let startDate = activeResearch[i].researchStartDate else { continue }
+
+            let elapsed = Calendar.current.dateComponents([.day], from: startDate, to: currentDate).day ?? 0
+            let totalDays = activeResearch[i].timeToComplete
+
+            activeResearch[i].progress = min(1.0, Double(elapsed) / Double(totalDays))
+
+            // Check completion
+            if activeResearch[i].progress >= 1.0 {
+                completeResearch(index: i)
+            }
         }
     }
 
-    // MARK: - Crisis Management
+    private func completeResearch(index: Int) {
+        guard index < activeResearch.count else { return }
 
-    func activateCrisis(_ crisis: Crisis) {
-        var newCrisis = crisis
-        newCrisis.status = .developing
-        warRoomState.activeCrises.append(newCrisis)
-        warRoomState.lastCrisisDate = crisis.startDate
-        updateThreatLevel()
+        var research = activeResearch[index]
+        research.progress = 1.0
+
+        // Upgrade tech level
+        militaryStats.technologyLevels[research.category] = research.targetLevel
+
+        // Move to completed
+        completedResearch.append(research)
+        activeResearch.remove(at: index)
+
+        // Nuclear weapons unlock arsenal
+        if research.category == .nuclearWeapons && research.targetLevel >= 5 {
+            unlockNuclearCapability()
+        }
     }
 
-    func respondToCrisis(
-        crisisId: UUID,
-        response: CrisisResponse,
+    // MARK: - Nuclear Weapons
+
+    private func unlockNuclearCapability() {
+        militaryStats.nuclearArsenal.hasFirstStrikeCapability = true
+
+        if militaryStats.technologyLevels[.nuclearWeapons] ?? 0 >= 8 {
+            militaryStats.nuclearArsenal.hasSecondStrikeCapability = true
+        }
+    }
+
+    func buildNuclearWarheads(
+        count: Int,
         character: inout Character
     ) -> (success: Bool, message: String) {
-        guard let index = warRoomState.activeCrises.firstIndex(where: { $0.id == crisisId }) else {
-            return (false, "Crisis not found.")
+        guard militaryStats.technologyLevels[.nuclearWeapons] ?? 0 >= 5 else {
+            return (false, "Nuclear Weapons tech must be level 5+")
         }
 
-        var crisis = warRoomState.activeCrises[index]
+        let costPerWarhead: Decimal = 5_000_000_000  // $5B each
+        let totalCost = costPerWarhead * Decimal(count)
 
-        // Check if player has enough funds
-        if character.campaignFunds < response.requiredFunds {
-            return (false, "Insufficient funds for this response.")
+        guard character.campaignFunds >= totalCost else {
+            return (false, "Insufficient funds. Need $\(totalCost)")
         }
 
-        // Deduct funds
-        character.campaignFunds -= response.requiredFunds
+        character.campaignFunds -= totalCost
+        militaryStats.nuclearArsenal.warheadCount += count
 
-        // Set response as chosen
-        crisis.chosenResponse = response
-        crisis.responseStartDate = character.currentDate
-        crisis.status = .active
-        crisis.progressPercentage = 0.0
+        // International condemnation
+        character.approvalRating = max(0, character.approvalRating - Double(count) * 2.0)
 
-        warRoomState.activeCrises[index] = crisis
-
-        return (true, "Response initiated: \(response.title)")
+        return (true, "Built \(count) nuclear warheads. Total arsenal: \(militaryStats.nuclearArsenal.warheadCount)")
     }
 
-    func updateCrisisProgress(character: Character, currentDate: Date) {
-        for i in 0..<warRoomState.activeCrises.count {
-            var crisis = warRoomState.activeCrises[i]
-
-            // Check if crisis has expired without response
-            if crisis.status == .developing, let expiryDate = crisis.expiryDate {
-                if currentDate >= expiryDate {
-                    failCrisis(index: i, character: character)
-                    continue
-                }
-            }
-
-            // Update progress for active responses
-            if crisis.status == .active,
-               let response = crisis.chosenResponse,
-               let startDate = crisis.responseStartDate {
-
-                let daysElapsed = Calendar.current.dateComponents([.day], from: startDate, to: currentDate).day ?? 0
-                let progress = (Double(daysElapsed) / Double(response.executionTime)) * 100.0
-                crisis.progressPercentage = min(100.0, progress)
-
-                // Check if response is complete
-                if daysElapsed >= response.executionTime {
-                    resolveCrisis(index: i, character: character)
-                } else {
-                    warRoomState.activeCrises[i] = crisis
-                }
-            }
+    func buildICBM(
+        count: Int,
+        character: inout Character
+    ) -> (success: Bool, message: String) {
+        guard militaryStats.technologyLevels[.missileSystems] ?? 0 >= 6 else {
+            return (false, "Missile Systems tech must be level 6+")
         }
 
-        updateThreatLevel()
-    }
+        let costPerICBM: Decimal = 10_000_000_000  // $10B each
+        let totalCost = costPerICBM * Decimal(count)
 
-    private func resolveCrisis(index: Int, character: Character) {
-        guard index < warRoomState.activeCrises.count else { return }
-
-        var crisis = warRoomState.activeCrises[index]
-        guard let response = crisis.chosenResponse else { return }
-
-        // Calculate success based on probability
-        let successProb = calculateSuccessProbability(response: response, character: character, crisis: crisis)
-        let roll = Double.random(in: 0...1)
-
-        let outcome: OutcomeEffects
-        if roll < successProb * 0.3 {
-            // Best case (30% of success range)
-            outcome = response.outcomes.bestCase
-            crisis.status = .resolved
-        } else if roll < successProb {
-            // Expected case (rest of success range)
-            outcome = response.outcomes.expectedCase
-            crisis.status = .resolved
-        } else {
-            // Worst case (failure)
-            outcome = response.outcomes.worstCase
-            crisis.status = .failed
+        guard character.campaignFunds >= totalCost else {
+            return (false, "Insufficient funds. Need $\(totalCost)")
         }
 
-        // Apply outcome effects (will be handled by GameManager)
-        // For now, just update crisis status
+        character.campaignFunds -= totalCost
+        militaryStats.nuclearArsenal.icbmCount += count
 
-        if crisis.status == .resolved {
-            warRoomState.successfulResolutions += 1
-            warRoomState.resolvedCrises.append(crisis)
-        } else {
-            warRoomState.failedCrises.append(crisis)
-        }
-
-        warRoomState.totalCrisesHandled += 1
-        warRoomState.activeCrises.remove(at: index)
-    }
-
-    private func failCrisis(index: Int, character: Character) {
-        guard index < warRoomState.activeCrises.count else { return }
-
-        var crisis = warRoomState.activeCrises[index]
-        crisis.status = .failed
-
-        // Apply full negative impacts
-        // (will be handled by GameManager)
-
-        warRoomState.failedCrises.append(crisis)
-        warRoomState.totalCrisesHandled += 1
-        warRoomState.activeCrises.remove(at: index)
-    }
-
-    // MARK: - Success Probability
-
-    func calculateSuccessProbability(
-        response: CrisisResponse,
-        character: Character,
-        crisis: Crisis
-    ) -> Double {
-        var probability = response.baseProbability
-
-        // Character attribute bonuses
-        let intelligenceBonus = Double(character.intelligence) * 0.002  // +0.2 at 100
-        let charismaBonus = Double(character.charisma) * 0.001         // +0.1 at 100
-        let diplomacyBonus = Double(character.diplomacy) * 0.001       // +0.1 at 100
-
-        // Stress penalty
-        let stressPenalty = Double(character.stress) * -0.001  // -0.1 at 100 stress
-
-        probability += intelligenceBonus + charismaBonus + diplomacyBonus + stressPenalty
-
-        // Clamp between 5% and 95%
-        return min(0.95, max(0.05, probability))
-    }
-
-    // MARK: - Threat Level
-
-    func updateThreatLevel() {
-        let activeCrises = warRoomState.activeCrises
-
-        if activeCrises.isEmpty {
-            warRoomState.nationalThreatLevel = .green
-            return
-        }
-
-        // Count crises by severity
-        let criticalCount = activeCrises.filter { $0.severity == .critical }.count
-        let severeCount = activeCrises.filter { $0.severity == .severe }.count
-        let moderateCount = activeCrises.filter { $0.severity == .moderate }.count
-
-        // Determine threat level
-        if criticalCount >= 1 || severeCount >= 3 {
-            warRoomState.nationalThreatLevel = .black
-        } else if severeCount >= 2 || moderateCount >= 4 {
-            warRoomState.nationalThreatLevel = .red
-        } else if severeCount >= 1 || moderateCount >= 2 {
-            warRoomState.nationalThreatLevel = .orange
-        } else if moderateCount >= 1 || activeCrises.count >= 3 {
-            warRoomState.nationalThreatLevel = .yellow
-        } else {
-            warRoomState.nationalThreatLevel = .green
-        }
-    }
-
-    // MARK: - Crisis Templates (stub - will implement in Phase 5)
-
-    private func getCrisisTemplate(category: Crisis.CrisisCategory, severity: Crisis.CrisisSeverity) -> Crisis {
-        // Placeholder - will be populated with real templates
-        return Crisis(
-            title: "Sample \(severity.rawValue) \(category.rawValue) Crisis",
-            description: "This is a placeholder crisis.",
-            category: category,
-            severity: severity,
-            startDate: Date(),
-            affectedDepartments: [.infrastructure],
-            potentialImpacts: CrisisImpacts(
-                gdpImpact: -0.01,
-                approvalImpact: -5,
-                departmentImpacts: [:],
-                casualties: nil,
-                economicCost: 10_000_000_000,
-                internationalRelationsImpact: 0
-            ),
-            availableResponses: []
-        )
+        return (true, "Built \(count) ICBMs. Total: \(militaryStats.nuclearArsenal.icbmCount)")
     }
 }
 ```
 
 ---
 
-### **Phase 3: UI Components**
+### **Phase 2: Warfare Engine**
 
-#### 3.1 Create `WarRoomView.swift`
+#### 2.1 War Model
+**Location**: `PoliticianSim/PoliticianSim/Models/War.swift`
+
+```swift
+//
+//  War.swift
+//  PoliticianSim
+//
+//  War state and configuration
+//
+
+import Foundation
+
+struct War: Codable, Identifiable {
+    let id: UUID
+    let attacker: Country
+    let defender: Country
+    let startDate: Date
+    var endDate: Date?
+    var type: WarType
+    var justification: WarJustification
+    var duration: Int                                      // Days
+    var attackerStrength: Int
+    var defenderStrength: Int
+    var casualtiesByCountry: [String: Int] = [:]          // country code → casualties
+    var costByCountry: [String: Decimal] = [:]            // country code → $ spent
+    var isActive: Bool = true
+    var winner: Country?
+    var currentStrategy: WarStrategy = .balanced
+    var territoryGained: Double = 0.0                     // Percentage
+
+    enum WarType: String, Codable {
+        case defensive = "Defensive"
+        case offensive = "Offensive"
+        case proxy = "Proxy"
+        case civil = "Civil War"
+    }
+
+    enum WarJustification: String, Codable {
+        case borderDispute = "Border Dispute"
+        case territorialClaim = "Territorial Claim"
+        case defensivePact = "Defensive Pact"
+        case regimeChange = "Regime Change"
+        case counterInsurgency = "Counter-Insurgency"
+        case noJustification = "No Justification"
+
+        var approvalPenalty: Double {
+            switch self {
+            case .borderDispute: return -10
+            case .territorialClaim: return -15
+            case .defensivePact: return 5  // Bonus for defending ally
+            case .regimeChange: return -25
+            case .counterInsurgency: return -5
+            case .noJustification: return -35
+            }
+        }
+    }
+
+    enum WarStrategy: String, Codable {
+        case aggressive = "Aggressive"
+        case balanced = "Balanced"
+        case defensive = "Defensive"
+        case attrition = "Attrition"
+
+        var casualtyMultiplier: Double {
+            switch self {
+            case .aggressive: return 1.8
+            case .balanced: return 1.0
+            case .defensive: return 0.6
+            case .attrition: return 0.4
+            }
+        }
+
+        var victorySpeedMultiplier: Double {
+            switch self {
+            case .aggressive: return 1.5
+            case .balanced: return 1.0
+            case .defensive: return 0.7
+            case .attrition: return 0.5
+            }
+        }
+    }
+
+    init(
+        id: UUID = UUID(),
+        attacker: Country,
+        defender: Country,
+        startDate: Date,
+        endDate: Date? = nil,
+        type: WarType,
+        justification: WarJustification,
+        duration: Int = 0,
+        attackerStrength: Int,
+        defenderStrength: Int
+    ) {
+        self.id = id
+        self.attacker = attacker
+        self.defender = defender
+        self.startDate = startDate
+        self.endDate = endDate
+        self.type = type
+        self.justification = justification
+        self.duration = duration
+        self.attackerStrength = attackerStrength
+        self.defenderStrength = defenderStrength
+    }
+}
+```
+
+#### 2.2 War Engine
+**Location**: `PoliticianSim/PoliticianSim/ViewModels/WarEngine.swift`
+
+```swift
+//
+//  WarEngine.swift
+//  PoliticianSim
+//
+//  Manages war declaration, simulation, and resolution
+//
+
+import Foundation
+import Combine
+
+class WarEngine: ObservableObject {
+    @Published var activeWars: [War] = []
+    @Published var completedWars: [War] = []
+
+    // MARK: - War Declaration
+
+    func declareWar(
+        attacker: Country,
+        defender: Country,
+        justification: War.WarJustification,
+        character: inout Character,
+        militaryManager: MilitaryManager
+    ) -> War {
+        let war = War(
+            id: UUID(),
+            attacker: attacker,
+            defender: defender,
+            startDate: character.currentDate,
+            type: .offensive,
+            justification: justification,
+            attackerStrength: militaryManager.militaryStats.strength,
+            defenderStrength: defender.militaryStrength
+        )
+
+        // Apply approval penalty based on justification
+        character.approvalRating = max(0, character.approvalRating + justification.approvalPenalty)
+
+        // Stress from war decision
+        character.stress = min(100, character.stress + 20)
+
+        activeWars.append(war)
+
+        return war
+    }
+
+    // MARK: - War Simulation
+
+    func simulateWarDay(war: inout War, currentDate: Date) {
+        war.duration += 1
+
+        // Calculate daily losses
+        let attackerLosses = calculateDailyLosses(
+            strength: war.attackerStrength,
+            opponentStrength: war.defenderStrength,
+            strategy: war.currentStrategy
+        )
+
+        let defenderLosses = calculateDailyLosses(
+            strength: war.defenderStrength,
+            opponentStrength: war.attackerStrength,
+            strategy: .balanced  // AI uses balanced
+        )
+
+        // Apply losses
+        war.attackerStrength -= attackerLosses
+        war.defenderStrength -= defenderLosses
+
+        // Track casualties
+        war.casualtiesByCountry[war.attacker.code, default: 0] += attackerLosses
+        war.casualtiesByCountry[war.defender.code, default: 0] += defenderLosses
+
+        // Daily war cost ($2B per day base)
+        let dailyCost: Decimal = 2_000_000_000
+        war.costByCountry[war.attacker.code, default: 0] += dailyCost
+        war.costByCountry[war.defender.code, default: 0] += dailyCost
+
+        // Check victory conditions
+        checkVictoryConditions(war: &war, currentDate: currentDate)
+    }
+
+    private func calculateDailyLosses(
+        strength: Int,
+        opponentStrength: Int,
+        strategy: War.WarStrategy
+    ) -> Int {
+        // Base attrition: 0.1% per day
+        let baseAttrition = Double(strength) * 0.001
+
+        // Strength ratio modifier
+        let strengthRatio = Double(opponentStrength) / Double(max(1, strength))
+
+        // Strategy modifier
+        let strategyMod = strategy.casualtyMultiplier
+
+        let totalLosses = Int(baseAttrition * strengthRatio * strategyMod)
+
+        return max(1, totalLosses)
+    }
+
+    private func checkVictoryConditions(war: inout War, currentDate: Date) {
+        // Victory if opponent reduced to 20% strength
+        if war.defenderStrength < Int(Double(war.attackerStrength) * 0.2) {
+            endWar(war: &war, winner: war.attacker, currentDate: currentDate)
+        } else if war.attackerStrength < Int(Double(war.defenderStrength) * 0.2) {
+            endWar(war: &war, winner: war.defender, currentDate: currentDate)
+        }
+
+        // Average duration: 240 days (8 months)
+        // Random chance to end after this point
+        if war.duration > 240 && Double.random(in: 0...1) > 0.95 {
+            let winner = war.attackerStrength > war.defenderStrength ? war.attacker : war.defender
+            endWar(war: &war, winner: winner, currentDate: currentDate)
+        }
+    }
+
+    // MARK: - War Resolution
+
+    func endWar(war: inout War, winner: Country, currentDate: Date) {
+        war.isActive = false
+        war.endDate = currentDate
+        war.winner = winner
+
+        // Calculate spoils
+        distributeSpoils(war: &war)
+
+        // Move to completed
+        if let index = activeWars.firstIndex(where: { $0.id == war.id }) {
+            completedWars.append(war)
+            activeWars.remove(at: index)
+        }
+    }
+
+    private func distributeSpoils(war: inout War) {
+        guard let winner = war.winner else { return }
+
+        let loser = winner.code == war.attacker.code ? war.defender : war.attacker
+
+        // Territory gain: 10-40% based on strength ratio
+        let strengthRatio = Double(winner.militaryStrength) / Double(max(1, loser.militaryStrength))
+        let territoryGainPercentage = min(0.4, 0.1 + (strengthRatio - 1.0) * 0.15)
+
+        war.territoryGained = territoryGainPercentage
+
+        // Reparations: 10-30% of loser's treasury
+        // (This will be applied by GameManager)
+    }
+
+    // MARK: - Strategy Changes
+
+    func changeStrategy(warId: UUID, newStrategy: War.WarStrategy) {
+        if let index = activeWars.firstIndex(where: { $0.id == warId }) {
+            activeWars[index].currentStrategy = newStrategy
+        }
+    }
+
+    // MARK: - Nuclear Strike
+
+    func launchNuclearStrike(
+        war: inout War,
+        character: inout Character,
+        militaryManager: MilitaryManager
+    ) -> (success: Bool, message: String) {
+        guard militaryManager.militaryStats.nuclearArsenal.warheadCount > 0 else {
+            return (false, "No nuclear warheads available.")
+        }
+
+        guard militaryManager.militaryStats.nuclearArsenal.icbmCount > 0 else {
+            return (false, "No ICBMs available for delivery.")
+        }
+
+        // Instant victory but massive consequences
+        war.defenderStrength = 0
+        war.isActive = false
+        war.winner = war.attacker
+
+        // Apocalyptic approval penalty
+        character.approvalRating = max(0, character.approvalRating - 50)
+
+        // Massive civilian casualties
+        let civilianDeaths = war.defender.population / 2  // 50% of population
+        war.casualtiesByCountry[war.defender.code, default: 0] += civilianDeaths
+
+        // Use up warheads
+        militaryManager.militaryStats.nuclearArsenal.warheadCount -= 1
+        militaryManager.militaryStats.nuclearArsenal.icbmCount -= 1
+
+        return (true, "Nuclear strike launched. \(civilianDeaths.formatted()) casualties. The world will never forgive this.")
+    }
+}
+```
+
+---
+
+### **Phase 3: Territory System**
+
+#### 3.1 Territory Model
+**Location**: `PoliticianSim/PoliticianSim/Models/Territory.swift`
+
+```swift
+//
+//  Territory.swift
+//  PoliticianSim
+//
+//  Conquered and controlled territories
+//
+
+import Foundation
+
+struct Territory: Codable, Identifiable {
+    let id: UUID
+    var name: String
+    var size: Double                   // Square kilometers
+    var population: Int
+    var morale: Double                 // 0.0-1.0
+    var type: TerritoryType
+    var rebellionRisk: Double          // 0.0-1.0
+    var taxRevenue: Decimal
+    var controlledSince: Date
+
+    enum TerritoryType: String, Codable {
+        case core = "Core Territory"
+        case conquered = "Conquered"
+        case annexed = "Annexed"
+        case puppet = "Puppet State"
+    }
+
+    var isRebelling: Bool {
+        return rebellionRisk >= 0.75
+    }
+
+    init(
+        id: UUID = UUID(),
+        name: String,
+        size: Double,
+        population: Int,
+        morale: Double,
+        type: TerritoryType,
+        rebellionRisk: Double,
+        taxRevenue: Decimal,
+        controlledSince: Date
+    ) {
+        self.id = id
+        self.name = name
+        self.size = size
+        self.population = population
+        self.morale = morale
+        self.type = type
+        self.rebellionRisk = rebellionRisk
+        self.taxRevenue = taxRevenue
+        self.controlledSince = controlledSince
+    }
+}
+
+struct Rebellion: Codable, Identifiable {
+    let id: UUID
+    let territory: Territory
+    var rebelStrength: Int
+    var startDate: Date
+    var demands: String
+    var supportPercentage: Double      // 0.0-1.0
+
+    init(
+        id: UUID = UUID(),
+        territory: Territory,
+        rebelStrength: Int,
+        startDate: Date,
+        demands: String,
+        supportPercentage: Double
+    ) {
+        self.id = id
+        self.territory = territory
+        self.rebelStrength = rebelStrength
+        self.startDate = startDate
+        self.demands = demands
+        self.supportPercentage = supportPercentage
+    }
+}
+```
+
+#### 3.2 Territory Manager
+**Location**: `PoliticianSim/PoliticianSim/ViewModels/TerritoryManager.swift`
+
+```swift
+//
+//  TerritoryManager.swift
+//  PoliticianSim
+//
+//  Manages conquered territories and rebellions
+//
+
+import Foundation
+import Combine
+
+class TerritoryManager: ObservableObject {
+    @Published var territories: [Territory] = []
+    @Published var activeRebellions: [Rebellion] = []
+
+    // MARK: - Territory Acquisition
+
+    func conqueredTerritory(
+        from war: War,
+        percentage: Double,
+        currentDate: Date
+    ) -> Territory {
+        let loser = war.winner!.code == war.attacker.code ? war.defender : war.attacker
+        let sizeGained = loser.territorySize * percentage
+        let populationGained = Int(Double(loser.population) * percentage)
+
+        let territory = Territory(
+            name: "\(loser.name) Territory",
+            size: sizeGained,
+            population: populationGained,
+            morale: 0.45,              // Low morale for conquered
+            type: .conquered,
+            rebellionRisk: 0.30,       // 30% base rebellion risk
+            taxRevenue: 0,
+            controlledSince: currentDate
+        )
+
+        territories.append(territory)
+        return territory
+    }
+
+    // MARK: - Morale & Rebellion
+
+    func updateTerritoryMorale(currentDate: Date) {
+        for i in 0..<territories.count {
+            // Conquered territories slowly improve morale over time
+            if territories[i].type == .conquered {
+                // 1% morale improvement per year
+                let yearsSinceConquest = Calendar.current.dateComponents(
+                    [.year],
+                    from: territories[i].controlledSince,
+                    to: currentDate
+                ).year ?? 0
+
+                territories[i].morale = min(0.8, 0.45 + (Double(yearsSinceConquest) * 0.01))
+
+                // Rebellion risk decreases as morale improves
+                territories[i].rebellionRisk = max(0.1, 0.3 - (territories[i].morale - 0.45))
+            }
+
+            // Check for rebellion trigger
+            if territories[i].rebellionRisk >= 0.75 && Double.random(in: 0...1) < 0.05 {
+                triggerRebellion(territory: territories[i], currentDate: currentDate)
+            }
+        }
+    }
+
+    private func triggerRebellion(territory: Territory, currentDate: Date) {
+        let rebelStrength = calculateRebelStrength(territory: territory)
+
+        let rebellion = Rebellion(
+            territory: territory,
+            rebelStrength: rebelStrength,
+            startDate: currentDate,
+            demands: "Independence from foreign occupation",
+            supportPercentage: 1.0 - territory.morale
+        )
+
+        activeRebellions.append(rebellion)
+    }
+
+    private func calculateRebelStrength(territory: Territory) -> Int {
+        // 30-60% of government military strength
+        let populationFactor = territory.population / 1_000_000
+        let moraleFactor = 1.0 - territory.morale
+        return Int(Double(populationFactor) * moraleFactor * 50000)
+    }
+
+    // MARK: - Counter-Insurgency
+
+    func suppressRebellion(
+        rebellion: Rebellion,
+        militaryStrength: Int,
+        character: Character,
+        warEngine: WarEngine
+    ) -> War {
+        // Create civil war
+        let civilWar = War(
+            id: UUID(),
+            attacker: Country(
+                name: character.country,
+                code: character.country,
+                population: 0,  // Will be filled
+                militaryStrength: militaryStrength,
+                territorySize: 0,
+                gdp: 0,
+                governmentType: .presidential
+            ),
+            defender: Country(
+                name: "Rebel Forces - \(rebellion.territory.name)",
+                code: "REBEL",
+                population: rebellion.territory.population,
+                militaryStrength: rebellion.rebelStrength,
+                territorySize: rebellion.territory.size,
+                gdp: 0,
+                governmentType: .singleParty
+            ),
+            startDate: character.currentDate,
+            type: .civil,
+            justification: .counterInsurgency,
+            attackerStrength: militaryStrength,
+            defenderStrength: rebellion.rebelStrength
+        )
+
+        return civilWar
+    }
+
+    func grantAutonomy(rebellion: Rebellion, character: inout Character) {
+        // Grant independence, lose territory
+        if let index = territories.firstIndex(where: { $0.id == rebellion.territory.id }) {
+            territories.remove(at: index)
+        }
+
+        // Remove rebellion
+        if let index = activeRebellions.firstIndex(where: { $0.id == rebellion.id }) {
+            activeRebellions.remove(at: index)
+        }
+
+        // Approval penalty for "losing" territory
+        character.approvalRating = max(0, character.approvalRating - 10)
+    }
+}
+```
+
+---
+
+### **Phase 4: War Room UI**
+
+#### 4.1 War Room View
 **Location**: `PoliticianSim/PoliticianSim/Views/WarRoom/WarRoomView.swift`
 
-**Layout**:
-- Header with threat level indicator
-- Tab selector (Active / Resolved / Failed)
-- Crisis cards list with:
-  - Severity badge
-  - Category icon
-  - Title and brief description
-  - Impact preview
-  - Countdown timer (if deadline exists)
-  - Action buttons
-- Statistics summary
-
-#### 3.2 Create `CrisisDetailView.swift`
-**Location**: `PoliticianSim/PoliticianSim/Views/WarRoom/CrisisDetailView.swift`
-
-**Layout**:
-- Full crisis description
-- Affected departments list
-- Potential impacts breakdown
-- Countdown timer (prominent)
-- Response options with:
-  - Cost
-  - Execution time
-  - Success probability
-  - Outcome scenarios (best/expected/worst)
-  - Execute button
-- Ignore option (risk warning)
-
-#### 3.3 Create `CrisisCard.swift` (Reusable Component)
-**Location**: `PoliticianSim/PoliticianSim/Views/WarRoom/CrisisCard.swift`
-
-Compact card showing crisis summary for list views.
-
-#### 3.4 Create `CrisisProgressView.swift`
-**Location**: `PoliticianSim/PoliticianSim/Views/WarRoom/CrisisProgressView.swift`
-
-Shows active crisis response progress with:
-- Progress bar
-- ETA to completion
-- Current status updates
-
----
-
-### **Phase 4: Integration**
-
-#### 4.1 Update `NavigationManager.swift`
-
-Add to `NavigationView` enum:
 ```swift
-case warRoom = "War Room"
-```
+//
+//  WarRoomView.swift
+//  PoliticianSim
+//
+//  Main War Room interface for presidents
+//
 
-Update icon mapping:
-```swift
-case .warRoom: return "exclamationmark.triangle.fill"
-```
+import SwiftUI
 
-Update section mapping:
-```swift
-case .warRoom: return .governance
-```
+struct WarRoomView: View {
+    @EnvironmentObject var gameManager: GameManager
+    @State private var selectedTab: WarRoomTab = .activeWars
 
-#### 4.2 Update `GameManager.swift`
-
-1. Add property:
-```swift
-@Published var warRoomManager = WarRoomManager()
-```
-
-2. Add to `setupObjectWillChangeForwarding()`:
-```swift
-warRoomManager.objectWillChange
-    .sink { [weak self] _ in
-        self?.objectWillChange.send()
+    enum WarRoomTab: String, CaseIterable {
+        case activeWars = "Active Wars"
+        case military = "Military"
+        case technology = "Technology"
+        case territories = "Territories"
+        case nuclear = "Nuclear"
     }
-    .store(in: &cancellables)
-```
 
-3. Add crisis checks to `skipDay()` and `skipWeek()`:
-```swift
-// Check for new crisis
-if let newCrisis = self.warRoomManager.checkForCrisisOpportunity(character: updatedChar) {
-    self.warRoomManager.activateCrisis(newCrisis)
+    var body: some View {
+        ZStack {
+            StandardBackgroundView()
+
+            VStack(spacing: 0) {
+                // Header
+                HStack {
+                    Image(systemName: "shield.fill")
+                        .font(.system(size: 24))
+                        .foregroundColor(.red)
+
+                    Text("War Room")
+                        .font(.system(size: 24, weight: .bold))
+                        .foregroundColor(.white)
+
+                    Spacer()
+
+                    // Military strength badge
+                    HStack(spacing: 4) {
+                        Image(systemName: "bolt.fill")
+                            .font(.system(size: 12))
+                        Text("\(gameManager.militaryManager.militaryStats.strength)")
+                            .font(.system(size: 14, weight: .bold))
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(Color.red.opacity(0.3))
+                    )
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 20)
+
+                // Tab selector
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(WarRoomTab.allCases, id: \.self) { tab in
+                            TabButton(
+                                title: tab.rawValue,
+                                isSelected: selectedTab == tab
+                            ) {
+                                selectedTab = tab
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                }
+                .padding(.vertical, 12)
+
+                // Content
+                ScrollView {
+                    switch selectedTab {
+                    case .activeWars:
+                        ActiveWarsView()
+                    case .military:
+                        MilitaryManagementView()
+                    case .technology:
+                        TechnologyResearchView()
+                    case .territories:
+                        TerritoriesView()
+                    case .nuclear:
+                        NuclearArsenalView()
+                    }
+                }
+            }
+        }
+    }
 }
 
-// Update crisis progress
-self.warRoomManager.updateCrisisProgress(character: updatedChar, currentDate: updatedChar.currentDate)
+struct TabButton: View {
+    let title: String
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .font(.system(size: 13, weight: isSelected ? .semibold : .regular))
+                .foregroundColor(isSelected ? .white : Constants.Colors.secondaryText)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(isSelected ? Color.red.opacity(0.3) : Color.white.opacity(0.05))
+                )
+        }
+    }
+}
 ```
-
-4. Add to `newGame()`:
-```swift
-warRoomManager = WarRoomManager()
-```
-
-#### 4.3 Update `ContentView.swift`
-
-Add case to router:
-```swift
-case .warRoom:
-    WarRoomView()
-```
-
-#### 4.4 Update `SaveGame.swift`
-
-Add property:
-```swift
-var warRoomState: WarRoomState
-```
-
-Update encoding/decoding and GameManager integration.
 
 ---
 
-### **Phase 5: Crisis Templates Library**
-
-Create 30+ crisis templates across all categories with realistic impacts and response options.
-
-**Economic Crises** (5 templates):
-1. Stock Market Crash
-2. Banking System Failure
-3. Currency Crisis
-4. Trade War Escalation
-5. Recession Onset
-
-**Health Crises** (4 templates):
-1. Pandemic Outbreak
-2. Food Contamination Event
-3. Hospital System Overload
-4. Drug Shortage Emergency
-
-**Natural Disasters** (5 templates):
-1. Category 4+ Hurricane
-2. Major Earthquake
-3. Widespread Wildfire
-4. Severe Flooding
-5. Prolonged Drought
-
-**Security Crises** (4 templates):
-1. Terrorist Attack
-2. Cyber Attack on Critical Infrastructure
-3. Border Security Breach
-4. Domestic Terrorism Threat
-
-**Diplomatic Crises** (4 templates):
-1. International Armed Conflict
-2. Hostage Situation Abroad
-3. Trade Embargo
-4. Alliance Breakdown
-
-**Social Crises** (4 templates):
-1. Mass Civil Protests
-2. Urban Riots
-3. National Strike
-4. Civil Unrest
-
-**Environmental Crises** (3 templates):
-1. Major Oil Spill
-2. Nuclear Facility Accident
-3. Toxic Waste Leak
-
-**Infrastructure Crises** (3 templates):
-1. Bridge/Dam Collapse
-2. National Power Grid Failure
-3. Water System Contamination
-
-Each template includes:
-- 2-4 response options
-- Realistic dollar costs ($10B - $500B depending on severity)
-- Character-based success probabilities
-- Multiple outcome scenarios
-- Department impacts
-
----
-
-### **Phase 6: Polish & Features**
-
-#### Visual Design
-- **Severity color coding**: Yellow (minor) → Orange (moderate) → Red (severe) → Dark Red (critical)
-- **Animated threat level indicator** with pulsing effect for high alerts
-- **Category icons** for quick identification
-- **Progress bars** with smooth animations
-- **Countdown timers** with urgency color shifts
-
-#### Sound & Haptics
-- Alert sound when new crisis appears
-- Haptic feedback for crisis severity
-- Success/failure audio feedback
-
-#### Statistics Dashboard
-- Total crises handled
-- Success rate percentage
-- Crises by category breakdown
-- Average resolution time
-
-#### Tutorial System
-- First-time War Room tutorial
-- Contextual help for crisis responses
-- Tips for maximizing success probability
-
----
-
-## 🎮 Gameplay Balance Parameters
-
-### Crisis Frequency by Position
-
-| Position Level | Position Name | Weekly Probability | Yearly Expected | Max Simultaneous |
-|---------------|---------------|-------------------|----------------|------------------|
-| 1 | City Council | 1% | 0.5 | 1 |
-| 2 | Mayor | 2% | 1 | 1 |
-| 3 | State Rep | 4% | 2 | 2 |
-| 4 | Governor | 8% | 4 | 3 |
-| 5 | Senator | 12% | 6 | 3 |
-| 6 | President | 20% | 10 | 5 |
-
-### Severity Distribution
-- **Minor**: 60% (Yellow)
-- **Moderate**: 25% (Orange)
-- **Severe**: 12% (Red)
-- **Critical**: 3% (Dark Red)
-
-### Impact Ranges by Severity
-
-| Severity | GDP Impact | Approval Impact | Cost Range | Casualties | Deadline |
-|----------|-----------|----------------|------------|------------|----------|
-| Minor | -0.1% to -0.5% | -3 to -5 | $5B - $20B | 0 | None |
-| Moderate | -0.5% to -2% | -5 to -12 | $20B - $100B | 0-100 | 2-4 weeks |
-| Severe | -2% to -5% | -12 to -25 | $100B - $300B | 100-1000 | 3-7 days |
-| Critical | -5% to -10% | -25 to -50 | $300B - $1T | 1000+ | 1-3 days |
-
-### Response Success Probability Formula
-
-```
-Base Probability (from response template): 0.4 - 0.8
-
-Character Bonuses:
-+ Intelligence × 0.002 (max +0.20 at 100)
-+ Charisma × 0.001 (max +0.10 at 100)
-+ Diplomacy × 0.001 (max +0.10 at 100)
-
-Character Penalties:
-- Stress × 0.001 (max -0.10 at 100)
-
-Department Bonus (future):
-+ (Department Score / 100) × 0.05 per required department
-
-Final Probability: Clamp(0.05, 0.95, Total)
-```
-
-Example:
-- Base: 0.60
-- Intelligence 80: +0.16
-- Charisma 70: +0.07
-- Diplomacy 60: +0.06
-- Stress 50: -0.05
-- **Total: 0.84 (84% success chance)**
-
----
-
-## 🔄 System Integration Map
-
-### War Room Interactions with Existing Systems
-
-1. **Budget System**
-   - Crisis responses cost money from campaign funds
-   - Department funding affects success probability (future enhancement)
-
-2. **Government Stats**
-   - Affected departments suffer score decreases during crisis
-   - Successful resolution can boost department scores
-
-3. **Policy System**
-   - Certain policies can prevent crisis types
-   - Policies can provide bonuses to crisis responses
-
-4. **Approval Rating**
-   - Crisis mishandling damages approval
-   - Successful resolution boosts approval
-
-5. **Economic Simulation**
-   - Crises directly impact GDP
-   - Crisis costs added to national debt
-   - Capital stock can be damaged
-
-6. **Event System**
-   - Some events can escalate into crises
-   - Crisis resolution can trigger follow-up events
-
-7. **Diplomacy**
-   - International crises affect diplomatic relations
-   - Diplomatic stats influence crisis success
-
-8. **Character Health/Stress**
-   - Crisis management increases stress
-   - Failed crises cause major stress damage
-
----
-
-## 📁 Complete File Structure
+## 📊 Complete File Structure
 
 ```
 PoliticianSim/PoliticianSim/
 ├── Models/
-│   ├── Crisis.swift                    (NEW - Phase 1)
-│   └── WarRoomState.swift              (NEW - Phase 1)
+│   ├── MilitaryStats.swift           (NEW - Phase 1)
+│   ├── TechnologyResearch.swift      (NEW - Phase 1)
+│   ├── War.swift                     (NEW - Phase 2)
+│   ├── Territory.swift               (NEW - Phase 3)
+│   └── NuclearArsenal.swift          (included in MilitaryStats)
 │
 ├── ViewModels/
-│   └── WarRoomManager.swift            (NEW - Phase 2)
+│   ├── MilitaryManager.swift         (NEW - Phase 1)
+│   ├── WarEngine.swift               (NEW - Phase 2)
+│   └── TerritoryManager.swift        (NEW - Phase 3)
 │
 ├── Views/
 │   └── WarRoom/
-│       ├── WarRoomView.swift           (NEW - Phase 3)
-│       ├── CrisisDetailView.swift      (NEW - Phase 3)
-│       ├── CrisisCard.swift            (NEW - Phase 3)
-│       └── CrisisProgressView.swift    (NEW - Phase 3)
+│       ├── WarRoomView.swift         (NEW - Phase 4)
+│       ├── ActiveWarsView.swift      (NEW - Phase 4)
+│       ├── MilitaryManagementView.swift (NEW - Phase 4)
+│       ├── TechnologyResearchView.swift (NEW - Phase 4)
+│       ├── TerritoriesView.swift     (NEW - Phase 4)
+│       ├── NuclearArsenalView.swift  (NEW - Phase 4)
+│       ├── WarCard.swift             (NEW - Phase 4)
+│       └── WarDetailSheet.swift      (NEW - Phase 4)
 │
 └── Updated Files:
-    ├── NavigationManager.swift         (MODIFY - Phase 4)
-    ├── GameManager.swift               (MODIFY - Phase 4)
-    ├── ContentView.swift               (MODIFY - Phase 4)
-    └── SaveGame.swift                  (MODIFY - Phase 4)
+    ├── NavigationManager.swift       (MODIFY - add .warRoom case)
+    ├── GameManager.swift             (MODIFY - add managers, war simulation)
+    ├── ContentView.swift             (MODIFY - routing)
+    └── SaveGame.swift                (MODIFY - serialization)
 ```
+
+---
+
+## 🎮 Gameplay Balance
+
+### Military Strength Formula
+```
+Base Strength = Manpower × 0.5
+Tech Bonus = Average Tech Level × 10,000
+Budget Bonus = (Military Budget / $10B)
+Tech Multipliers = Sum of (Tech Level / 10) × (Category Multiplier - 1)
+
+Total Strength = (Base + Tech Bonus + Budget Bonus) × Tech Multipliers
+```
+
+**Example**:
+- Manpower: 1,000,000 (volunteer)
+- Avg Tech Level: 5
+- Military Budget: $700B
+- Total Strength ≈ 570,000
+
+### War Duration
+- **Average**: 240 days (8 months)
+- **Quick Victory**: 60-120 days (overwhelming force)
+- **Long War**: 365-540 days (evenly matched)
+
+### Technology Research Costs
+| Level | Cost | Time |
+|-------|------|------|
+| 1→2 | $75B | 216 days |
+| 2→3 | $112B | 252 days |
+| 5→6 | $284B | 396 days |
+| 9→10 | $1.7T | 540 days |
+
+### Nuclear Arsenal
+- **Warhead Cost**: $5B each
+- **ICBM Cost**: $10B each
+- **Minimum Tech**: Nuclear Weapons Level 5
+- **Second Strike**: Nuclear Weapons Level 8
 
 ---
 
 ## ✅ Implementation Checklist
 
-### Phase 1: Models ☐
-- [ ] Create `Crisis.swift` with all enums and structs
-- [ ] Create `WarRoomState.swift`
-- [ ] Test model serialization (Codable)
+### Phase 1: Military Foundation ☐
+- [ ] Create MilitaryStats.swift
+- [ ] Create TechnologyResearch.swift
+- [ ] Create MilitaryManager.swift
+- [ ] Implement strength calculation formula
+- [ ] Implement conscription toggle
+- [ ] Implement tech research start/progress
+- [ ] Implement nuclear arsenal management
+- [ ] Test all military manager methods
 
-### Phase 2: Manager ☐
-- [ ] Create `WarRoomManager.swift`
-- [ ] Implement crisis generation logic
-- [ ] Implement crisis lifecycle management
-- [ ] Implement success probability calculation
-- [ ] Implement threat level system
-- [ ] Test all manager methods
+### Phase 2: Warfare Engine ☐
+- [ ] Create War.swift
+- [ ] Create WarEngine.swift
+- [ ] Implement war declaration
+- [ ] Implement daily war simulation
+- [ ] Implement casualty calculations
+- [ ] Implement victory/defeat conditions
+- [ ] Implement strategy changes
+- [ ] Implement nuclear strike mechanics
+- [ ] Test 8-month average duration
 
-### Phase 3: UI ☐
-- [ ] Create `WarRoomView.swift` (main view)
-- [ ] Create `CrisisCard.swift` (reusable component)
-- [ ] Create `CrisisDetailView.swift`
-- [ ] Create `CrisisProgressView.swift`
-- [ ] Implement countdown timers
-- [ ] Implement severity color coding
-- [ ] Test UI on different screen sizes
+### Phase 3: Territory System ☐
+- [ ] Create Territory.swift
+- [ ] Create TerritoryManager.swift
+- [ ] Implement territory conquest from wars
+- [ ] Implement morale system
+- [ ] Implement rebellion generation
+- [ ] Implement counter-insurgency wars
+- [ ] Implement autonomy grants
+- [ ] Test rebellion probabilities
 
-### Phase 4: Integration ☐
-- [ ] Update `NavigationManager.swift`
-- [ ] Update `GameManager.swift` (add manager, crisis checks)
-- [ ] Update `ContentView.swift` (routing)
-- [ ] Update `SaveGame.swift` (serialization)
-- [ ] Test save/load with War Room data
-- [ ] Test crisis generation during gameplay
+### Phase 4: War Room UI ☐
+- [ ] Create WarRoomView.swift (main)
+- [ ] Create ActiveWarsView.swift
+- [ ] Create MilitaryManagementView.swift
+- [ ] Create TechnologyResearchView.swift
+- [ ] Create TerritoriesView.swift
+- [ ] Create NuclearArsenalView.swift
+- [ ] Create WarCard.swift component
+- [ ] Create WarDetailSheet.swift
+- [ ] Test all UI flows
 
-### Phase 5: Content ☐
-- [ ] Create 5 economic crisis templates
-- [ ] Create 4 health crisis templates
-- [ ] Create 5 natural disaster templates
-- [ ] Create 4 security crisis templates
-- [ ] Create 4 diplomatic crisis templates
-- [ ] Create 4 social crisis templates
-- [ ] Create 3 environmental crisis templates
-- [ ] Create 3 infrastructure crisis templates
-- [ ] Test all crisis templates
-
-### Phase 6: Polish ☐
-- [ ] Implement visual animations
-- [ ] Add sound effects (if desired)
-- [ ] Create tutorial/help system
-- [ ] Implement statistics tracking
-- [ ] Add achievements (optional)
-- [ ] Final balance testing
-- [ ] Bug fixes and optimization
-
----
-
-## 🎯 Success Metrics
-
-After implementation, the War Room should:
-
-1. ✅ Generate crises at appropriate frequency for position level
-2. ✅ Provide meaningful strategic choices with risk/reward tradeoffs
-3. ✅ Create time pressure and urgency through deadlines
-4. ✅ Reward good governance (high department scores, character attributes)
-5. ✅ Integrate seamlessly with existing economic and approval systems
-6. ✅ Add replayability through varied crisis scenarios
-7. ✅ Feel impactful on overall game progression
+### Phase 5: Integration ☐
+- [ ] Update NavigationManager.swift
+- [ ] Update GameManager.swift
+- [ ] Add war simulation to skipDay/skipWeek
+- [ ] Update SaveGame.swift
+- [ ] Test save/load with wars
+- [ ] Test full war cycle end-to-end
 
 ---
 
-## 📝 Notes for Implementation
+## 🎯 Success Criteria
 
-1. **Start with Phase 1-2** to get core functionality working
-2. **Phase 3 UI can be iterative** - start simple, add polish later
-3. **Phase 4 integration is critical** - test thoroughly
-4. **Phase 5 content** can be added gradually (start with 5-10 templates)
-5. **Phase 6 polish** can be done after core gameplay is validated
-
-**Estimated Implementation Time**:
-- Phase 1-2: 4-6 hours
-- Phase 3: 6-8 hours
-- Phase 4: 2-3 hours
-- Phase 5: 8-12 hours (content creation)
-- Phase 6: 4-6 hours
-- **Total: 24-35 hours**
+After implementation, War Room should:
+1. ✅ Be accessible only to Presidents
+2. ✅ Support defensive, offensive, proxy, and counter-insurgency wars
+3. ✅ Provide troop/budget/tech management
+4. ✅ Include draft/conscription mechanics
+5. ✅ Feature 10 technology categories
+6. ✅ Enable territory conquest and management
+7. ✅ Include nuclear weapons with MAD consequences
+8. ✅ Average 8-month war duration
+9. ✅ Integrate with approval, GDP, and budget systems
+10. ✅ Feel like commanding a nation's military
 
 ---
 
-## 🚀 Future Enhancements (Post-Launch)
-
-1. **Multi-stage crises** that evolve over time
-2. **Crisis chains** where one crisis triggers another
-3. **Regional variations** (state-specific crises)
-4. **International coalition responses** (for diplomatic crises)
-5. **Media coverage system** affecting public perception
-6. **Expert advisors** providing recommendations
-7. **Historical crisis database** for reference
-8. **Crisis preparedness** system (prevention policies)
-9. **Emergency powers** temporary authority during critical crises
-10. **Post-crisis recovery tracking**
-
----
-
-This implementation plan provides a complete roadmap for building the War Room feature from scratch, with detailed specifications, integration points, and realistic time estimates.
+This comprehensive plan provides everything needed to implement a full-featured War Room system for presidential gameplay!

@@ -91,6 +91,12 @@
 		7C6E46E72ECAB931005F7A3D /* GovernmentStatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46E52ECAB931005F7A3D /* GovernmentStatsView.swift */; };
 		7C6E46E92ECACD92005F7A3D /* FiscalCapitalStock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46E82ECACD92005F7A3D /* FiscalCapitalStock.swift */; };
 		7C6E46EB2ECAD875005F7A3D /* GameOverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46EA2ECAD875005F7A3D /* GameOverView.swift */; };
+		7C6E46F02ECC4970005F7A3D /* MilitaryStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46EC2ECC4970005F7A3D /* MilitaryStats.swift */; };
+		7C6E46F12ECC4970005F7A3D /* TechnologyResearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46ED2ECC4970005F7A3D /* TechnologyResearch.swift */; };
+		7C6E46F22ECC4970005F7A3D /* War.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46EF2ECC4970005F7A3D /* War.swift */; };
+		7C6E46F32ECC4970005F7A3D /* Territory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46EE2ECC4970005F7A3D /* Territory.swift */; };
+		7C6E46F62ECC4AA6005F7A3D /* WarEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46F52ECC4AA6005F7A3D /* WarEngine.swift */; };
+		7C6E46F72ECC4AA6005F7A3D /* MilitaryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46F42ECC4AA6005F7A3D /* MilitaryManager.swift */; };
 		FB1BD9A2FE914F06F1F9D2BC /* CustomAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61D83AE85A5956CC2FFCB315 /* CustomAlert.swift */; };
 /* End PBXBuildFile section */
 
@@ -181,6 +187,12 @@
 		7C6E46E52ECAB931005F7A3D /* GovernmentStatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GovernmentStatsView.swift; sourceTree = "<group>"; };
 		7C6E46E82ECACD92005F7A3D /* FiscalCapitalStock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiscalCapitalStock.swift; sourceTree = "<group>"; };
 		7C6E46EA2ECAD875005F7A3D /* GameOverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameOverView.swift; sourceTree = "<group>"; };
+		7C6E46EC2ECC4970005F7A3D /* MilitaryStats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MilitaryStats.swift; sourceTree = "<group>"; };
+		7C6E46ED2ECC4970005F7A3D /* TechnologyResearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TechnologyResearch.swift; sourceTree = "<group>"; };
+		7C6E46EE2ECC4970005F7A3D /* Territory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Territory.swift; sourceTree = "<group>"; };
+		7C6E46EF2ECC4970005F7A3D /* War.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = War.swift; sourceTree = "<group>"; };
+		7C6E46F42ECC4AA6005F7A3D /* MilitaryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MilitaryManager.swift; sourceTree = "<group>"; };
+		7C6E46F52ECC4AA6005F7A3D /* WarEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarEngine.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -254,6 +266,10 @@
 				7C6E46CE2EC965AF005F7A3D /* Treasury.swift */,
 				7C6E46DA2EC9AFBB005F7A3D /* GovernmentStats.swift */,
 				7C6E46E82ECACD92005F7A3D /* FiscalCapitalStock.swift */,
+				7C6E46EC2ECC4970005F7A3D /* MilitaryStats.swift */,
+				7C6E46ED2ECC4970005F7A3D /* TechnologyResearch.swift */,
+				7C6E46EE2ECC4970005F7A3D /* Territory.swift */,
+				7C6E46EF2ECC4970005F7A3D /* War.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -261,6 +277,8 @@
 		312 /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
+				7C6E46F42ECC4AA6005F7A3D /* MilitaryManager.swift */,
+				7C6E46F52ECC4AA6005F7A3D /* WarEngine.swift */,
 				7C6E46E32ECAB919005F7A3D /* GovernmentStatsManager.swift */,
 				7C6E46DC2ECAB841005F7A3D /* FiscalImpactCalculator.swift */,
 				108 /* GameManager.swift */,
@@ -629,6 +647,8 @@
 				028 /* CharacterCreationViewModel.swift in Sources */,
 				029 /* CountrySelectionView.swift in Sources */,
 				030 /* CharacterDetailsView.swift in Sources */,
+				7C6E46F62ECC4AA6005F7A3D /* WarEngine.swift in Sources */,
+				7C6E46F72ECC4AA6005F7A3D /* MilitaryManager.swift in Sources */,
 				031 /* AttributeGenerationView.swift in Sources */,
 				032 /* CharacterSummaryView.swift in Sources */,
 				033 /* CharacterCreationContainerView.swift in Sources */,
@@ -646,6 +666,10 @@
 				039 /* NewHomeView.swift in Sources */,
 				040 /* ProfileView.swift in Sources */,
 				041 /* StatsView.swift in Sources */,
+				7C6E46F02ECC4970005F7A3D /* MilitaryStats.swift in Sources */,
+				7C6E46F12ECC4970005F7A3D /* TechnologyResearch.swift in Sources */,
+				7C6E46F22ECC4970005F7A3D /* War.swift in Sources */,
+				7C6E46F32ECC4970005F7A3D /* Territory.swift in Sources */,
 				042 /* PositionView.swift in Sources */,
 				7C6E45102EC552FB005F7A3D /* Campaign.swift in Sources */,
 				043 /* SettingsView.swift in Sources */,
