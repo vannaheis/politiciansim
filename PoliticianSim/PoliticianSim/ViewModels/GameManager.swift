@@ -27,6 +27,9 @@ class GameManager: ObservableObject {
     @Published var educationManager = EducationManager()
     @Published var economicDataManager = EconomicDataManager()
     @Published var governmentStatsManager = GovernmentStatsManager()
+    @Published var militaryManager = MilitaryManager()
+    @Published var warEngine = WarEngine()
+    @Published var territoryManager = TerritoryManager()
     let saveManager = SaveManager.shared
 
     // Game state
@@ -132,6 +135,24 @@ class GameManager: ObservableObject {
 
                 // Process active opinion actions
                 self.publicOpinionManager.processActiveActions(character: &updatedChar, currentDate: updatedChar.currentDate)
+
+                // Military operations (President only)
+                if updatedChar.currentPosition?.level == 6 {
+                    // Advance technology research
+                    self.militaryManager.advanceResearch(days: 1)
+
+                    // Simulate active wars
+                    self.warEngine.simulateDay()
+
+                    // Update territories and check for rebellions
+                    self.territoryManager.processDaily(currentDate: updatedChar.currentDate)
+
+                    // Recalculate military strength if militaryStats exists
+                    if var militaryStats = updatedChar.militaryStats {
+                        militaryStats.strength = self.militaryManager.calculateStrength(militaryStats: militaryStats)
+                        updatedChar.militaryStats = militaryStats
+                    }
+                }
             }
 
             // ALWAYS simulate economic changes (even if character is dead)
@@ -185,6 +206,26 @@ class GameManager: ObservableObject {
 
                 // Process active opinion actions
                 self.publicOpinionManager.processActiveActions(character: &updatedChar, currentDate: updatedChar.currentDate)
+
+                // Military operations (President only)
+                if updatedChar.currentPosition?.level == 6 {
+                    // Advance technology research
+                    self.militaryManager.advanceResearch(days: 7)
+
+                    // Simulate active wars (7 days)
+                    for _ in 0..<7 {
+                        self.warEngine.simulateDay()
+                    }
+
+                    // Update territories and check for rebellions
+                    self.territoryManager.processWeekly(currentDate: updatedChar.currentDate)
+
+                    // Recalculate military strength if militaryStats exists
+                    if var militaryStats = updatedChar.militaryStats {
+                        militaryStats.strength = self.militaryManager.calculateStrength(militaryStats: militaryStats)
+                        updatedChar.militaryStats = militaryStats
+                    }
+                }
             }
 
             // ALWAYS simulate economic changes (even if character is dead)
@@ -247,6 +288,17 @@ class GameManager: ObservableObject {
         }
     }
 
+    // MARK: - Military Operations
+
+    func initializeMilitaryStats() {
+        guard var character = character else { return }
+        guard character.currentPosition?.level == 6 else { return } // President only
+        guard character.militaryStats == nil else { return } // Don't reinitialize
+
+        character.militaryStats = MilitaryStats()
+        characterManager.updateCharacter(character)
+    }
+
     // MARK: - Navigation
 
     func navigateTo(_ view: NavigationManager.NavigationView) {
@@ -294,6 +346,9 @@ class GameManager: ObservableObject {
         educationManager = EducationManager()
         economicDataManager = EconomicDataManager()
         governmentStatsManager = GovernmentStatsManager()
+        militaryManager = MilitaryManager()
+        warEngine = WarEngine()
+        territoryManager = TerritoryManager()
 
         // Reset game state
         gameState = GameState()
@@ -402,6 +457,24 @@ class GameManager: ObservableObject {
             .store(in: &cancellables)
 
         governmentStatsManager.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
+
+        militaryManager.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
+
+        warEngine.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
+
+        territoryManager.objectWillChange
             .sink { [weak self] _ in
                 self?.objectWillChange.send()
             }

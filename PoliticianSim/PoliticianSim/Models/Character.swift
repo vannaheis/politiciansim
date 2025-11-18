@@ -32,6 +32,9 @@ struct Character: Codable, Identifiable {
     var currentPosition: Position?
     var careerHistory: [CareerEntry]
 
+    // Military (only available for Presidents)
+    var militaryStats: MilitaryStats?
+
     // Dates
     var birthDate: Date
     var currentDate: Date
@@ -107,6 +110,9 @@ struct Character: Codable, Identifiable {
         self.currentPosition = nil
         self.careerHistory = []
 
+        // Military
+        self.militaryStats = nil
+
         // Dates (18 years old)
         let calendar = Calendar.current
         let birthDate = calendar.date(byAdding: .year, value: -18, to: Date()) ?? Date()
@@ -149,6 +155,9 @@ struct Character: Codable, Identifiable {
         // Career
         self.currentPosition = nil
         self.careerHistory = []
+
+        // Military
+        self.militaryStats = nil
 
         // Dates (18 years old)
         let calendar = Calendar.current

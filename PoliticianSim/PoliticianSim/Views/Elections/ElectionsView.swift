@@ -236,6 +236,9 @@ struct RunElectionButton: View {
             var updatedCharacter = character
             updatedCharacter.currentPosition = election.position
             gameManager.characterManager.updateCharacter(updatedCharacter)
+
+            // Initialize military stats if becoming President
+            gameManager.initializeMilitaryStats()
         }
     }
 }
