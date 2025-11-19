@@ -52,6 +52,20 @@ struct War: Codable, Identifiable {
         case retaliation = "Retaliation"
         case civilWar = "Civil War"
         case rebellion = "Rebellion Suppression"
+
+        var approvalPenalty: Double {
+            switch self {
+            case .territorialDispute: return -12
+            case .selfDefense: return 10  // Bonus for defending
+            case .preemptiveStrike: return -18
+            case .regimeChange: return -25
+            case .resourceControl: return -20
+            case .ideologicalConflict: return -15
+            case .retaliation: return -8
+            case .civilWar: return -5
+            case .rebellion: return -3
+            }
+        }
     }
 
     enum WarStrategy: String, Codable {
