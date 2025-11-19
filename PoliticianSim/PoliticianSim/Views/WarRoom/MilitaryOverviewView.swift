@@ -159,6 +159,7 @@ struct MilitaryBudgetCard: View {
     @EnvironmentObject var gameManager: GameManager
     let militaryStats: MilitaryStats
     @State private var budgetAmount: Double = 0
+    @State private var hasInitialized = false
 
     var militaryDepartment: Department? {
         gameManager.budgetManager.currentBudget?.departments.first(where: { $0.category == .military })
@@ -212,7 +213,15 @@ struct MilitaryBudgetCard: View {
         .background(Color(red: 0.15, green: 0.17, blue: 0.22))
         .cornerRadius(12)
         .onAppear {
-            budgetAmount = Double(truncating: militaryStats.militaryBudget as NSDecimalNumber)
+            // Only initialize once when first appearing
+            if !hasInitialized {
+                budgetAmount = Double(truncating: militaryStats.militaryBudget as NSDecimalNumber)
+                hasInitialized = true
+            }
+        }
+        .onChange(of: militaryStats.militaryBudget) { newBudget in
+            // Update if the actual military budget changes externally
+            budgetAmount = Double(truncating: newBudget as NSDecimalNumber)
         }
     }
 

@@ -167,80 +167,87 @@ struct DeclareWarSheet: View {
             ZStack {
                 StandardBackgroundView()
 
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 20) {
-                        // Warning Banner
-                        HStack(spacing: 12) {
-                            Image(systemName: "exclamationmark.triangle.fill")
-                                .font(.system(size: 20))
-                                .foregroundColor(Constants.Colors.negative)
+                ScrollViewReader { scrollProxy in
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 20) {
+                            // Warning Banner
+                            HStack(spacing: 12) {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .font(.system(size: 20))
+                                    .foregroundColor(Constants.Colors.negative)
 
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Declaration of War")
-                                    .font(.system(size: 14, weight: .bold))
-                                    .foregroundColor(.white)
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("Declaration of War")
+                                        .font(.system(size: 14, weight: .bold))
+                                        .foregroundColor(.white)
 
-                                Text("This action will have severe consequences")
-                                    .font(.system(size: 12))
-                                    .foregroundColor(Constants.Colors.secondaryText)
-                            }
-
-                            Spacer()
-                        }
-                        .padding(16)
-                        .background(Constants.Colors.negative.opacity(0.15))
-                        .cornerRadius(12)
-
-                        // Select Target Country
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Select Target Nation")
-                                .font(.system(size: 16, weight: .bold))
-                                .foregroundColor(.white)
-
-                            ForEach(RivalCountry.allRivals, id: \.code) { country in
-                                CountrySelectionCard(
-                                    country: country,
-                                    isSelected: selectedCountry?.code == country.code,
-                                    playerStrength: gameManager.character?.militaryStats?.strength ?? 0
-                                ) {
-                                    selectedCountry = country
+                                    Text("This action will have severe consequences")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(Constants.Colors.secondaryText)
                                 }
-                            }
-                        }
 
-                        // War Justification
-                        if selectedCountry != nil {
+                                Spacer()
+                            }
+                            .padding(16)
+                            .background(Constants.Colors.negative.opacity(0.15))
+                            .cornerRadius(12)
+
+                            // Select Target Country
                             VStack(alignment: .leading, spacing: 12) {
-                                Text("War Justification")
+                                Text("Select Target Nation")
                                     .font(.system(size: 16, weight: .bold))
                                     .foregroundColor(.white)
 
-                                ForEach([War.WarJustification.territorialDispute, .regimeChange, .resourceControl, .preemptiveStrike], id: \.self) { justification in
-                                    JustificationCard(
-                                        justification: justification,
-                                        isSelected: selectedJustification == justification
+                                ForEach(RivalCountry.allRivals, id: \.code) { country in
+                                    CountrySelectionCard(
+                                        country: country,
+                                        isSelected: selectedCountry?.code == country.code,
+                                        playerStrength: gameManager.character?.militaryStats?.strength ?? 0
                                     ) {
-                                        selectedJustification = justification
+                                        selectedCountry = country
+                                        // Auto-scroll to justification section
+                                        withAnimation {
+                                            scrollProxy.scrollTo("justification", anchor: .top)
+                                        }
                                     }
                                 }
                             }
 
-                            // Declare War Button
-                            Button(action: {
-                                showConfirmation = true
-                            }) {
-                                Text("Declare War")
-                                    .font(.system(size: 16, weight: .bold))
-                                    .foregroundColor(.white)
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 14)
-                                    .background(Constants.Colors.negative)
-                                    .cornerRadius(10)
+                            // War Justification
+                            if selectedCountry != nil {
+                                VStack(alignment: .leading, spacing: 12) {
+                                    Text("War Justification")
+                                        .font(.system(size: 16, weight: .bold))
+                                        .foregroundColor(.white)
+
+                                    ForEach([War.WarJustification.territorialDispute, .regimeChange, .resourceControl, .preemptiveStrike], id: \.self) { justification in
+                                        JustificationCard(
+                                            justification: justification,
+                                            isSelected: selectedJustification == justification
+                                        ) {
+                                            selectedJustification = justification
+                                        }
+                                    }
+                                }
+                                .id("justification")
+
+                                // Declare War Button
+                                Button(action: {
+                                    showConfirmation = true
+                                }) {
+                                    Text("Declare War")
+                                        .font(.system(size: 16, weight: .bold))
+                                        .foregroundColor(.white)
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.vertical, 14)
+                                        .background(Constants.Colors.negative)
+                                        .cornerRadius(10)
+                                }
+                                .padding(.top, 10)
                             }
-                            .padding(.top, 10)
                         }
+                        .padding(20)
                     }
-                    .padding(20)
                 }
             }
             .navigationTitle("Declare War")
