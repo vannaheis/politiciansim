@@ -144,6 +144,9 @@ class GameManager: ObservableObject {
                     // Simulate active wars
                     self.warEngine.simulateDay()
 
+                    // Apply war costs to budget
+                    self.applyWarCosts(to: &updatedChar)
+
                     // Update territories and check for rebellions
                     self.territoryManager.processDaily(currentDate: updatedChar.currentDate)
 
@@ -215,6 +218,7 @@ class GameManager: ObservableObject {
                     // Simulate active wars (7 days)
                     for _ in 0..<7 {
                         self.warEngine.simulateDay()
+                        self.applyWarCosts(to: &updatedChar)
                     }
 
                     // Update territories and check for rebellions
@@ -305,6 +309,52 @@ class GameManager: ObservableObject {
 
         character.militaryStats = militaryStats
         characterManager.updateCharacter(character)
+    }
+
+    private func applyWarCosts(to character: inout Character) {
+        // Calculate total daily war costs for all active wars
+        var totalDailyCost: Decimal = 0
+
+        for war in warEngine.activeWars where war.isActive {
+            // Get the player's country code
+            let playerCountry = character.country
+
+            // Add cost if this country is involved in the war
+            if let cost = war.costByCountry[playerCountry] {
+                // Calculate the cost for just today (last entry added by simulateDay)
+                // Since costByCountry is cumulative, we need the increment
+                // For simplicity, we'll calculate it based on current strength
+                let dailyCost = Decimal(war.attacker == playerCountry ? war.attackerStrength : war.defenderStrength) / 1000 * 1_000_000
+                totalDailyCost += dailyCost
+            }
+        }
+
+        // Deduct from budget if there's a cost
+        if totalDailyCost > 0 {
+            if var budget = budgetManager.currentBudget {
+                // Add to expenses (war costs are separate from department budgets)
+                budget.totalExpenses += totalDailyCost
+
+                // Update the budget
+                budgetManager.currentBudget = budget
+
+                // If budget deficit is too large, add stress and reduce approval
+                let deficit = budget.totalExpensesWithInterest - budget.totalRevenue
+                if deficit > 0 {
+                    let deficitPercentage = Double(truncating: (deficit / budget.totalRevenue * 100) as NSDecimalNumber)
+
+                    // Add stress for large deficits (>20% of revenue)
+                    if deficitPercentage > 20 {
+                        character.stress = min(100, character.stress + 1)
+                    }
+
+                    // Reduce approval for massive deficits (>50% of revenue)
+                    if deficitPercentage > 50 {
+                        character.approvalRating = max(0, character.approvalRating - 0.1)
+                    }
+                }
+            }
+        }
     }
 
     // MARK: - Navigation
