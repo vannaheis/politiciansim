@@ -77,6 +77,9 @@ struct MilitaryOverviewView: View {
                     // Military Budget Card
                     MilitaryBudgetCard(militaryStats: militaryStats)
 
+                    // Military Treasury Card
+                    MilitaryTreasuryCard(treasury: militaryStats.treasury)
+
                     // Nuclear Arsenal Card
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Nuclear Arsenal")
@@ -236,6 +239,188 @@ struct MilitaryBudgetCard: View {
             return String(format: "$%.1fB", value / 1_000_000_000)
         } else if value >= 1_000_000 {
             return String(format: "$%.1fM", value / 1_000_000)
+        } else {
+            return formatter.string(from: amount as NSNumber) ?? "$0"
+        }
+    }
+}
+
+// MARK: - Military Treasury Card
+
+struct MilitaryTreasuryCard: View {
+    let treasury: MilitaryTreasury
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Image(systemName: "banknote.fill")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(Constants.Colors.money)
+
+                Text("Military Treasury")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundColor(.white)
+
+                Spacer()
+            }
+
+            Divider().background(Color.white.opacity(0.2))
+
+            // Revenue
+            TreasuryRow(
+                label: "Daily Revenue",
+                amount: treasury.dailyRevenue,
+                icon: "arrow.down.circle.fill",
+                color: Constants.Colors.positive
+            )
+
+            // Expenses breakdown
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Daily Expenses")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(Constants.Colors.secondaryText)
+
+                TreasuryRow(
+                    label: "  Personnel",
+                    amount: treasury.personnelCosts,
+                    icon: "person.fill",
+                    color: Constants.Colors.negative,
+                    isSubitem: true
+                )
+
+                TreasuryRow(
+                    label: "  Maintenance",
+                    amount: treasury.maintenanceCosts,
+                    icon: "wrench.fill",
+                    color: Constants.Colors.negative,
+                    isSubitem: true
+                )
+
+                if treasury.warCosts > 0 {
+                    TreasuryRow(
+                        label: "  War Operations",
+                        amount: treasury.warCosts,
+                        icon: "flag.fill",
+                        color: Constants.Colors.negative,
+                        isSubitem: true
+                    )
+                }
+
+                if treasury.researchCosts > 0 {
+                    TreasuryRow(
+                        label: "  Research",
+                        amount: treasury.researchCosts,
+                        icon: "flame.fill",
+                        color: Constants.Colors.negative,
+                        isSubitem: true
+                    )
+                }
+
+                TreasuryRow(
+                    label: "Total Expenses",
+                    amount: treasury.dailyExpenses,
+                    icon: "arrow.up.circle.fill",
+                    color: Constants.Colors.negative,
+                    isBold: true
+                )
+            }
+
+            Divider().background(Color.white.opacity(0.2))
+
+            // Net Daily
+            HStack {
+                Image(systemName: treasury.isDeficit ? "exclamationmark.triangle.fill" : "checkmark.circle.fill")
+                    .font(.system(size: 14))
+                    .foregroundColor(treasury.isDeficit ? .orange : Constants.Colors.positive)
+
+                Text("Net Daily:")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(Constants.Colors.secondaryText)
+
+                Spacer()
+
+                Text(formatMoney(treasury.netDaily))
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundColor(treasury.isDeficit ? .orange : Constants.Colors.positive)
+            }
+
+            // Cash Reserves
+            HStack {
+                Text("Cash Reserves:")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(Constants.Colors.secondaryText)
+
+                Spacer()
+
+                Text(formatMoney(treasury.cashReserves))
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundColor(treasury.cashReserves >= 0 ? .white : .orange)
+            }
+        }
+        .padding(16)
+        .background(Color(red: 0.15, green: 0.17, blue: 0.22))
+        .cornerRadius(12)
+    }
+
+    private func formatMoney(_ amount: Decimal) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.currencySymbol = "$"
+        formatter.maximumFractionDigits = 0
+
+        let value = Double(truncating: amount as NSNumber)
+        if abs(value) >= 1_000_000_000 {
+            return String(format: "$%.1fB", value / 1_000_000_000)
+        } else if abs(value) >= 1_000_000 {
+            return String(format: "$%.1fM", value / 1_000_000)
+        } else if abs(value) >= 1_000 {
+            return String(format: "$%.1fK", value / 1_000)
+        } else {
+            return formatter.string(from: amount as NSNumber) ?? "$0"
+        }
+    }
+}
+
+struct TreasuryRow: View {
+    let label: String
+    let amount: Decimal
+    let icon: String
+    let color: Color
+    var isSubitem: Bool = false
+    var isBold: Bool = false
+
+    var body: some View {
+        HStack {
+            Image(systemName: icon)
+                .font(.system(size: isSubitem ? 10 : 12))
+                .foregroundColor(color)
+                .frame(width: 16)
+
+            Text(label)
+                .font(.system(size: isSubitem ? 12 : 13, weight: isBold ? .bold : .regular))
+                .foregroundColor(isSubitem ? Constants.Colors.secondaryText : .white)
+
+            Spacer()
+
+            Text(formatMoney(amount))
+                .font(.system(size: isSubitem ? 12 : 13, weight: isBold ? .bold : .semibold))
+                .foregroundColor(color)
+        }
+    }
+
+    private func formatMoney(_ amount: Decimal) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.currencySymbol = "$"
+        formatter.maximumFractionDigits = 0
+
+        let value = Double(truncating: amount as NSNumber)
+        if abs(value) >= 1_000_000_000 {
+            return String(format: "$%.1fB", value / 1_000_000_000)
+        } else if abs(value) >= 1_000_000 {
+            return String(format: "$%.1fM", value / 1_000_000)
+        } else if abs(value) >= 1_000 {
+            return String(format: "$%.1fK", value / 1_000)
         } else {
             return formatter.string(from: amount as NSNumber) ?? "$0"
         }

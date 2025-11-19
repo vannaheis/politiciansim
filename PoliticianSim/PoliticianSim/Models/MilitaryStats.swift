@@ -14,6 +14,7 @@ struct MilitaryStats: Codable {
     var technologyLevels: [TechCategory: Int] = [:]  // 1-10 per category
     var nuclearArsenal: NuclearArsenal
     var militaryBudget: Decimal    // Annual military spending
+    var treasury: MilitaryTreasury // Military-specific treasury tracking
 
     enum RecruitmentType: String, Codable {
         case volunteer = "Volunteer Force"
@@ -47,11 +48,63 @@ struct MilitaryStats: Codable {
         self.recruitmentType = .volunteer
         self.nuclearArsenal = NuclearArsenal()
         self.militaryBudget = 50_000_000_000  // $50B default
+        self.treasury = MilitaryTreasury()
 
         // Initialize all tech categories at level 1
         for category in TechCategory.allCases {
             self.technologyLevels[category] = 1
         }
+    }
+}
+
+// MARK: - Military Treasury
+
+struct MilitaryTreasury: Codable {
+    var cashReserves: Decimal          // Available military funds
+    var dailyRevenue: Decimal          // Daily allocation from budget
+    var dailyExpenses: Decimal         // Daily total expenses
+    var warCosts: Decimal              // Daily war operation costs
+    var personnelCosts: Decimal        // Daily personnel salaries
+    var researchCosts: Decimal         // Daily research expenses
+    var maintenanceCosts: Decimal      // Daily equipment maintenance
+
+    init() {
+        self.cashReserves = 0
+        self.dailyRevenue = 0
+        self.dailyExpenses = 0
+        self.warCosts = 0
+        self.personnelCosts = 0
+        self.researchCosts = 0
+        self.maintenanceCosts = 0
+    }
+
+    var netDaily: Decimal {
+        dailyRevenue - dailyExpenses
+    }
+
+    var isDeficit: Bool {
+        dailyExpenses > dailyRevenue
+    }
+
+    mutating func processDay(budget: Decimal, manpower: Int, activeWarCost: Decimal, activeResearchCost: Decimal) {
+        // Calculate daily revenue from annual budget
+        dailyRevenue = budget / 365
+
+        // Calculate daily personnel costs
+        personnelCosts = Decimal(manpower) * 200 // $200/day per soldier (~$73k/year)
+
+        // Calculate daily maintenance (2% of annual budget)
+        maintenanceCosts = (budget * 0.02) / 365
+
+        // Set war and research costs
+        warCosts = activeWarCost
+        researchCosts = activeResearchCost
+
+        // Calculate total expenses
+        dailyExpenses = personnelCosts + maintenanceCosts + warCosts + researchCosts
+
+        // Update cash reserves
+        cashReserves += netDaily
     }
 }
 
