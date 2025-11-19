@@ -83,6 +83,9 @@ class GovernmentStatsManager: ObservableObject {
                 stats.cultureScore = score
             case .administration:
                 stats.administrationScore = score
+            case .military:
+                // Military doesn't affect government stats directly
+                break
             }
         }
 
@@ -120,6 +123,9 @@ class GovernmentStatsManager: ObservableObject {
             stats.cultureScore = min(100, max(0, stats.cultureScore + change))
         case .administration:
             stats.administrationScore = min(100, max(0, stats.administrationScore + change))
+        case .military:
+            // Military doesn't affect government stats directly
+            break
         }
 
         currentStats = stats
@@ -155,6 +161,8 @@ class GovernmentStatsManager: ObservableObject {
             optimalThreshold = 200 // $200/person annually
         case .administration:
             optimalThreshold = 300 // $300/person annually
+        case .military:
+            optimalThreshold = 1500 // $1,500/person annually
         }
 
         // Use sigmoid-like curve to calculate score (0-100)

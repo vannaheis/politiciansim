@@ -295,7 +295,15 @@ class GameManager: ObservableObject {
         guard character.currentPosition?.level == 5 else { return } // President only
         guard character.militaryStats == nil else { return } // Don't reinitialize
 
-        character.militaryStats = MilitaryStats()
+        var militaryStats = MilitaryStats()
+
+        // Sync with budget department if it exists
+        if let budget = budgetManager.currentBudget,
+           let militaryDept = budget.departments.first(where: { $0.category == .military }) {
+            militaryStats.militaryBudget = militaryDept.allocatedFunds
+        }
+
+        character.militaryStats = militaryStats
         characterManager.updateCharacter(character)
     }
 

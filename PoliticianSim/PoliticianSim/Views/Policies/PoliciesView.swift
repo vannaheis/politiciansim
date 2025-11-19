@@ -852,6 +852,7 @@ struct PolicyDetailView: View {
         case .science: return "atom"
         case .culture: return "theatermasks.fill"
         case .administration: return "building.columns.fill"
+        case .military: return "flag.fill"
         }
     }
 
@@ -867,6 +868,7 @@ struct PolicyDetailView: View {
         case .science: return "Science & Research"
         case .culture: return "Culture & Arts"
         case .administration: return "Administration"
+        case .military: return "Military"
         }
     }
 }

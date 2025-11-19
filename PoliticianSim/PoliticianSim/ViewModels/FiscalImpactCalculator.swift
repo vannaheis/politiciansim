@@ -65,6 +65,10 @@ struct FiscalImpactCalculator {
             case .administration:
                 // Overhead/bureaucracy (negative productivity)
                 immediateFlowEffect += (spending / 1_000_000_000_000) * 0.00005 // 0.005% per $1T
+
+            case .military:
+                // Similar to defense - neutral multiplier
+                immediateFlowEffect += (spending / 1_000_000_000_000) * 0.0004 // 0.04% per $1T
             }
         }
 

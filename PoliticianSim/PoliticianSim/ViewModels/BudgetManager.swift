@@ -78,6 +78,12 @@ class BudgetManager: ObservableObject {
 
         currentBudget = budget
 
+        // Sync with military stats if this is the military department
+        if department.category == .military, var militaryStats = character.militaryStats {
+            militaryStats.militaryBudget = newAmount
+            character.militaryStats = militaryStats
+        }
+
         // Add stress for making tough decisions
         character.stress = min(100, character.stress + 2)
 

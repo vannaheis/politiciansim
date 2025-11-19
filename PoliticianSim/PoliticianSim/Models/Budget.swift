@@ -72,6 +72,7 @@ struct Department: Codable, Identifiable {
         case science = "Science & Research"
         case culture = "Arts & Culture"
         case administration = "Administration"
+        case military = "Military"
 
         var iconName: String {
             switch self {
@@ -85,6 +86,7 @@ struct Department: Codable, Identifiable {
             case .science: return "flask.fill"
             case .culture: return "theatermasks.fill"
             case .administration: return "building.columns.fill"
+            case .military: return "flag.fill"
             }
         }
 
@@ -100,6 +102,7 @@ struct Department: Codable, Identifiable {
             case .science: return (0.4, 0.7, 0.9)
             case .culture: return (0.9, 0.7, 0.4)
             case .administration: return (0.6, 0.6, 0.6)
+            case .military: return (0.5, 0.1, 0.1)
             }
         }
     }
@@ -250,7 +253,7 @@ extension Budget {
 
         // Set initial department allocations as reasonable defaults (% of revenue)
         // User can adjust these in the Departments tab
-        let departments = [
+        var departments = [
             Department(
                 name: "Education Department",
                 category: .education,
@@ -322,6 +325,19 @@ extension Budget {
                 description: "Government operations and administrative costs"
             )
         ]
+
+        // Add Military department for Presidents only (level 5)
+        if governmentLevel == 5 {
+            departments.append(
+                Department(
+                    name: "Military & Defense",
+                    category: .military,
+                    allocatedFunds: 50_000_000_000, // $50B default
+                    proposedFunds: 50_000_000_000,
+                    description: "Armed forces, weapons systems, and national defense"
+                )
+            )
+        }
 
         let totalExpenses = departments.reduce(Decimal(0)) { $0 + $1.allocatedFunds }
 
