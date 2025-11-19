@@ -22,8 +22,6 @@ struct WarRoomView: View {
         ZStack {
             StandardBackgroundView()
 
-            SideMenuView(isOpen: $gameManager.navigationManager.isMenuOpen)
-
             VStack(spacing: 0) {
                 // Top header
                 HStack {
@@ -99,6 +97,9 @@ struct WarRoomView: View {
 
                 Spacer()
             }
+
+            // Side menu overlay (must be last for proper z-index)
+            SideMenuView(isOpen: $gameManager.navigationManager.isMenuOpen)
         }
     }
 }
