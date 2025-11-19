@@ -22,6 +22,8 @@ struct WarRoomView: View {
         ZStack {
             StandardBackgroundView()
 
+            SideMenuView(isOpen: $gameManager.navigationManager.isMenuOpen)
+
             VStack(spacing: 0) {
                 // Top header
                 HStack {
@@ -51,7 +53,7 @@ struct WarRoomView: View {
 
                 // Check if President
                 if let character = gameManager.character {
-                    if character.currentPosition?.level == 6 {
+                    if character.currentPosition?.level == 5 {
                         // Tab selector
                         WarRoomTabSelector(selectedTab: $selectedTab)
                             .padding(.horizontal, 20)

@@ -137,7 +137,7 @@ class GameManager: ObservableObject {
                 self.publicOpinionManager.processActiveActions(character: &updatedChar, currentDate: updatedChar.currentDate)
 
                 // Military operations (President only)
-                if updatedChar.currentPosition?.level == 6 {
+                if updatedChar.currentPosition?.level == 5 {
                     // Advance technology research
                     self.militaryManager.advanceResearch(days: 1)
 
@@ -208,7 +208,7 @@ class GameManager: ObservableObject {
                 self.publicOpinionManager.processActiveActions(character: &updatedChar, currentDate: updatedChar.currentDate)
 
                 // Military operations (President only)
-                if updatedChar.currentPosition?.level == 6 {
+                if updatedChar.currentPosition?.level == 5 {
                     // Advance technology research
                     self.militaryManager.advanceResearch(days: 7)
 
@@ -292,7 +292,7 @@ class GameManager: ObservableObject {
 
     func initializeMilitaryStats() {
         guard var character = character else { return }
-        guard character.currentPosition?.level == 6 else { return } // President only
+        guard character.currentPosition?.level == 5 else { return } // President only
         guard character.militaryStats == nil else { return } // Don't reinitialize
 
         character.militaryStats = MilitaryStats()
