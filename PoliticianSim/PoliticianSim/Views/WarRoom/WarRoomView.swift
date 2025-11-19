@@ -101,6 +101,10 @@ struct WarRoomView: View {
             // Side menu overlay (must be last for proper z-index)
             SideMenuView(isOpen: $gameManager.navigationManager.isMenuOpen)
         }
+        .onAppear {
+            // Initialize military stats if President but stats don't exist
+            gameManager.initializeMilitaryStats()
+        }
     }
 }
 
