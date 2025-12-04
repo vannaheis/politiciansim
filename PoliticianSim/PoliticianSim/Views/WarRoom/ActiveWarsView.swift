@@ -205,9 +205,11 @@ struct DeclareWarSheet: View {
                                         playerStrength: gameManager.character?.militaryStats?.strength ?? 0
                                     ) {
                                         selectedCountry = country
-                                        // Auto-scroll to justification section
-                                        withAnimation {
-                                            scrollProxy.scrollTo("justification", anchor: .top)
+                                        // Auto-scroll to justification section after a brief delay to ensure view is rendered
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                            withAnimation {
+                                                scrollProxy.scrollTo("justification", anchor: .top)
+                                            }
                                         }
                                     }
                                 }
@@ -274,21 +276,43 @@ struct DeclareWarSheet: View {
     }
 
     private func declareWar() {
-        guard var character = gameManager.character else { return }
-        guard let militaryStats = character.militaryStats else { return }
-        guard let target = selectedCountry else { return }
-
-        // Check if can declare war
-        guard gameManager.warEngine.canDeclareWar(
-            playerCountry: character.country,
-            targetCountry: target.code,
-            militaryStats: militaryStats
-        ) else {
+        guard var character = gameManager.character else {
+            print("❌ No character found")
+            return
+        }
+        guard let militaryStats = character.militaryStats else {
+            print("❌ No military stats")
+            return
+        }
+        guard let target = selectedCountry else {
+            print("❌ No target selected")
             return
         }
 
+        print("✅ Attempting to declare war on \(target.name)")
+        print("   Player: \(character.country), Strength: \(militaryStats.strength)")
+        print("   Target: \(target.code), Strength: \(target.militaryStrength)")
+        print("   Active wars: \(gameManager.warEngine.activeWars.count)")
+
+        // Check if can declare war
+        let canDeclare = gameManager.warEngine.canDeclareWar(
+            playerCountry: character.country,
+            targetCountry: target.code,
+            militaryStats: militaryStats
+        )
+
+        if !canDeclare {
+            print("❌ Cannot declare war - check failed")
+            print("   Same country? \(character.country == target.code)")
+            print("   Too many wars? \(gameManager.warEngine.activeWars.count >= 3)")
+            print("   Insufficient strength? \(militaryStats.strength < 100_000)")
+            return
+        }
+
+        print("✅ Can declare war - proceeding")
+
         // Declare war
-        _ = gameManager.warEngine.declareWar(
+        let war = gameManager.warEngine.declareWar(
             attacker: character.country,
             defender: target.name,
             type: .offensive,
@@ -298,6 +322,14 @@ struct DeclareWarSheet: View {
             currentDate: character.currentDate
         )
 
+        if let war = war {
+            print("✅ War declared successfully: \(war.id)")
+            print("   Active wars now: \(gameManager.warEngine.activeWars.count)")
+        } else {
+            print("❌ War declaration returned nil")
+            return
+        }
+
         // Apply approval penalty
         character.approvalRating = max(0, character.approvalRating + selectedJustification.approvalPenalty)
 
@@ -306,6 +338,12 @@ struct DeclareWarSheet: View {
 
         gameManager.characterManager.updateCharacter(character)
 
+        // Force UI update
+        DispatchQueue.main.async {
+            gameManager.objectWillChange.send()
+        }
+
+        print("✅ War declaration complete, dismissing sheet")
         dismiss()
     }
 }

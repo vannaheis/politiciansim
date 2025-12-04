@@ -159,7 +159,7 @@ struct MilitaryBudgetCard: View {
     @EnvironmentObject var gameManager: GameManager
     let militaryStats: MilitaryStats
     @State private var budgetAmount: Double = 0
-    @State private var hasInitialized = false
+    @State private var lastBudgetValue: Decimal = 0
 
     var militaryDepartment: Department? {
         gameManager.budgetManager.currentBudget?.departments.first(where: { $0.category == .military })
@@ -213,15 +213,18 @@ struct MilitaryBudgetCard: View {
         .background(Color(red: 0.15, green: 0.17, blue: 0.22))
         .cornerRadius(12)
         .onAppear {
-            // Only initialize once when first appearing
-            if !hasInitialized {
-                budgetAmount = Double(truncating: militaryStats.militaryBudget as NSDecimalNumber)
-                hasInitialized = true
-            }
+            // Initialize on first appearance
+            budgetAmount = Double(truncating: militaryStats.militaryBudget as NSDecimalNumber)
+            lastBudgetValue = militaryStats.militaryBudget
         }
         .onChange(of: militaryStats.militaryBudget) { newBudget in
-            // Update if the actual military budget changes externally
-            budgetAmount = Double(truncating: newBudget as NSDecimalNumber)
+            // Only update if the budget changed externally (not from slider adjustment)
+            // Check if it's significantly different (more than step size) to avoid update loops
+            let difference = abs(Double(truncating: (newBudget - lastBudgetValue) as NSDecimalNumber))
+            if difference > stepSize * 2 {
+                budgetAmount = Double(truncating: newBudget as NSDecimalNumber)
+                lastBudgetValue = newBudget
+            }
         }
     }
 
@@ -229,6 +232,7 @@ struct MilitaryBudgetCard: View {
         guard var character = gameManager.character else { return }
         guard let departmentId = militaryDepartment?.id else { return }
 
+        lastBudgetValue = newAmount
         let _ = gameManager.budgetManager.adjustDepartmentFunding(
             departmentId: departmentId,
             newAmount: newAmount,

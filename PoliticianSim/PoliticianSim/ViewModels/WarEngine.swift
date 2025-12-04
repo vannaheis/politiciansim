@@ -21,9 +21,7 @@ class WarEngine: ObservableObject {
         // Can't have too many simultaneous wars (max 3)
         guard activeWars.count < 3 else { return false }
 
-        // Must have minimum military strength (100,000)
-        guard militaryStats.strength >= 100_000 else { return false }
-
+        // No minimum strength requirement - you can declare war even if you'll lose
         return true
     }
 
