@@ -3,6 +3,23 @@
 ## Overview
 Implementation of realistic territory tracking, war progression updates, and GDP integration for the political simulation game.
 
+## Recent Updates (Based on User Clarifications)
+
+This plan has been updated to address 12 critical clarifications:
+
+1. **GDP Initialization**: Confirmed GDP data exists in `economicData.worldGDPs`. Need to add 20 missing countries.
+2. **Territory/Population/GDP Changes**: Clarified that all three change proportionally (non-linearly) based on war outcomes using `change_percent^0.7` formula.
+3. **Reparations Integration**: Reparations will integrate with TreasuryManager, deducted yearly for 10 years.
+4. **Territory Aging**: Added annual GDP improvement mechanics for conquered territories (30% → 90% over 4 years).
+5. **Territory Ceding Priority**: Loser's conquered territories are ceded first, then core territory. Active rebellions are separate conflicts.
+6. **Save/Load**: GlobalCountryState, reparations, war reports, and AI wars will be integrated with SaveManager.
+7. **Player Death**: Game ends immediately with popup when player loses war.
+8. **Multiple War Popups**: Show 3 separate popups for 3 concurrent wars (not combined).
+9. **AI Military Strength**: AI military strength evolves based on GDP/territory changes.
+10. **AI War Geography**: No restrictions on AI wars, but neighbors have 3x higher probability (6% vs 2%).
+11. **Status Quo Peace**: Returns all territories to pre-war state (no changes).
+12. **AI War Notifications**: Player is notified of ALL AI wars via popup, not just major powers.
+
 ---
 
 ## 1. Territory System
@@ -86,6 +103,21 @@ class GlobalCountryState {
 }
 ```
 
+### 1.3 Country GDP Initialization
+
+**Existing GDP Data Source**: `EconomicData.worldGDPs` array contains GDP and population for countries.
+
+**Current Coverage**: 20 countries have GDP data initialized in `EconomicData.defaultWorldGDPs()`:
+- USA, China, Japan, Germany, India, UK, France, Brazil, Italy, Canada
+- Russia, South Korea, Australia, Spain, Mexico, Indonesia, Netherlands, Saudi Arabia, Turkey, Switzerland
+
+**Missing GDP Data** (20 countries need to be added):
+- North Korea, Pakistan, Iran, Egypt, Vietnam, Myanmar, Thailand, Poland
+- Israel, Syria, Iraq, Colombia, Venezuela, Cuba, Nigeria, Ethiopia
+- South Africa, Algeria, Taiwan, Ukraine, Afghanistan, Belarus, Kazakhstan, Serbia, Libya
+
+**Implementation**: Add GDP data for remaining 20 countries to `EconomicData.defaultWorldGDPs()` based on 2024 World Bank estimates.
+
 ---
 
 ## 2. Territory Changes from War
@@ -103,15 +135,58 @@ When war ends:
 3. Add to winner's total territory: `winnerTerritory += (loserBaseTerritory * territoryConquered)`
 4. Create `Territory` object in `TerritoryManager` for conquered land (rebellion tracking)
 
-### 2.3 Example Calculation
+### 2.3 Proportional Impact on Population and GDP
+
+**Territory changes affect population and GDP non-linearly** based on war outcomes:
+
+**Population Impact**:
+- When territory is lost/gained, population changes proportionally to territory change
+- Formula: `population_change_percent = territory_change_percent^0.7`
+- Example: Lose 30% territory → Lose ~19.8% population
+
+**GDP Impact**:
+- GDP changes non-linearly with territory (see Section 3.1 for full formula)
+- Conquered territories generate reduced GDP initially (30% → 90% over 4 years)
+- Population loss indirectly reduces GDP (fewer workers, consumers)
+
+**Example**:
+```
+War: USA vs Cuba (30% conquest)
+Territory: Cuba loses 12,727 sq mi (30%)
+Population: Cuba loses 19.8% population → ~2.2M people
+GDP: Cuba loses ~19.8% GDP (if 30% territory lost)
+USA gains: 12,727 sq mi, 2.2M people, but only 30% GDP contribution in Year 1
+```
+
+### 2.4 Territory Loss Priority
+
+**Which territories are ceded?**:
+- Territories owned by the **loser country** are ceded first
+- If loser has conquered territories, those are returned to original owners
+- If loser has no conquered territories, core territory is ceded
+- **Active rebellions are a separate conflict** - not affected by peace terms
+
+**Example**:
+```
+USA has:
+- 3.8M sq mi core territory
+- 450K sq mi conquered territories (Cuba, Libya)
+
+USA loses war, must cede 20%:
+1. First: Return conquered territories (450K sq mi)
+2. If needed: Cede core territory to make up difference
+```
+
+### 2.5 Example Calculation
 ```
 War: USA vs Cuba
 - Cuba base territory: 42,426 sq mi
 - USA wins with 30% conquest
 - Territory transferred: 42,426 * 0.30 = 12,727 sq mi
-- Cuba new total: 29,699 sq mi
+- Population transferred: ~19.8% of Cuba's population (~2.2M)
+- Cuba new total: 29,699 sq mi, 8.9M population
 - USA new total: 3,800,000 + 12,727 = 3,812,727 sq mi
-- Territory object created: "Cuba (Conquered)" - 12,727 sq mi, low morale, rebellion risk
+- Territory object created: "Cuba (Conquered)" - 12,727 sq mi, 2.2M pop, low morale, rebellion risk
 ```
 
 ---
@@ -137,6 +212,36 @@ Newly conquered territories generate **reduced GDP initially**:
 - **Year 4+**: 90% (fully integrated if morale > 0.5)
 
 If territory is annexed (requires morale ≥ 0.5), GDP contribution increases to 100%.
+
+### 3.5 Conquered Territory GDP Aging Mechanics
+
+**Annual GDP Improvement**: Conquered territories automatically improve their GDP contribution each year.
+
+**Implementation**:
+```swift
+struct Territory {
+    let conquestDate: Date
+    var yearsSinceConquest: Int {
+        Calendar.current.dateComponents([.year], from: conquestDate, to: Date()).year ?? 0
+    }
+
+    var gdpContributionMultiplier: Double {
+        switch yearsSinceConquest {
+        case 0: return 0.30  // Year 1
+        case 1: return 0.50  // Year 2
+        case 2: return 0.70  // Year 3
+        case 3...: return morale >= 0.5 ? 0.90 : 0.70  // Year 4+
+        default: return 0.30
+        }
+    }
+}
+```
+
+**Annual Update Trigger**:
+- Add `processAnnualTerritoryGrowth()` to `TerritoryManager`
+- Call from `GameManager.processDaily()` when calendar year changes
+- Recalculate GDP contribution for all conquered territories
+- Notify player if any territories reach 90% integration
 
 ### 3.3 GDP Update Timing
 
@@ -178,9 +283,16 @@ func applyTerritoryGDPImpact(
 
 ### 4.2 Monthly War Update Content
 
+**Multiple Concurrent Wars**: If player is engaged in multiple wars (e.g., 3 wars), show **3 separate popups** sequentially.
+
+**Popup Behavior**:
+- Player must dismiss first popup before seeing second
+- All popups for current month shown in sequence
+- No stacking or combining of war updates
+
 ```
 ┌─────────────────────────────────────┐
-│  WAR UPDATE: USA vs China           │
+│  WAR UPDATE: USA vs China (1 of 3)   │
 │  Month 3 - March 2025                │
 ├─────────────────────────────────────┤
 │                                      │
@@ -200,12 +312,22 @@ func applyTerritoryGDPImpact(
 │                                      │
 │         [Dismiss]  [War Details]     │
 └─────────────────────────────────────┘
+
+[After dismissal, second popup appears]
+
+┌─────────────────────────────────────┐
+│  WAR UPDATE: USA vs Russia (2 of 3)  │
+│  Month 1 - March 2025                │
+├─────────────────────────────────────┤
+│  ...                                 │
+└─────────────────────────────────────┘
 ```
 
 ### 4.3 War Conclusion Popup
 
-Appears when war ends with outcome:
+Appears when war ends with outcome.
 
+**Player Victory**:
 ```
 ┌─────────────────────────────────────┐
 │  WAR CONCLUDED: USA vs China         │
@@ -228,6 +350,33 @@ Appears when war ends with outcome:
 │    [Choose Terms]     [Dismiss]      │
 └─────────────────────────────────────┘
 ```
+
+**Player Defeat (Death)**:
+```
+┌─────────────────────────────────────┐
+│  WAR LOST: USA vs China              │
+│  Defeat - March 15, 2025             │
+├─────────────────────────────────────┤
+│                                      │
+│  YOUR CHARACTER HAS DIED             │
+│                                      │
+│  You have been removed from office   │
+│  due to the catastrophic war defeat. │
+│                                      │
+│  FINAL CASUALTIES                    │
+│  USA: 245,230 killed                 │
+│  China: 52,450 killed                │
+│                                      │
+│  TERRITORY LOST                      │
+│  Lost: 1.5M sq mi (40% of USA)       │
+│                                      │
+│        GAME OVER                     │
+│                                      │
+│       [Return to Menu]               │
+└─────────────────────────────────────┘
+```
+
+**Game Immediately Ends**: No option to continue, player returns to main menu.
 
 ### 4.4 Implementation Location
 
@@ -288,15 +437,104 @@ AI selection based on defeat margin:
 | Narrow (20-40%) | Limited | 10-15% | $50B |
 | Pyrrhic (<20%) | Status Quo | 0% | $0 |
 
-### 5.3 Stalemate Resolution
+### 5.3 Status Quo Peace Terms
+
+**Status Quo Ante Bellum** (Return to pre-war state):
+- **Territory**: All territories return to pre-war ownership
+- **No changes**: GDP, population, and territory are restored to pre-war levels
+- **Casualties/Costs**: Both sides keep war casualties and costs incurred
+- **Reputation Impact**: +10 for winner (merciful), -5 for loser (failed war)
+- **Approval**: +2 for winner, -5 for loser
+
+**When Selected**:
+- Player wins and chooses Status Quo peace term
+- AI selects if pyrrhic victory (attrition difference < 20%)
+- Automatic stalemate after 365 days (neither side reaches 80% attrition)
+
+**Implementation**:
+```swift
+func applyStatusQuoPeace(war: War) {
+    // Restore all territory changes to pre-war state
+    // Return conquered territories to original owners
+    // No GDP changes applied
+    // No population transfers
+}
+```
+
+### 5.4 Stalemate Resolution (Automatic Status Quo)
 
 If neither side reaches 80% attrition after 365 days:
-- Automatic stalemate
-- No territory changes
+- Automatic stalemate outcome
+- Status quo peace terms applied (territories return to pre-war state)
 - Both sides keep casualties/costs
 - Small approval penalty for both (-5)
 
-### 5.4 Implementation Location
+### 5.5 Reparations Integration with TreasuryManager
+
+**Reparations** are monetary payments from loser to winner over time.
+
+**Payment Schedule**:
+- **Amount**: $50B - $500B based on loser's GDP (5-10% of annual GDP)
+- **Duration**: Paid over 10 years
+- **Frequency**: Annual deduction on fiscal year anniversary
+- **Currency**: Deducted from loser's treasury, added to winner's treasury
+
+**Implementation**:
+```swift
+struct ReparationAgreement: Codable, Identifiable {
+    let id: UUID
+    let payerCountry: String
+    let recipientCountry: String
+    let totalAmount: Decimal
+    let yearlyPayment: Decimal
+    let startDate: Date
+    var yearsPaid: Int
+    let totalYears: Int = 10
+
+    var isComplete: Bool {
+        yearsPaid >= totalYears
+    }
+
+    var remainingAmount: Decimal {
+        totalAmount - (yearlyPayment * Decimal(yearsPaid))
+    }
+}
+```
+
+**TreasuryManager Integration**:
+```swift
+class TreasuryManager {
+    @Published var activeReparations: [ReparationAgreement] = []
+
+    func processAnnualReparations(currentDate: Date) {
+        for i in 0..<activeReparations.count {
+            var agreement = activeReparations[i]
+
+            // Deduct from payer
+            deductFunds(amount: agreement.yearlyPayment, reason: "War Reparations")
+
+            // Add to recipient (if player)
+            if agreement.recipientCountry == playerCountry {
+                addRevenue(amount: agreement.yearlyPayment, category: .reparations)
+            }
+
+            // Increment years paid
+            agreement.yearsPaid += 1
+
+            // Remove if complete
+            if agreement.isComplete {
+                activeReparations.remove(at: i)
+            } else {
+                activeReparations[i] = agreement
+            }
+        }
+    }
+}
+```
+
+**Annual Trigger**: Called from `GameManager.processDaily()` when fiscal year changes (calendar year anniversary).
+
+### 5.6 Implementation Location
 
 New view: `PeaceTermsView.swift` - Appears as sheet when player wins war
 
@@ -400,23 +638,50 @@ class GlobalCountryState: ObservableObject {
 ### 7.2 AI vs AI Wars
 
 **Frequency**: Low probability check every month
-- 2% chance per month that two random AI countries declare war
-- Restricted to countries with bordering territories or historical rivalries
+- 2% chance per month that two AI countries declare war
+- **No geographic restrictions** - any two countries can war
+- **Neighbor preference**: Countries close to each other have 3x higher chance (6% vs 2%)
 - Simulated in background (no detailed tracking, just outcome after 3-6 months)
+
+**Neighbor/Rival Pairs** (higher war probability):
+- Russia ↔ Ukraine, China ↔ Taiwan, India ↔ Pakistan
+- Iran ↔ Israel, North Korea ↔ South Korea
+- Saudi Arabia ↔ Iran, Turkey ↔ Syria
+- Ethiopia ↔ Egypt, Algeria ↔ Libya
 
 **Impact on Player**:
 - Territory changes reflected in global rankings
 - Can affect global GDP, trade, alliances (future feature)
-- Player can see AI wars in "Global Conflicts" section
+- **Player is notified of ALL AI wars** via popup notification
+
+**AI War Notification**:
+```
+┌─────────────────────────────────────┐
+│  GLOBAL WAR ALERT                    │
+│  March 2025                          │
+├─────────────────────────────────────┤
+│                                      │
+│  China has declared war on Taiwan    │
+│                                      │
+│  Justification: Territorial Dispute  │
+│  Chinese Forces: 2.0M                │
+│  Taiwan Forces: 150K                 │
+│                                      │
+│  This war does not involve the USA.  │
+│                                      │
+│            [Acknowledge]             │
+└─────────────────────────────────────┘
+```
 
 **Simulation**:
 ```swift
 func simulateAIWar() {
-    // Pick two rival countries
+    // Pick two countries (3x weight for neighbors/rivals)
     // Determine outcome based on strength difference
     // Apply territory changes (10-30% range)
-    // Update GlobalCountryState
-    // Post notification to player if major power involved
+    // Update GlobalCountryState (territory, population, GDP)
+    // Notify player of war start with popup
+    // Simulate 3-6 months, then notify war conclusion
 }
 ```
 
@@ -425,11 +690,112 @@ func simulateAIWar() {
 Maximum simultaneous AI wars: 3 globally
 Cooldown: Country can't declare war again for 12 months after war ends
 
+### 7.4 AI Military Strength Evolution
+
+**AI countries' military strength changes over time** based on:
+- **GDP Growth**: +2% strength per year if GDP grows > 3%
+- **GDP Decline**: -2% strength per year if GDP shrinks
+- **Territory Gains**: +5% strength per 10% territory gained
+- **Territory Losses**: -5% strength per 10% territory lost
+- **Random Events**: ±1-3% strength variation annually
+
+**Implementation**:
+```swift
+func updateAIMilitaryStrength(countryCode: String, yearsPassed: Int) {
+    let country = globalCountryState.getCountry(code: countryCode)
+    let gdpGrowth = (country.currentGDP - country.previousYearGDP) / country.previousYearGDP
+    let territoryChange = (country.totalTerritory - country.baseTerritory) / country.baseTerritory
+
+    var strengthChange = 1.0
+
+    // GDP impact
+    if gdpGrowth > 0.03 {
+        strengthChange *= 1.02
+    } else if gdpGrowth < 0 {
+        strengthChange *= 0.98
+    }
+
+    // Territory impact
+    strengthChange *= (1.0 + territoryChange * 0.5)
+
+    // Random variation
+    strengthChange *= Double.random(in: 0.97...1.03)
+
+    country.militaryStrength = Int(Double(country.militaryStrength) * strengthChange)
+}
+```
+
+**Annual Update Trigger**: Called from `GameManager.processAnnualUpdates()` for all AI countries.
+
 ---
 
-## 8. Monthly Update Timing & War Reports
+## 8. Save/Load Integration
 
-### 8.1 Calendar Month Boundaries
+### 8.1 GlobalCountryState Persistence
+
+**SaveManager Integration**: All territory and war data must be saved and loaded properly.
+
+**Data to Persist**:
+```swift
+struct GameSaveData: Codable {
+    // Existing data
+    var character: Character
+    var economicData: EconomicData
+    var treasuryManager: TreasuryManager
+    // ... other existing data
+
+    // NEW: Territory system data
+    var globalCountryState: GlobalCountryState
+    var conqueredTerritories: [Territory]
+    var activeReparations: [ReparationAgreement]
+    var warReports: [WarReport]
+    var aiWars: [War]  // Background AI vs AI wars
+}
+```
+
+**SaveManager Modifications**:
+```swift
+class SaveManager {
+    func saveGame(
+        character: Character,
+        economicData: EconomicData,
+        treasuryManager: TreasuryManager,
+        globalCountryState: GlobalCountryState,  // NEW
+        conqueredTerritories: [Territory],       // NEW
+        activeReparations: [ReparationAgreement], // NEW
+        warReports: [WarReport],                 // NEW
+        aiWars: [War]                            // NEW
+    ) {
+        let saveData = GameSaveData(...)
+        // Encode and save to disk
+    }
+
+    func loadGame() -> GameSaveData? {
+        // Load from disk and decode
+        // Initialize GlobalCountryState if missing (for old saves)
+    }
+}
+```
+
+**Backwards Compatibility**:
+- If loading old save without GlobalCountryState: Initialize with default values
+- If loading old save without reparations: Initialize empty array
+- Migrate existing character.country territory data to GlobalCountryState
+
+### 8.2 Save Frequency
+
+**Auto-save Triggers**:
+- After war conclusion (territory changes applied)
+- After peace terms selected
+- After monthly war update
+- After AI war conclusion
+- Standard auto-save on day skip
+
+---
+
+## 9. Monthly Update Timing & War Reports
+
+### 9.1 Calendar Month Boundaries
 
 **Trigger**: Check on `skipDay()` if day of month == 1
 **Tracking**: `lastWarUpdateMonth` in GameManager
@@ -447,13 +813,13 @@ func checkMonthlyUpdates(character: Character) {
 }
 ```
 
-### 8.2 Update Stacking Behavior
+### 9.2 Update Stacking Behavior
 
 **Only show most recent**: If player skips multiple months, only show update for current month
 - Previous months' data is recorded but not shown as popup
 - Full history available in War Report view
 
-### 8.3 War Report View
+### 9.3 War Report View
 
 New section in War Room: "War Reports"
 
@@ -477,7 +843,7 @@ New section in War Room: "War Reports"
 
 **Tap to view detailed monthly stats**
 
-### 8.4 War Report Data Model
+### 9.4 War Report Data Model
 
 ```swift
 struct WarReport: Codable, Identifiable {
@@ -502,32 +868,40 @@ Store in `WarEngine`: `@Published var warReports: [WarReport] = []`
 
 ---
 
-## Implementation Order
+## 10. Implementation Order
 
-1. **Phase 1**: Territory Data
+1. **Phase 1**: Territory Data & GDP Initialization
    - Add territory sizes to Country model
    - Create GlobalCountryState manager
    - Initialize all 40 countries with real territory
+   - **Add missing GDP data for 20 countries** to EconomicData.defaultWorldGDPs()
 
 2. **Phase 2**: Territory Transfer Logic
    - Update WarEngine.resolveWar() to transfer territory
    - Implement GlobalCountryState.applyWarOutcome()
    - Update TerritoryManager to create Territory objects
+   - **Add territory loss priority logic** (conquered territories ceded first)
+   - **Add proportional population/GDP impact** (non-linear formula)
 
-3. **Phase 3**: GDP Integration
+3. **Phase 3**: GDP Integration & Aging
    - Implement non-linear GDP impact formula in EconomicDataManager
    - Add conquered territory GDP tracking (30% → 90% over time)
+   - **Add annual territory aging mechanics** (processAnnualTerritoryGrowth)
    - Connect territory changes to budget/revenue updates
 
 4. **Phase 4**: Monthly War Updates
    - Add monthly check to GameManager
    - Create WarUpdate popup model
    - Implement popup UI with war statistics
+   - **Support multiple concurrent war popups** (3 separate popups for 3 wars)
 
-5. **Phase 5**: Peace Terms
+5. **Phase 5**: Peace Terms & Reparations
    - Create PeaceTermsView with 4 options
    - Implement AI peace term selection logic
    - Add reputation/approval impacts
+   - **Implement reparations integration with TreasuryManager** (yearly deductions)
+   - **Add status quo peace term** (restore pre-war state)
+   - **Add player death on war loss** (game over popup)
 
 6. **Phase 6**: Territories UI Tab
    - Create TerritoriesOverviewView
@@ -540,41 +914,65 @@ Store in `WarEngine`: `@Published var warReports: [WarReport] = []`
    - Add monthly snapshot generation
    - Create WarReportsView to browse history
 
-8. **Phase 8**: AI Wars (Optional/Future)
+8. **Phase 8**: AI Wars & Military Strength Evolution
    - Implement AI vs AI war logic
    - Add background war simulation
    - Update global territories automatically
+   - **Add AI military strength evolution** (based on GDP/territory)
+   - **Add neighbor war preference** (3x probability for rivals)
+   - **Notify player of ALL AI wars** (popup notifications)
+
+9. **Phase 9**: Save/Load Integration
+   - **Add GlobalCountryState to SaveManager**
+   - **Add reparations, war reports, AI wars to save data**
+   - Implement backwards compatibility for old saves
+   - Add auto-save triggers for territory changes
 
 ---
 
-## Files to Create/Modify
+## 11. Files to Create/Modify
 
 ### New Files
-- `GlobalCountryState.swift` - Track all countries' territories and GDP
+- `GlobalCountryState.swift` - Track all countries' territories, GDP, and military strength
 - `TerritoriesOverviewView.swift` - Main territories tab UI
 - `PeaceTermsView.swift` - Peace negotiation interface
 - `WarReportsView.swift` - Historical war report browser
 - `WarUpdate.swift` - Monthly war update model
+- `ReparationAgreement.swift` - Reparations payment tracking (or add to existing file)
 
 ### Modified Files
 - `Country.swift` - Add territory data for all countries
 - `RivalCountry` (in ActiveWarsView.swift) - Add territory property
-- `WarEngine.swift` - Add territory transfer logic, war reports
-- `War.swift` - Add peace terms enum
-- `EconomicDataManager.swift` - Add GDP impact from territory
-- `GameManager.swift` - Add monthly war update checks
-- `TerritoryManager.swift` - Enhanced territory tracking
+- `WarEngine.swift` - Add territory transfer logic, war reports, AI war simulation
+- `War.swift` - Add peace terms enum, status quo outcome
+- `EconomicData.swift` - **Add GDP data for 20 missing countries**
+- `EconomicDataManager.swift` - Add GDP impact from territory (non-linear formula)
+- `GameManager.swift` - Add monthly war update checks, annual territory aging, AI military strength updates
+- `TerritoryManager.swift` - Enhanced territory tracking, annual GDP improvement, reparations processing
+- `TreasuryManager.swift` - **Add reparations payment processing**
 - `WarRoomView.swift` - Add Territories tab
+- `SaveManager.swift` - **Add GlobalCountryState, reparations, AI wars to save data**
 
 ---
 
-## Success Metrics
+## 12. Success Metrics
 
 ✅ All 40 countries have realistic territory data
+✅ **All 40 countries have GDP data initialized** (added 20 missing countries)
 ✅ Territory transfers correctly on war conclusion
+✅ **Territory/population/GDP change proportionally (non-linear)** on war outcomes
+✅ **Conquered territories ceded first** when losing wars
 ✅ GDP updates non-linearly with territory changes
+✅ **Conquered territory GDP improves annually** (30% → 90% over 4 years)
 ✅ Monthly popups appear on 1st of each month during active wars
+✅ **Multiple concurrent wars show separate popups** (3 wars = 3 popups)
 ✅ Player can choose peace terms with reputation impacts
+✅ **Reparations are deducted yearly from treasury** for 10 years
+✅ **Status quo peace term restores pre-war state**
+✅ **Player death on war loss triggers game over**
 ✅ Territories tab shows global rankings and player territories
 ✅ War reports archive all monthly war data
-✅ AI wars occasionally occur in background (optional)
+✅ AI wars occur in background with **neighbor preference**
+✅ **AI military strength evolves** based on GDP/territory
+✅ **Player notified of ALL AI wars** via popup
+✅ **All territory data persists** via SaveManager integration
