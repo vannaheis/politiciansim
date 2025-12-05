@@ -158,21 +158,6 @@ struct MilitaryOverviewView: View {
 struct MilitaryBudgetCard: View {
     @EnvironmentObject var gameManager: GameManager
     let militaryStats: MilitaryStats
-    @State private var budgetAmount: Double = 0
-    @State private var lastBudgetValue: Decimal = 0
-
-    var militaryDepartment: Department? {
-        gameManager.budgetManager.currentBudget?.departments.first(where: { $0.category == .military })
-    }
-
-    var maxBudget: Double {
-        guard let budget = gameManager.budgetManager.currentBudget else { return 1_000_000_000_000 }
-        return Double(truncating: (budget.totalRevenue * 0.5) as NSDecimalNumber)
-    }
-
-    var stepSize: Double {
-        maxBudget / 100.0
-    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -181,64 +166,35 @@ struct MilitaryBudgetCard: View {
                 .foregroundColor(.white)
 
             HStack {
-                Text("Current:")
-                    .font(.system(size: 12))
-                    .foregroundColor(Constants.Colors.secondaryText)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Annual Budget")
+                        .font(.system(size: 13))
+                        .foregroundColor(Constants.Colors.secondaryText)
+
+                    Text(formatMoney(militaryStats.militaryBudget))
+                        .font(.system(size: 24, weight: .bold))
+                        .foregroundColor(Constants.Colors.positive)
+                }
 
                 Spacer()
-
-                Text(formatMoney(militaryStats.militaryBudget))
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(.white)
             }
 
-            // Budget adjustment slider
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Proposed: \(formatMoney(Decimal(budgetAmount)))")
-                    .font(.system(size: 12, weight: .semibold))
+            Divider()
+                .background(Color.white.opacity(0.2))
+
+            HStack(spacing: 8) {
+                Image(systemName: "info.circle")
+                    .font(.system(size: 12))
                     .foregroundColor(Constants.Colors.buttonPrimary)
 
-                Slider(value: $budgetAmount, in: 0...maxBudget, step: stepSize)
-                    .accentColor(Constants.Colors.buttonPrimary)
-                    .onChange(of: budgetAmount) { newValue in
-                        adjustBudget(newAmount: Decimal(newValue))
-                    }
+                Text("To adjust military budget, go to Budget → Military Department")
+                    .font(.system(size: 12))
+                    .foregroundColor(Constants.Colors.secondaryText)
             }
-
-            Text("Adjust military budget in the Budget view to apply changes")
-                .font(.system(size: 10))
-                .foregroundColor(Constants.Colors.secondaryText.opacity(0.7))
         }
         .padding(16)
         .background(Color(red: 0.15, green: 0.17, blue: 0.22))
         .cornerRadius(12)
-        .onAppear {
-            // Initialize on first appearance
-            budgetAmount = Double(truncating: militaryStats.militaryBudget as NSDecimalNumber)
-            lastBudgetValue = militaryStats.militaryBudget
-        }
-        .onChange(of: militaryStats.militaryBudget) { newBudget in
-            // Only update if the budget changed externally (not from slider adjustment)
-            // Check if it's significantly different (more than step size) to avoid update loops
-            let difference = abs(Double(truncating: (newBudget - lastBudgetValue) as NSDecimalNumber))
-            if difference > stepSize * 2 {
-                budgetAmount = Double(truncating: newBudget as NSDecimalNumber)
-                lastBudgetValue = newBudget
-            }
-        }
-    }
-
-    private func adjustBudget(newAmount: Decimal) {
-        guard var character = gameManager.character else { return }
-        guard let departmentId = militaryDepartment?.id else { return }
-
-        lastBudgetValue = newAmount
-        let _ = gameManager.budgetManager.adjustDepartmentFunding(
-            departmentId: departmentId,
-            newAmount: newAmount,
-            character: &character
-        )
-        gameManager.characterManager.updateCharacter(character)
     }
 
     private func formatMoney(_ amount: Decimal) -> String {
