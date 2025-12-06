@@ -135,6 +135,7 @@ struct EconomicData: Codable {
     static func defaultWorldGDPs() -> [WorldCountryGDP] {
         // 2024 GDP data (nominal, in USD) and population estimates
         return [
+            // Existing 20 countries
             WorldCountryGDP(countryName: "United States", countryCode: "USA", gdp: 27_360_000_000_000, population: 335_000_000),
             WorldCountryGDP(countryName: "China", countryCode: "CHN", gdp: 17_960_000_000_000, population: 1_425_000_000),
             WorldCountryGDP(countryName: "Japan", countryCode: "JPN", gdp: 4_210_000_000_000, population: 123_000_000),
@@ -154,7 +155,34 @@ struct EconomicData: Codable {
             WorldCountryGDP(countryName: "Netherlands", countryCode: "NLD", gdp: 1_120_000_000_000, population: 17_000_000),
             WorldCountryGDP(countryName: "Saudi Arabia", countryCode: "SAU", gdp: 1_070_000_000_000, population: 36_000_000),
             WorldCountryGDP(countryName: "Turkey", countryCode: "TUR", gdp: 1_030_000_000_000, population: 85_000_000),
-            WorldCountryGDP(countryName: "Switzerland", countryCode: "CHE", gdp: 905_000_000_000, population: 9_000_000)
+            WorldCountryGDP(countryName: "Switzerland", countryCode: "CHE", gdp: 905_000_000_000, population: 9_000_000),
+
+            // NEW: 20 additional countries for territory system
+            WorldCountryGDP(countryName: "Taiwan", countryCode: "TWN", gdp: 790_000_000_000, population: 23_000_000),
+            WorldCountryGDP(countryName: "Poland", countryCode: "POL", gdp: 688_000_000_000, population: 38_000_000),
+            WorldCountryGDP(countryName: "Israel", countryCode: "ISR", gdp: 525_000_000_000, population: 9_500_000),
+            WorldCountryGDP(countryName: "Thailand", countryCode: "THA", gdp: 514_000_000_000, population: 71_000_000),
+            WorldCountryGDP(countryName: "Nigeria", countryCode: "NGA", gdp: 477_000_000_000, population: 223_000_000),
+            WorldCountryGDP(countryName: "Egypt", countryCode: "EGY", gdp: 476_000_000_000, population: 112_000_000),
+            WorldCountryGDP(countryName: "Vietnam", countryCode: "VNM", gdp: 430_000_000_000, population: 98_000_000),
+            WorldCountryGDP(countryName: "Iran", countryCode: "IRN", gdp: 413_000_000_000, population: 89_000_000),
+            WorldCountryGDP(countryName: "South Africa", countryCode: "ZAF", gdp: 380_000_000_000, population: 60_000_000),
+            WorldCountryGDP(countryName: "Colombia", countryCode: "COL", gdp: 363_000_000_000, population: 52_000_000),
+            WorldCountryGDP(countryName: "Pakistan", countryCode: "PAK", gdp: 338_000_000_000, population: 240_000_000),
+            WorldCountryGDP(countryName: "Iraq", countryCode: "IRQ", gdp: 250_000_000_000, population: 44_000_000),
+            WorldCountryGDP(countryName: "Kazakhstan", countryCode: "KAZ", gdp: 225_000_000_000, population: 20_000_000),
+            WorldCountryGDP(countryName: "Algeria", countryCode: "DZA", gdp: 195_000_000_000, population: 45_000_000),
+            WorldCountryGDP(countryName: "Ukraine", countryCode: "UKR", gdp: 160_000_000_000, population: 37_000_000),
+            WorldCountryGDP(countryName: "Ethiopia", countryCode: "ETH", gdp: 156_000_000_000, population: 126_000_000),
+            WorldCountryGDP(countryName: "Cuba", countryCode: "CUB", gdp: 107_000_000_000, population: 11_000_000),
+            WorldCountryGDP(countryName: "Venezuela", countryCode: "VEN", gdp: 97_000_000_000, population: 28_000_000),
+            WorldCountryGDP(countryName: "Belarus", countryCode: "BLR", gdp: 72_000_000_000, population: 9_000_000),
+            WorldCountryGDP(countryName: "Serbia", countryCode: "SRB", gdp: 68_000_000_000, population: 7_000_000),
+            WorldCountryGDP(countryName: "Myanmar", countryCode: "MMR", gdp: 65_000_000_000, population: 54_000_000),
+            WorldCountryGDP(countryName: "Libya", countryCode: "LBY", gdp: 45_000_000_000, population: 7_000_000),
+            WorldCountryGDP(countryName: "North Korea", countryCode: "PRK", gdp: 28_000_000_000, population: 26_000_000),
+            WorldCountryGDP(countryName: "Afghanistan", countryCode: "AFG", gdp: 20_000_000_000, population: 42_000_000),
+            WorldCountryGDP(countryName: "Syria", countryCode: "SYR", gdp: 9_000_000_000, population: 23_000_000)
         ].sorted { $0.gdp > $1.gdp }
     }
 }
