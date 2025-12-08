@@ -30,6 +30,7 @@ class GameManager: ObservableObject {
     @Published var militaryManager = MilitaryManager()
     @Published var warEngine = WarEngine()
     @Published var territoryManager = TerritoryManager()
+    @Published var globalCountryState = GlobalCountryState()
     let saveManager = SaveManager.shared
 
     // Game state

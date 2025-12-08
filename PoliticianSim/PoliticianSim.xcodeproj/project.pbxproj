@@ -103,6 +103,7 @@
 		7C6E47022ECD0F04005F7A3D /* TechnologyResearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46FC2ECD0F04005F7A3D /* TechnologyResearchView.swift */; };
 		7C6E47032ECD0F04005F7A3D /* ActiveWarsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46FA2ECD0F04005F7A3D /* ActiveWarsView.swift */; };
 		7C6E47042ECD0F04005F7A3D /* MilitaryOverviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46FB2ECD0F04005F7A3D /* MilitaryOverviewView.swift */; };
+		7C6E470E2EE75D24005F7A3D /* GlobalCountryState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E470D2EE75D24005F7A3D /* GlobalCountryState.swift */; };
 		FB1BD9A2FE914F06F1F9D2BC /* CustomAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61D83AE85A5956CC2FFCB315 /* CustomAlert.swift */; };
 /* End PBXBuildFile section */
 
@@ -205,6 +206,7 @@
 		7C6E46FC2ECD0F04005F7A3D /* TechnologyResearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TechnologyResearchView.swift; sourceTree = "<group>"; };
 		7C6E46FD2ECD0F04005F7A3D /* TerritoryManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerritoryManagementView.swift; sourceTree = "<group>"; };
 		7C6E46FE2ECD0F04005F7A3D /* WarRoomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarRoomView.swift; sourceTree = "<group>"; };
+		7C6E470D2EE75D24005F7A3D /* GlobalCountryState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalCountryState.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -310,6 +312,7 @@
 				7C6E45332EC58E41005F7A3D /* DiplomacyManager.swift */,
 				7C6E45352EC59552005F7A3D /* PublicOpinionManager.swift */,
 				7C6E453C2EC59BBC005F7A3D /* SaveManager.swift */,
+				7C6E470D2EE75D24005F7A3D /* GlobalCountryState.swift */,
 				7C6E454E2EC6F17A005F7A3D /* EconomicDataManager.swift */,
 			);
 			path = ViewModels;
@@ -635,6 +638,7 @@
 				011 /* TimeManager.swift in Sources */,
 				012 /* NavigationManager.swift in Sources */,
 				013 /* Constants.swift in Sources */,
+				7C6E470E2EE75D24005F7A3D /* GlobalCountryState.swift in Sources */,
 				7C6E45122EC5530A005F7A3D /* ElectionManager.swift in Sources */,
 				7C6E47002ECD0F04005F7A3D /* WarRoomView.swift in Sources */,
 				7C6E47012ECD0F04005F7A3D /* TerritoryManagementView.swift in Sources */,

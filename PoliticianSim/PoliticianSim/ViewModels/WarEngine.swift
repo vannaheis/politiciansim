@@ -84,6 +84,101 @@ class WarEngine: ObservableObject {
         return true
     }
 
+    func applyPeaceTerms(
+        warId: UUID,
+        peaceTerm: War.PeaceTerm,
+        globalCountryState: GlobalCountryState,
+        territoryManager: TerritoryManager,
+        currentDate: Date
+    ) -> PeaceTermResult {
+        guard let index = activeWars.firstIndex(where: { $0.id == warId }) else {
+            return PeaceTermResult(success: false, territoryTransferred: 0, reparationAmount: 0)
+        }
+
+        var war = activeWars[index]
+        war.peaceTerm = peaceTerm
+
+        // Determine winner and loser based on outcome
+        guard let outcome = war.outcome else {
+            return PeaceTermResult(success: false, territoryTransferred: 0, reparationAmount: 0)
+        }
+
+        let isAttackerWinner = outcome == .attackerVictory
+        let winnerCode = isAttackerWinner ? war.attacker : war.defender
+        let loserCode = isAttackerWinner ? war.defender : war.attacker
+
+        var territoryTransferred: Double = 0
+        var reparationAmount: Decimal = 0
+
+        // Apply peace terms
+        switch peaceTerm {
+        case .statusQuo:
+            // No territory changes, return to pre-war state
+            break
+
+        case .reparations:
+            // No territory, only reparations
+            if let loserCountry = globalCountryState.getCountry(code: loserCode) {
+                reparationAmount = peaceTerm.getReparationAmount(loserGDP: loserCountry.currentGDP)
+            }
+
+        case .partialTerritory, .fullConquest:
+            // Territory transfer
+            let territoryPercent = war.territoryConquered ?? peaceTerm.territoryPercent
+
+            // Apply territory changes to GlobalCountryState
+            globalCountryState.applyWarOutcome(
+                attackerCode: winnerCode,
+                defenderCode: loserCode,
+                territoryPercentConquered: territoryPercent
+            )
+
+            // Create conquered Territory object for rebellion tracking
+            if let loserCountry = globalCountryState.getCountry(code: loserCode) {
+                let conqueredSize = loserCountry.baseTerritory * territoryPercent
+                let conqueredPopulation = Int(Double(loserCountry.population) * pow(territoryPercent, 0.7))
+
+                let territory = Territory(
+                    name: "\(loserCountry.name) (Conquered)",
+                    formerOwner: loserCode,
+                    currentOwner: winnerCode,
+                    size: conqueredSize,
+                    population: conqueredPopulation,
+                    conquestDate: currentDate
+                )
+
+                territoryManager.territories.append(territory)
+                territoryTransferred = conqueredSize
+            }
+
+            // Also apply reparations if full conquest
+            if peaceTerm == .fullConquest, let loserCountry = globalCountryState.getCountry(code: loserCode) {
+                reparationAmount = peaceTerm.getReparationAmount(loserGDP: loserCountry.currentGDP)
+            }
+        }
+
+        // Update war record
+        activeWars[index] = war
+
+        return PeaceTermResult(
+            success: true,
+            territoryTransferred: territoryTransferred,
+            reparationAmount: reparationAmount
+        )
+    }
+
+    struct PeaceTermResult {
+        let success: Bool
+        let territoryTransferred: Double  // Square miles
+        let reparationAmount: Decimal
+    }
+
+    func endWar(warId: UUID) {
+        guard let index = activeWars.firstIndex(where: { $0.id == warId }) else { return }
+        let completedWar = activeWars.remove(at: index)
+        warHistory.append(completedWar)
+    }
+
     // MARK: - Nuclear Strike
 
     func launchNuclearStrike(

@@ -23,6 +23,7 @@ struct War: Codable, Identifiable {
     let startDate: Date
     var endDate: Date?
     var outcome: WarOutcome?
+    var peaceTerm: PeaceTerm?  // Peace terms selected by winner
     var territoryConquered: Double?  // Percentage of defender's territory (0.0-0.4)
     var daysSinceStart: Int
 
@@ -119,6 +120,58 @@ struct War: Codable, Identifiable {
         }
     }
 
+    enum PeaceTerm: String, Codable {
+        case fullConquest = "Full Conquest"
+        case partialTerritory = "Partial Territory"
+        case reparations = "Reparations Only"
+        case statusQuo = "Status Quo Ante Bellum"
+
+        var territoryPercent: Double {
+            switch self {
+            case .fullConquest: return 0.35  // 30-40% territory
+            case .partialTerritory: return 0.20  // 15-25% territory
+            case .reparations: return 0.0
+            case .statusQuo: return 0.0
+            }
+        }
+
+        var reputationImpact: Double {
+            switch self {
+            case .fullConquest: return -35
+            case .partialTerritory: return -15
+            case .reparations: return -5
+            case .statusQuo: return 10  // Merciful
+            }
+        }
+
+        var approvalImpact: Double {
+            switch self {
+            case .fullConquest: return -20
+            case .partialTerritory: return -8
+            case .reparations: return 5
+            case .statusQuo: return 2
+            }
+        }
+
+        func getReparationAmount(loserGDP: Double) -> Decimal {
+            switch self {
+            case .fullConquest: return Decimal(loserGDP * 0.10)  // 10% GDP
+            case .partialTerritory: return Decimal(loserGDP * 0.05)  // 5% GDP
+            case .reparations: return Decimal(loserGDP * 0.08)  // 8% GDP
+            case .statusQuo: return 0
+            }
+        }
+
+        var description: String {
+            switch self {
+            case .fullConquest: return "Maximum territory conquest (35-40%). Severe reputation penalty."
+            case .partialTerritory: return "Moderate territory gain (15-25%). Moderate reputation penalty."
+            case .reparations: return "No territory, monetary reparations over 10 years. Small reputation penalty."
+            case .statusQuo: return "Return to pre-war borders. Reputation boost for mercy."
+            }
+        }
+    }
+
     init(
         attacker: String,
         defender: String,
@@ -143,6 +196,7 @@ struct War: Codable, Identifiable {
         self.startDate = startDate
         self.endDate = nil
         self.outcome = nil
+        self.peaceTerm = nil
         self.territoryConquered = nil
         self.daysSinceStart = 0
     }
