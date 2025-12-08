@@ -36,6 +36,9 @@ class GameManager: ObservableObject {
     // Game state
     @Published var gameState: GameState
 
+    // Annual tracking for territory growth
+    private var lastYearChecked: Int?
+
     // Convenience accessors
     var character: Character? {
         characterManager.character
@@ -162,6 +165,27 @@ class GameManager: ObservableObject {
             // ALWAYS simulate economic changes (even if character is dead)
             self.economicDataManager.simulateEconomicChanges(character: updatedChar)
 
+            // Update player's GDP to include conquered territories
+            self.economicDataManager.applyTerritoryGDPImpact(
+                playerCountry: updatedChar.country,
+                globalCountryState: self.globalCountryState,
+                territoryManager: self.territoryManager
+            )
+
+            // Check for annual territory growth (year change)
+            let calendar = Calendar.current
+            let currentYear = calendar.component(.year, from: updatedChar.currentDate)
+            if self.lastYearChecked != currentYear {
+                self.lastYearChecked = currentYear
+
+                // Process annual territory aging
+                let notifications = self.territoryManager.processAnnualTerritoryGrowth(currentDate: updatedChar.currentDate)
+
+                // TODO: Display notifications to player for territories reaching 90% integration
+                // For now, notifications are generated but not shown (will be added in UI phase)
+                _ = notifications
+            }
+
             return updatedChar
         }
 
@@ -237,6 +261,27 @@ class GameManager: ObservableObject {
 
             // ALWAYS simulate economic changes (even if character is dead)
             self.economicDataManager.simulateEconomicChanges(character: updatedChar)
+
+            // Update player's GDP to include conquered territories
+            self.economicDataManager.applyTerritoryGDPImpact(
+                playerCountry: updatedChar.country,
+                globalCountryState: self.globalCountryState,
+                territoryManager: self.territoryManager
+            )
+
+            // Check for annual territory growth (year change)
+            let calendar = Calendar.current
+            let currentYear = calendar.component(.year, from: updatedChar.currentDate)
+            if self.lastYearChecked != currentYear {
+                self.lastYearChecked = currentYear
+
+                // Process annual territory aging
+                let notifications = self.territoryManager.processAnnualTerritoryGrowth(currentDate: updatedChar.currentDate)
+
+                // TODO: Display notifications to player for territories reaching 90% integration
+                // For now, notifications are generated but not shown (will be added in UI phase)
+                _ = notifications
+            }
 
             return updatedChar
         }

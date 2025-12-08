@@ -367,6 +367,54 @@ class EconomicDataManager: ObservableObject {
         objectWillChange.send()
     }
 
+    // MARK: - Territory GDP Impact
+
+    func applyTerritoryGDPImpact(
+        playerCountry: String,
+        globalCountryState: GlobalCountryState,
+        territoryManager: TerritoryManager
+    ) {
+        // Get player's country from global state
+        guard let country = globalCountryState.getCountry(code: playerCountry) else { return }
+
+        // Calculate total conquered territory GDP contribution
+        let conqueredGDP = territoryManager.getTotalConqueredGDPContribution(
+            playerCountry: playerCountry,
+            globalCountryState: globalCountryState
+        )
+
+        // Update federal GDP to include conquered territory GDP
+        let baseGDP = country.currentGDP
+        let totalGDP = baseGDP + conqueredGDP
+
+        economicData.federal.gdp.current = totalGDP
+    }
+
+    func applyTerritoryChangeToCountryGDP(
+        countryCode: String,
+        territoryChangePercent: Double,
+        isGain: Bool,
+        globalCountryState: GlobalCountryState
+    ) {
+        // Get country from global state
+        guard let country = globalCountryState.getCountry(code: countryCode) else { return }
+
+        // Non-linear GDP impact: GDP_change_percent = territory_change_percent^0.7
+        let gdpChangePercent = pow(abs(territoryChangePercent), 0.7)
+
+        if isGain {
+            // New territory initially contributes at 30% productivity (handled by Territory.gdpContributionMultiplier)
+            // The actual GDP calculation is done in TerritoryManager.getTotalConqueredGDPContribution
+            // This function is called when war ends to update GlobalCountryState
+        } else {
+            // Lost territory reduces GDP immediately
+            let gdpLoss = country.currentGDP * gdpChangePercent
+            var updatedCountry = country
+            updatedCountry.currentGDP -= gdpLoss
+            globalCountryState.updateCountry(updatedCountry)
+        }
+    }
+
     // MARK: - Formatting Helpers
 
     func formatGDP(_ value: Double) -> String {

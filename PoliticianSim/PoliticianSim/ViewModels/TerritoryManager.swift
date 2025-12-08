@@ -251,4 +251,56 @@ class TerritoryManager: ObservableObject {
         // Check for new rebellions (weekly check)
         checkForRebellions(currentDate: currentDate)
     }
+
+    // MARK: - Annual Territory Growth
+
+    func processAnnualTerritoryGrowth(currentDate: Date) -> [TerritoryGrowthNotification] {
+        var notifications: [TerritoryGrowthNotification] = []
+
+        for i in 0..<territories.count {
+            let territory = territories[i]
+            let previousMultiplier = territory.gdpContributionMultiplier
+
+            // Territory automatically ages one year
+            // The gdpContributionMultiplier is recalculated based on yearsSinceConquest
+
+            let newMultiplier = territory.gdpContributionMultiplier
+
+            // Notify if territory reached 90% integration
+            if previousMultiplier < 0.90 && newMultiplier >= 0.90 {
+                notifications.append(TerritoryGrowthNotification(
+                    territoryName: territory.name,
+                    newMultiplier: newMultiplier,
+                    reachedFullIntegration: true
+                ))
+            }
+        }
+
+        return notifications
+    }
+
+    struct TerritoryGrowthNotification {
+        let territoryName: String
+        let newMultiplier: Double
+        let reachedFullIntegration: Bool
+    }
+
+    // MARK: - GDP Contribution Calculations
+
+    func getTotalConqueredGDPContribution(playerCountry: String, globalCountryState: GlobalCountryState) -> Double {
+        var totalGDP: Double = 0
+
+        for territory in territories where territory.currentOwner == playerCountry {
+            // Get the base GDP for this territory from global state
+            if let formerCountry = globalCountryState.getCountry(code: territory.formerOwner) {
+                let territoryPercentOfFormerCountry = territory.size / formerCountry.baseTerritory
+                let baseGDPForTerritory = formerCountry.currentGDP * territoryPercentOfFormerCountry
+
+                // Apply GDP contribution multiplier based on years since conquest
+                totalGDP += baseGDPForTerritory * territory.gdpContributionMultiplier
+            }
+        }
+
+        return totalGDP
+    }
 }
