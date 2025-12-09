@@ -190,11 +190,10 @@ class GameManager: ObservableObject {
                 _ = notifications
             }
 
-            // Check for monthly war updates (month change, 1st of month)
+            // Check for monthly war updates (month change)
             let currentMonth = calendar.component(.month, from: updatedChar.currentDate)
-            let dayOfMonth = calendar.component(.day, from: updatedChar.currentDate)
 
-            if dayOfMonth == 1 && self.lastMonthChecked != currentMonth {
+            if self.lastMonthChecked != currentMonth {
                 self.lastMonthChecked = currentMonth
                 self.checkForMonthlyWarUpdates(character: updatedChar)
             }
@@ -296,11 +295,10 @@ class GameManager: ObservableObject {
                 _ = notifications
             }
 
-            // Check for monthly war updates (month change, 1st of month)
+            // Check for monthly war updates (month change)
             let currentMonth = calendar.component(.month, from: updatedChar.currentDate)
-            let dayOfMonth = calendar.component(.day, from: updatedChar.currentDate)
 
-            if dayOfMonth == 1 && self.lastMonthChecked != currentMonth {
+            if self.lastMonthChecked != currentMonth {
                 self.lastMonthChecked = currentMonth
                 self.checkForMonthlyWarUpdates(character: updatedChar)
             }
