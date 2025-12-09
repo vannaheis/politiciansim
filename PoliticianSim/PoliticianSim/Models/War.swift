@@ -220,6 +220,17 @@ struct War: Codable, Identifiable {
 
         daysSinceStart += 1
 
+        // Safely calculate daily attrition with zero-strength protection
+        guard attackerStrength > 0 && defenderStrength > 0 else {
+            // If either side has no strength, resolve the war immediately
+            if attackerStrength <= 0 {
+                resolveWar(outcome: .defenderVictory)
+            } else {
+                resolveWar(outcome: .attackerVictory)
+            }
+            return
+        }
+
         // Calculate daily attrition
         let strengthRatio = Double(attackerStrength) / Double(defenderStrength)
         let baseAttrition = 0.001 // 0.1% per day baseline
@@ -228,12 +239,18 @@ struct War: Codable, Identifiable {
         let attackerDailyAttrition = baseAttrition * currentStrategy.attritionMultiplier * (2.0 - strengthRatio)
         let defenderDailyAttrition = baseAttrition * currentStrategy.attritionMultiplier * strengthRatio
 
+        // Ensure values are finite before use
+        guard attackerDailyAttrition.isFinite && defenderDailyAttrition.isFinite else { return }
+
         attackerAttrition = min(1.0, attackerAttrition + attackerDailyAttrition)
         defenderAttrition = min(1.0, defenderAttrition + defenderDailyAttrition)
 
-        // Calculate casualties
-        let attackerCasualties = Int(Double(attackerStrength) * attackerDailyAttrition)
-        let defenderCasualties = Int(Double(defenderStrength) * defenderDailyAttrition)
+        // Calculate casualties with safe conversion
+        let attackerCasualtiesDouble = Double(attackerStrength) * attackerDailyAttrition
+        let defenderCasualtiesDouble = Double(defenderStrength) * defenderDailyAttrition
+
+        let attackerCasualties = attackerCasualtiesDouble.isFinite ? Int(attackerCasualtiesDouble) : 0
+        let defenderCasualties = defenderCasualtiesDouble.isFinite ? Int(defenderCasualtiesDouble) : 0
 
         casualtiesByCountry[attacker, default: 0] += attackerCasualties
         casualtiesByCountry[defender, default: 0] += defenderCasualties

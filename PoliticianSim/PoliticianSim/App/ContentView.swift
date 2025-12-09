@@ -74,6 +74,18 @@ struct MainGameRouter: View {
                 }
             }
 
+            // War Update Popup (shows sequential popups)
+            if let firstUpdate = gameManager.pendingWarUpdates.first {
+                Color.black.opacity(0.7)
+                    .ignoresSafeArea()
+                    .transition(.opacity)
+                    .zIndex(900)
+
+                WarUpdatePopup(update: firstUpdate)
+                    .transition(.scale.combined(with: .opacity))
+                    .zIndex(901)
+            }
+
             // Game Over overlay (highest priority)
             if let gameOverData = gameManager.gameState.gameOverData {
                 GameOverView(gameOverData: gameOverData)

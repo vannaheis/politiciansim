@@ -39,6 +39,10 @@ class GameManager: ObservableObject {
     // Annual tracking for territory growth
     private var lastYearChecked: Int?
 
+    // Monthly tracking for war updates
+    private var lastMonthChecked: Int?
+    @Published var pendingWarUpdates: [WarUpdate] = []
+
     // Convenience accessors
     var character: Character? {
         characterManager.character
@@ -186,6 +190,15 @@ class GameManager: ObservableObject {
                 _ = notifications
             }
 
+            // Check for monthly war updates (month change, 1st of month)
+            let currentMonth = calendar.component(.month, from: updatedChar.currentDate)
+            let dayOfMonth = calendar.component(.day, from: updatedChar.currentDate)
+
+            if dayOfMonth == 1 && self.lastMonthChecked != currentMonth {
+                self.lastMonthChecked = currentMonth
+                self.checkForMonthlyWarUpdates(character: updatedChar)
+            }
+
             return updatedChar
         }
 
@@ -283,6 +296,15 @@ class GameManager: ObservableObject {
                 _ = notifications
             }
 
+            // Check for monthly war updates (month change, 1st of month)
+            let currentMonth = calendar.component(.month, from: updatedChar.currentDate)
+            let dayOfMonth = calendar.component(.day, from: updatedChar.currentDate)
+
+            if dayOfMonth == 1 && self.lastMonthChecked != currentMonth {
+                self.lastMonthChecked = currentMonth
+                self.checkForMonthlyWarUpdates(character: updatedChar)
+            }
+
             return updatedChar
         }
 
@@ -357,6 +379,35 @@ class GameManager: ObservableObject {
 
         character.militaryStats = militaryStats
         characterManager.updateCharacter(character)
+    }
+
+    // MARK: - Monthly War Updates
+
+    private func checkForMonthlyWarUpdates(character: Character) {
+        // Only check if character is president and has active wars
+        guard character.currentPosition?.level == 5 else { return }
+        guard !warEngine.activeWars.isEmpty else { return }
+
+        // Generate war updates for all active wars
+        var updates: [WarUpdate] = []
+        let totalWars = warEngine.activeWars.count
+
+        for (index, war) in warEngine.activeWars.enumerated() where war.isActive {
+            // Calculate which month of the war this is
+            let monthNumber = (war.daysSinceStart / 30) + 1
+
+            let update = WarUpdate(
+                war: war,
+                monthNumber: monthNumber,
+                totalWars: totalWars,
+                warIndex: index
+            )
+
+            updates.append(update)
+        }
+
+        // Set pending war updates to be shown
+        self.pendingWarUpdates = updates
     }
 
     private func processMilitaryTreasury(character: inout Character, days: Int) {

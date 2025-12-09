@@ -104,6 +104,8 @@
 		7C6E47032ECD0F04005F7A3D /* ActiveWarsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46FA2ECD0F04005F7A3D /* ActiveWarsView.swift */; };
 		7C6E47042ECD0F04005F7A3D /* MilitaryOverviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E46FB2ECD0F04005F7A3D /* MilitaryOverviewView.swift */; };
 		7C6E470E2EE75D24005F7A3D /* GlobalCountryState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E470D2EE75D24005F7A3D /* GlobalCountryState.swift */; };
+		7C6E47102EE77B53005F7A3D /* WarUpdate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E470F2EE77B52005F7A3D /* WarUpdate.swift */; };
+		7C6E47122EE77B6C005F7A3D /* WarUpdatePopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E47112EE77B6C005F7A3D /* WarUpdatePopup.swift */; };
 		FB1BD9A2FE914F06F1F9D2BC /* CustomAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61D83AE85A5956CC2FFCB315 /* CustomAlert.swift */; };
 /* End PBXBuildFile section */
 
@@ -207,6 +209,8 @@
 		7C6E46FD2ECD0F04005F7A3D /* TerritoryManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerritoryManagementView.swift; sourceTree = "<group>"; };
 		7C6E46FE2ECD0F04005F7A3D /* WarRoomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarRoomView.swift; sourceTree = "<group>"; };
 		7C6E470D2EE75D24005F7A3D /* GlobalCountryState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalCountryState.swift; sourceTree = "<group>"; };
+		7C6E470F2EE77B52005F7A3D /* WarUpdate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarUpdate.swift; sourceTree = "<group>"; };
+		7C6E47112EE77B6C005F7A3D /* WarUpdatePopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarUpdatePopup.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -284,6 +288,7 @@
 				7C6E46ED2ECC4970005F7A3D /* TechnologyResearch.swift */,
 				7C6E46EE2ECC4970005F7A3D /* Territory.swift */,
 				7C6E46EF2ECC4970005F7A3D /* War.swift */,
+				7C6E470F2EE77B52005F7A3D /* WarUpdate.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -545,6 +550,7 @@
 				7C6E46FC2ECD0F04005F7A3D /* TechnologyResearchView.swift */,
 				7C6E46FD2ECD0F04005F7A3D /* TerritoryManagementView.swift */,
 				7C6E46FE2ECD0F04005F7A3D /* WarRoomView.swift */,
+				7C6E47112EE77B6C005F7A3D /* WarUpdatePopup.swift */,
 			);
 			path = WarRoom;
 			sourceTree = "<group>";
@@ -644,6 +650,7 @@
 				7C6E47012ECD0F04005F7A3D /* TerritoryManagementView.swift in Sources */,
 				7C6E47022ECD0F04005F7A3D /* TechnologyResearchView.swift in Sources */,
 				7C6E47032ECD0F04005F7A3D /* ActiveWarsView.swift in Sources */,
+				7C6E47102EE77B53005F7A3D /* WarUpdate.swift in Sources */,
 				7C6E47042ECD0F04005F7A3D /* MilitaryOverviewView.swift in Sources */,
 				7C6E45472EC684EA005F7A3D /* EnrollmentSheet.swift in Sources */,
 				7C6E45482EC684EA005F7A3D /* EducationView.swift in Sources */,
@@ -665,6 +672,7 @@
 				022 /* IconButton.swift in Sources */,
 				7C6E450C2EC54B25005F7A3D /* EventEngine.swift in Sources */,
 				7C6E454F2EC6F17A005F7A3D /* EconomicDataManager.swift in Sources */,
+				7C6E47122EE77B6C005F7A3D /* WarUpdatePopup.swift in Sources */,
 				023 /* StatDisplay.swift in Sources */,
 				7C6E45242EC57F3C005F7A3D /* BudgetManager.swift in Sources */,
 				7C6E45532EC6F1E2005F7A3D /* LineChartView.swift in Sources */,
