@@ -113,7 +113,7 @@ struct WarCard: View {
                         .font(.system(size: 12))
                         .foregroundColor(Constants.Colors.secondaryText)
 
-                    Text("\(war.casualtiesByCountry[war.attacker] ?? 0)")
+                    Text("\(abs(war.casualtiesByCountry[war.attacker] ?? 0))")
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(Constants.Colors.negative)
                 }

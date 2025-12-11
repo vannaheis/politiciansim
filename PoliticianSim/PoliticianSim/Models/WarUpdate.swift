@@ -23,11 +23,11 @@ struct WarUpdate: Identifiable {
     }
 
     var attackerCasualties: Int {
-        war.casualtiesByCountry[war.attacker] ?? 0
+        abs(war.casualtiesByCountry[war.attacker] ?? 0)
     }
 
     var defenderCasualties: Int {
-        war.casualtiesByCountry[war.defender] ?? 0
+        abs(war.casualtiesByCountry[war.defender] ?? 0)
     }
 
     var attackerCost: Decimal {

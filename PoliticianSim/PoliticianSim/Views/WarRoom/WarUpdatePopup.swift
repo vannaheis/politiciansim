@@ -111,7 +111,7 @@ struct WarUpdatePopup: View {
                                 .font(.system(size: 13))
                                 .foregroundColor(.white)
 
-                            Text(String(format: "%.1f%% depleted", update.attackerAttritionPercent))
+                            Text(String(format: "%.1f%% depleted", abs(update.attackerAttritionPercent)))
                                 .font(.system(size: 16, weight: .bold))
                                 .foregroundColor(.white)
                         }
@@ -123,7 +123,7 @@ struct WarUpdatePopup: View {
                                 .font(.system(size: 13))
                                 .foregroundColor(.white)
 
-                            Text(String(format: "%.1f%% depleted", update.defenderAttritionPercent))
+                            Text(String(format: "%.1f%% depleted", abs(update.defenderAttritionPercent)))
                                 .font(.system(size: 16, weight: .bold))
                                 .foregroundColor(.white)
                         }

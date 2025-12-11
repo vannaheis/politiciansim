@@ -740,7 +740,7 @@ class GameManager: ObservableObject {
                 }
             }
 
-            casualties = war.casualtiesByCountry[character.country] ?? 0
+            casualties = abs(war.casualtiesByCountry[character.country] ?? 0)
         }
 
         // Get current approval/reputation from character properties

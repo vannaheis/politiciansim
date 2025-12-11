@@ -52,63 +52,65 @@ struct PeaceTermsView: View {
                 Divider()
                     .background(Color.white.opacity(0.2))
 
-                // War Summary
-                VStack(spacing: 16) {
-                    // Casualties
-                    HStack {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("CASUALTIES")
-                                .font(.system(size: 12, weight: .semibold))
-                                .foregroundColor(Constants.Colors.secondaryText)
+                // Scrollable content
+                ScrollView {
+                    VStack(spacing: 16) {
+                        // Casualties
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("CASUALTIES")
+                                    .font(.system(size: 12, weight: .semibold))
+                                    .foregroundColor(Constants.Colors.secondaryText)
 
-                            Text("\(formatNumber(war.casualtiesByCountry[war.attacker] ?? 0)) \(war.attacker)")
-                                .font(.system(size: 14))
-                                .foregroundColor(.white)
+                                Text("\(formatNumber(abs(war.casualtiesByCountry[war.attacker] ?? 0))) \(war.attacker)")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.white)
 
-                            Text("\(formatNumber(war.casualtiesByCountry[war.defender] ?? 0)) \(war.defender)")
-                                .font(.system(size: 14))
-                                .foregroundColor(.white)
-                        }
-
-                        Spacer()
-
-                        VStack(alignment: .trailing, spacing: 4) {
-                            Text("WAR COSTS")
-                                .font(.system(size: 12, weight: .semibold))
-                                .foregroundColor(Constants.Colors.secondaryText)
-
-                            Text(formatMoney(war.costByCountry[war.attacker] ?? 0))
-                                .font(.system(size: 14))
-                                .foregroundColor(.white)
-
-                            Text(formatMoney(war.costByCountry[war.defender] ?? 0))
-                                .font(.system(size: 14))
-                                .foregroundColor(.white)
-                        }
-                    }
-
-                    Divider()
-                        .background(Color.white.opacity(0.2))
-
-                    // Peace Terms Selection
-                    Text("SELECT PEACE TERMS")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(Constants.Colors.secondaryText)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-
-                    ForEach(availablePeaceTerms, id: \.self) { term in
-                        PeaceTermButton(
-                            term: term,
-                            defenderCountry: defenderCountry,
-                            war: war,
-                            isPlayerAttacker: isPlayerAttacker,
-                            action: {
-                                selectPeaceTerm(term)
+                                Text("\(formatNumber(abs(war.casualtiesByCountry[war.defender] ?? 0))) \(war.defender)")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.white)
                             }
-                        )
+
+                            Spacer()
+
+                            VStack(alignment: .trailing, spacing: 4) {
+                                Text("WAR COSTS")
+                                    .font(.system(size: 12, weight: .semibold))
+                                    .foregroundColor(Constants.Colors.secondaryText)
+
+                                Text(formatMoney(war.costByCountry[war.attacker] ?? 0))
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.white)
+
+                                Text(formatMoney(war.costByCountry[war.defender] ?? 0))
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.white)
+                            }
+                        }
+
+                        Divider()
+                            .background(Color.white.opacity(0.2))
+
+                        // Peace Terms Selection
+                        Text("SELECT PEACE TERMS")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(Constants.Colors.secondaryText)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+
+                        ForEach(availablePeaceTerms, id: \.self) { term in
+                            PeaceTermButton(
+                                term: term,
+                                defenderCountry: defenderCountry,
+                                war: war,
+                                isPlayerAttacker: isPlayerAttacker,
+                                action: {
+                                    selectPeaceTerm(term)
+                                }
+                            )
+                        }
                     }
+                    .padding(24)
                 }
-                .padding(24)
             }
             .frame(width: 420)
             .background(Constants.Colors.cardBackground)
