@@ -86,6 +86,19 @@ struct MainGameRouter: View {
                     .zIndex(901)
             }
 
+            // Peace Terms Selection (war victory)
+            if let war = gameManager.pendingPeaceTerms {
+                PeaceTermsView(
+                    war: war,
+                    isPresented: Binding(
+                        get: { gameManager.pendingPeaceTerms != nil },
+                        set: { if !$0 { gameManager.pendingPeaceTerms = nil } }
+                    )
+                )
+                .transition(.scale.combined(with: .opacity))
+                .zIndex(950)
+            }
+
             // Game Over overlay (highest priority)
             if let gameOverData = gameManager.gameState.gameOverData {
                 GameOverView(gameOverData: gameOverData)

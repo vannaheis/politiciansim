@@ -132,11 +132,68 @@ class GameState: ObservableObject, Codable {
 // MARK: - Game Over Data
 
 struct GameOverData {
-    let deathCause: DeathCause
-    let age: Int
-    let role: String
-    let characterName: String
+    let reason: GameOverReason
+    let date: Date
+    let finalAge: Int
+    let finalPosition: String?
+    let finalApproval: Double
+    let finalReputation: Double
+    let territoryLost: String?  // For war defeat
+    let warCasualties: Int?     // For war defeat
 
+    // Legacy support for old death causes
+    var deathCause: DeathCause? {
+        switch reason {
+        case .oldAge: return .oldAge
+        case .healthFailure: return .healthFailure
+        case .stress: return .stress
+        default: return nil
+        }
+    }
+
+    var age: Int { finalAge }
+    var role: String { finalPosition ?? "Unknown" }
+    var characterName: String { "Character" }  // TODO: Get from character
+
+    enum GameOverReason {
+        case oldAge
+        case healthFailure
+        case stress
+        case warDefeat
+
+        var title: String {
+            switch self {
+            case .oldAge: return "Natural Causes"
+            case .healthFailure: return "Health Failure"
+            case .stress: return "Fatal Stress"
+            case .warDefeat: return "War Defeat"
+            }
+        }
+
+        var message: String {
+            switch self {
+            case .oldAge:
+                return "lived a full life and passed away peacefully from natural causes."
+            case .healthFailure:
+                return "succumbed to severe health complications. Their health had deteriorated beyond recovery."
+            case .stress:
+                return "suffered a fatal stress-related incident. The pressures of their position proved too much to bear."
+            case .warDefeat:
+                return "was removed from office due to catastrophic war defeat. The nation could not survive such losses."
+            }
+        }
+
+        var icon: String {
+            switch self {
+            case .oldAge: return "clock.fill"
+            case .healthFailure: return "heart.fill"
+            case .stress: return "exclamationmark.triangle.fill"
+            case .warDefeat: return "exclamationmark.octagon.fill"
+            }
+        }
+    }
+
+    // Legacy DeathCause for compatibility
     enum DeathCause {
         case oldAge
         case healthFailure

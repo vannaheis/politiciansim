@@ -43,6 +43,10 @@ class GameManager: ObservableObject {
     private var lastMonthChecked: Int?
     @Published var pendingWarUpdates: [WarUpdate] = []
 
+    // War conclusion tracking
+    @Published var pendingPeaceTerms: War? = nil  // War awaiting peace term selection
+    @Published var playerWarDefeat: War? = nil     // War that caused player death
+
     // Convenience accessors
     var character: Character? {
         characterManager.character
@@ -198,6 +202,9 @@ class GameManager: ObservableObject {
                 self.checkForMonthlyWarUpdates(character: updatedChar)
             }
 
+            // Check for war conclusions
+            self.checkForWarConclusions(character: updatedChar)
+
             return updatedChar
         }
 
@@ -302,6 +309,9 @@ class GameManager: ObservableObject {
                 self.lastMonthChecked = currentMonth
                 self.checkForMonthlyWarUpdates(character: updatedChar)
             }
+
+            // Check for war conclusions
+            self.checkForWarConclusions(character: updatedChar)
 
             return updatedChar
         }
@@ -648,6 +658,105 @@ class GameManager: ObservableObject {
             gameState.stressWarningShown = true
             // Warning will be shown in UI
         }
+    }
+
+    // MARK: - War Conclusion Detection
+
+    private func checkForWarConclusions(character: Character) {
+        let playerCountryCode = character.country
+
+        for war in warEngine.activeWars where !war.isActive {
+            // War has concluded - check if player is involved
+            let isPlayerAttacker = war.attacker == playerCountryCode
+            let isPlayerDefender = war.defender == playerCountryCode
+            let isPlayerInvolved = isPlayerAttacker || isPlayerDefender
+
+            if !isPlayerInvolved {
+                // AI vs AI war - auto-resolve with AI peace terms
+                let aiPeaceTerm = selectAIPeaceTerm(war: war)
+                _ = warEngine.applyPeaceTerms(
+                    warId: war.id,
+                    peaceTerm: aiPeaceTerm,
+                    globalCountryState: globalCountryState,
+                    territoryManager: territoryManager,
+                    currentDate: character.currentDate
+                )
+                warEngine.endWar(warId: war.id)
+                continue
+            }
+
+            // Player is involved
+            let isPlayerWinner = (war.outcome == .attackerVictory && isPlayerAttacker) ||
+                               (war.outcome == .defenderVictory && isPlayerDefender)
+
+            if isPlayerWinner {
+                // Player victory - show peace terms selection
+                if pendingPeaceTerms == nil {  // Only set if not already pending
+                    pendingPeaceTerms = war
+                }
+            } else {
+                // Player defeat - trigger game over
+                if playerWarDefeat == nil {  // Only set if not already set
+                    playerWarDefeat = war
+                    triggerGameOver(reason: .warDefeat, war: war, character: character)
+                }
+            }
+        }
+    }
+
+    private func selectAIPeaceTerm(war: War) -> War.PeaceTerm {
+        // Calculate victory margin based on attrition difference
+        let attritionDiff = war.defenderAttrition - war.attackerAttrition
+
+        if abs(attritionDiff) < 0.20 {
+            // Pyrrhic victory (<20% difference) - Status Quo
+            return .statusQuo
+        } else if abs(attritionDiff) >= 0.60 {
+            // Crushing victory (>60% difference) - Full Conquest
+            return .fullConquest
+        } else if abs(attritionDiff) >= 0.40 {
+            // Decisive victory (40-60% difference) - Partial Territory
+            return .partialTerritory
+        } else {
+            // Narrow victory (20-40% difference) - Reparations
+            return .reparations
+        }
+    }
+
+    private func triggerGameOver(reason: GameOverData.GameOverReason, war: War?, character: Character) {
+        var territoryLost: String? = nil
+        var casualties: Int? = nil
+
+        if let war = war {
+            if let territoryPercent = war.territoryConquered {
+                // Get territory size from GlobalCountryState
+                if let countryState = globalCountryState.getCountry(code: character.country) {
+                    let sqMiles = countryState.totalTerritory * territoryPercent
+                    if sqMiles >= 1_000_000 {
+                        territoryLost = String(format: "%.1fM sq mi (%.0f%%)", sqMiles / 1_000_000, territoryPercent * 100)
+                    } else {
+                        territoryLost = String(format: "%.0fk sq mi (%.0f%%)", sqMiles / 1000, territoryPercent * 100)
+                    }
+                }
+            }
+
+            casualties = war.casualtiesByCountry[character.country] ?? 0
+        }
+
+        // Get current approval/reputation from character properties
+        let currentApproval = character.approvalRating
+        let currentReputation = Double(character.reputation)
+
+        gameState.gameOverData = GameOverData(
+            reason: reason,
+            date: character.currentDate,
+            finalAge: character.age,
+            finalPosition: character.currentPosition?.title,
+            finalApproval: Double(currentApproval),
+            finalReputation: Double(currentReputation),
+            territoryLost: territoryLost,
+            warCasualties: casualties
+        )
     }
 }
 

@@ -99,11 +99,27 @@ class CharacterManager: ObservableObject {
             }
         }
 
+        // Convert legacy death cause to new reason format
+        let deathCause = getDeathCause()
+        let reason: GameOverData.GameOverReason
+        switch deathCause {
+        case .oldAge:
+            reason = .oldAge
+        case .healthFailure:
+            reason = .healthFailure
+        case .stress:
+            reason = .stress
+        }
+
         return GameOverData(
-            deathCause: getDeathCause(),
-            age: character.age,
-            role: role,
-            characterName: character.name
+            reason: reason,
+            date: character.currentDate,
+            finalAge: character.age,
+            finalPosition: character.currentPosition?.title,
+            finalApproval: character.approvalRating,
+            finalReputation: Double(character.reputation),
+            territoryLost: nil,
+            warCasualties: nil
         )
     }
 }

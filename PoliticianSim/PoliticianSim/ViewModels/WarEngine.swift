@@ -54,12 +54,9 @@ class WarEngine: ObservableObject {
         for i in 0..<activeWars.count {
             activeWars[i].simulateDay()
 
-            // Move to history if resolved
-            if !activeWars[i].isActive {
-                let completedWar = activeWars.remove(at: i)
-                warHistory.append(completedWar)
-                break  // Only process one completion per day
-            }
+            // NOTE: Don't automatically move resolved wars to history
+            // Let GameManager.checkForWarConclusions() handle peace terms first
+            // Wars will be moved to history after peace terms are applied
         }
     }
 

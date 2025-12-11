@@ -12,6 +12,8 @@ class TerritoryManager: ObservableObject {
     @Published var territories: [Territory] = []
     @Published var activeRebellions: [Rebellion] = []
     @Published var rebellionHistory: [Rebellion] = []
+    @Published var activeReparations: [ReparationAgreement] = []
+    @Published var completedReparations: [ReparationAgreement] = []
 
     // MARK: - Territory Acquisition
 
@@ -283,6 +285,56 @@ class TerritoryManager: ObservableObject {
         let territoryName: String
         let newMultiplier: Double
         let reachedFullIntegration: Bool
+    }
+
+    // MARK: - Annual Reparations Processing
+
+    func processAnnualReparations(playerCountryCode: String, currentDate: Date) -> Decimal {
+        var totalReceived: Decimal = 0
+        var completedIndices: [Int] = []
+
+        for i in 0..<activeReparations.count {
+            var agreement = activeReparations[i]
+
+            // Process payment
+            agreement.yearsPaid += 1
+
+            // Track if player is recipient
+            if agreement.recipientCountry == playerCountryCode {
+                totalReceived += agreement.yearlyPayment
+            }
+
+            // Check if complete
+            if agreement.isComplete {
+                completedIndices.append(i)
+                completedReparations.append(agreement)
+            } else {
+                activeReparations[i] = agreement
+            }
+        }
+
+        // Remove completed reparations (reverse order to maintain indices)
+        for index in completedIndices.reversed() {
+            activeReparations.remove(at: index)
+        }
+
+        return totalReceived
+    }
+
+    func getTotalAnnualReparationsOwed(payerCountryCode: String) -> Decimal {
+        var total: Decimal = 0
+        for agreement in activeReparations where agreement.payerCountry == payerCountryCode {
+            total += agreement.yearlyPayment
+        }
+        return total
+    }
+
+    func getTotalAnnualReparationsReceived(recipientCountryCode: String) -> Decimal {
+        var total: Decimal = 0
+        for agreement in activeReparations where agreement.recipientCountry == recipientCountryCode {
+            total += agreement.yearlyPayment
+        }
+        return total
     }
 
     // MARK: - GDP Contribution Calculations

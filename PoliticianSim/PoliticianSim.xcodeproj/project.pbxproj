@@ -106,6 +106,8 @@
 		7C6E470E2EE75D24005F7A3D /* GlobalCountryState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E470D2EE75D24005F7A3D /* GlobalCountryState.swift */; };
 		7C6E47102EE77B53005F7A3D /* WarUpdate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E470F2EE77B52005F7A3D /* WarUpdate.swift */; };
 		7C6E47122EE77B6C005F7A3D /* WarUpdatePopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E47112EE77B6C005F7A3D /* WarUpdatePopup.swift */; };
+		7C6E47142EE7EF7D005F7A3D /* PeaceTermsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E47132EE7EF7D005F7A3D /* PeaceTermsView.swift */; };
+		7C6E47162EE7EF95005F7A3D /* ReparationAgreement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E47152EE7EF95005F7A3D /* ReparationAgreement.swift */; };
 		FB1BD9A2FE914F06F1F9D2BC /* CustomAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61D83AE85A5956CC2FFCB315 /* CustomAlert.swift */; };
 /* End PBXBuildFile section */
 
@@ -211,6 +213,8 @@
 		7C6E470D2EE75D24005F7A3D /* GlobalCountryState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalCountryState.swift; sourceTree = "<group>"; };
 		7C6E470F2EE77B52005F7A3D /* WarUpdate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarUpdate.swift; sourceTree = "<group>"; };
 		7C6E47112EE77B6C005F7A3D /* WarUpdatePopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarUpdatePopup.swift; sourceTree = "<group>"; };
+		7C6E47132EE7EF7D005F7A3D /* PeaceTermsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeaceTermsView.swift; sourceTree = "<group>"; };
+		7C6E47152EE7EF95005F7A3D /* ReparationAgreement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReparationAgreement.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -289,6 +293,7 @@
 				7C6E46EE2ECC4970005F7A3D /* Territory.swift */,
 				7C6E46EF2ECC4970005F7A3D /* War.swift */,
 				7C6E470F2EE77B52005F7A3D /* WarUpdate.swift */,
+				7C6E47152EE7EF95005F7A3D /* ReparationAgreement.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -551,6 +556,7 @@
 				7C6E46FD2ECD0F04005F7A3D /* TerritoryManagementView.swift */,
 				7C6E46FE2ECD0F04005F7A3D /* WarRoomView.swift */,
 				7C6E47112EE77B6C005F7A3D /* WarUpdatePopup.swift */,
+				7C6E47132EE7EF7D005F7A3D /* PeaceTermsView.swift */,
 			);
 			path = WarRoom;
 			sourceTree = "<group>";
@@ -658,6 +664,7 @@
 				015 /* StandardBackgroundView.swift in Sources */,
 				016 /* StatCard.swift in Sources */,
 				7C6E46D42EC965C4005F7A3D /* TreasuryView.swift in Sources */,
+				7C6E47142EE7EF7D005F7A3D /* PeaceTermsView.swift in Sources */,
 				017 /* InfoCard.swift in Sources */,
 				7C6E46F92ECD09F2005F7A3D /* TerritoryManager.swift in Sources */,
 				018 /* ProgressBar.swift in Sources */,
@@ -702,6 +709,7 @@
 				7C6E46CF2EC965AF005F7A3D /* Treasury.swift in Sources */,
 				035 /* DateDisplayView.swift in Sources */,
 				036 /* CharacterOverviewCard.swift in Sources */,
+				7C6E47162EE7EF95005F7A3D /* ReparationAgreement.swift in Sources */,
 				7C6E453F2EC59BC8005F7A3D /* SaveGame.swift in Sources */,
 				037 /* QuickStatsView.swift in Sources */,
 				7C6E46EB2ECAD875005F7A3D /* GameOverView.swift in Sources */,
