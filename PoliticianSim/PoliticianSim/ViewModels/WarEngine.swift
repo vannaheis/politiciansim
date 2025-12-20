@@ -314,23 +314,39 @@ class WarEngine: ObservableObject {
         currentDate: Date
     ) {
         // Don't trigger too many wars simultaneously
-        guard activeWars.count < 5 else { return }
+        guard activeWars.count < 5 else {
+            print("🤖 AI War Check: Max wars limit reached (5)")
+            return
+        }
 
         // Low probability - wars should be rare events
         // 2% chance per month = ~24% chance per year for any given country
         let warChance = Double.random(in: 0...1)
-        guard warChance < 0.02 else { return }
+        guard warChance < 0.02 else {
+            print("🤖 AI War Check: No war this month (rolled \(String(format: "%.2f", warChance)))")
+            return
+        }
+
+        print("\n🎲 AI WAR EVALUATION")
+        print("Active wars: \(activeWars.count)/5")
 
         // Select a random aggressor from all countries
         let allCountries = globalCountryState.countries
         guard let aggressor = allCountries.randomElement() else { return }
+
+        print("Evaluating \(aggressor.name) as potential aggressor...")
 
         // Check if this country can declare war
         guard canAICountryDeclareWar(
             aggressorCode: aggressor.code,
             playerCountry: playerCountry,
             globalCountryState: globalCountryState
-        ) else { return }
+        ) else {
+            print("❌ \(aggressor.name) cannot declare war (tier restrictions or war limit)")
+            return
+        }
+
+        print("✅ \(aggressor.name) passed aggression check, searching for target...")
 
         // Find a suitable target
         guard let target = findSuitableTarget(
@@ -338,7 +354,12 @@ class WarEngine: ObservableObject {
             allCountries: allCountries,
             playerCountry: playerCountry,
             globalCountryState: globalCountryState
-        ) else { return }
+        ) else {
+            print("❌ No suitable targets found for \(aggressor.name)")
+            return
+        }
+
+        print("🎯 Target selected: \(target.name)")
 
         // Select appropriate justification
         let justification = selectJustification(aggressor: aggressor, target: target)
@@ -355,9 +376,14 @@ class WarEngine: ObservableObject {
         )
 
         if war != nil {
-            print("🤖 AI WAR: \(aggressor.name) declared war on \(target.name)")
-            print("   Justification: \(justification.rawValue)")
-            print("   Strength ratio: \(Double(aggressor.militaryStrength) / Double(target.militaryStrength))")
+            print("\n⚔️ AI WAR DECLARED")
+            print("Attacker: \(aggressor.name) (strength: \(formatStrength(aggressor.militaryStrength)))")
+            print("Defender: \(target.name) (strength: \(formatStrength(target.militaryStrength)))")
+            print("Strength ratio: \(String(format: "%.2f", Double(aggressor.militaryStrength) / Double(target.militaryStrength))):1")
+            print("Justification: \(justification.rawValue)")
+            print("═══════════════════════════════════════\n")
+        } else {
+            print("❌ Failed to declare war (internal error)")
         }
     }
 
@@ -525,8 +551,28 @@ class WarEngine: ObservableObject {
         // End the war
         endWar(warId: war.id)
 
-        print("🤖 AI WAR RESOLVED: \(winnerCode) vs \(loserCode)")
-        print("   Outcome: \(outcome.rawValue)")
-        print("   Peace terms: \(peaceTerm.rawValue)")
+        // Get country names for better logging
+        let winnerName = globalCountryState.getCountry(code: winnerCode)?.name ?? winnerCode
+        let loserName = globalCountryState.getCountry(code: loserCode)?.name ?? loserCode
+
+        print("\n🏆 AI WAR CONCLUDED")
+        print("Winner: \(winnerName)")
+        print("Loser: \(loserName)")
+        print("Outcome: \(outcome.rawValue)")
+        print("Peace terms: \(peaceTerm.rawValue)")
+        print("Territory %: \(String(format: "%.1f", territoryConquered * 100))%")
+        print("═══════════════════════════════════════\n")
+    }
+
+    // MARK: - Formatting Helpers
+
+    private func formatStrength(_ strength: Int) -> String {
+        if strength >= 1_000_000 {
+            return String(format: "%.1fM", Double(strength) / 1_000_000.0)
+        } else if strength >= 1_000 {
+            return String(format: "%.0fk", Double(strength) / 1_000.0)
+        } else {
+            return "\(strength)"
+        }
     }
 }

@@ -399,6 +399,12 @@ class GameManager: ObservableObject {
     // MARK: - Monthly War Updates
 
     private func checkForMonthlyWarUpdates(character: Character) {
+        let calendar = Calendar.current
+        let month = calendar.component(.month, from: character.currentDate)
+        let year = calendar.component(.year, from: character.currentDate)
+
+        print("\n📅 MONTHLY UPDATE - \(month)/\(year)")
+
         // PHASE 7: AI War Declarations (monthly trigger)
         // Evaluate if AI countries should declare war on each other
         warEngine.evaluateAIWarDeclarations(
@@ -409,7 +415,10 @@ class GameManager: ObservableObject {
 
         // Only show war updates if character is president and has active wars
         guard character.currentPosition?.level == 5 else { return }
-        guard !warEngine.activeWars.isEmpty else { return }
+        guard !warEngine.activeWars.isEmpty else {
+            print("No active wars involving player\n")
+            return
+        }
 
         // Generate war updates for all active wars
         var updates: [WarUpdate] = []
