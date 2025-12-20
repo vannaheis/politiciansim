@@ -314,7 +314,7 @@ struct DeclareWarSheet: View {
         // Declare war
         let war = gameManager.warEngine.declareWar(
             attacker: character.country,
-            defender: target.name,
+            defender: target.code,
             type: .offensive,
             justification: selectedJustification,
             attackerStrength: militaryStats.strength,
