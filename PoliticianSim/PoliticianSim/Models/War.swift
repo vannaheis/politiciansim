@@ -274,10 +274,18 @@ struct War: Codable, Identifiable {
         self.outcome = outcome
         self.endDate = Calendar.current.date(byAdding: .day, value: daysSinceStart, to: startDate)
 
-        // Calculate territory conquered for attacker victories
+        // Calculate territory conquered for victories
         if outcome == .attackerVictory {
             let victorStrength = 1.0 - attackerAttrition
             let loserStrength = 1.0 - defenderAttrition
+            let strengthDifference = victorStrength - loserStrength
+
+            // 10-40% territory based on victory margin
+            territoryConquered = min(0.4, max(0.1, strengthDifference * 0.5))
+        } else if outcome == .defenderVictory {
+            // Defender also gets to claim territory from failed invader
+            let victorStrength = 1.0 - defenderAttrition
+            let loserStrength = 1.0 - attackerAttrition
             let strengthDifference = victorStrength - loserStrength
 
             // 10-40% territory based on victory margin

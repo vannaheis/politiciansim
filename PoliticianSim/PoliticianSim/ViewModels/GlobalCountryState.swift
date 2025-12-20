@@ -165,39 +165,42 @@ class GlobalCountryState: ObservableObject, Codable {
         defenderCode: String,
         territoryPercentConquered: Double
     ) {
-        guard var attacker = getCountry(code: attackerCode),
-              var defender = getCountry(code: defenderCode) else {
+        // NOTE: Parameter names are misleading for historical reasons
+        // attackerCode = winner (gains territory)
+        // defenderCode = loser (loses territory)
+        guard var winner = getCountry(code: attackerCode),
+              var loser = getCountry(code: defenderCode) else {
             return
         }
 
         // Calculate territory transfer
-        let territoryTransferred = defender.baseTerritory * territoryPercentConquered
+        let territoryTransferred = loser.baseTerritory * territoryPercentConquered
 
         // Calculate population transfer (non-linear)
         let populationPercentChange = pow(territoryPercentConquered, 0.7)
-        let populationTransferred = Int(Double(defender.population) * populationPercentChange)
+        let populationTransferred = Int(Double(loser.population) * populationPercentChange)
 
-        // Update attacker
-        attacker.conqueredTerritory += territoryTransferred
-        attacker.population += populationTransferred
+        // Update winner (gains territory)
+        winner.conqueredTerritory += territoryTransferred
+        winner.population += populationTransferred
 
-        // Update defender
-        defender.lostTerritory += territoryTransferred
-        defender.population -= populationTransferred
+        // Update loser (loses territory)
+        loser.lostTerritory += territoryTransferred
+        loser.population -= populationTransferred
 
         // Apply non-linear GDP impact
         let gdpPercentChange = pow(territoryPercentConquered, 0.7)
-        let gdpTransferred = defender.currentGDP * gdpPercentChange
+        let gdpTransferred = loser.currentGDP * gdpPercentChange
 
-        // Defender loses GDP
-        defender.currentGDP -= gdpTransferred
+        // Loser loses GDP
+        loser.currentGDP -= gdpTransferred
 
-        // Attacker gains GDP at reduced rate (30% initially for conquered territory)
-        attacker.currentGDP += gdpTransferred * 0.3
+        // Winner gains GDP at reduced rate (30% initially for conquered territory)
+        winner.currentGDP += gdpTransferred * 0.3
 
         // Save changes
-        updateCountry(attacker)
-        updateCountry(defender)
+        updateCountry(winner)
+        updateCountry(loser)
     }
 
     // MARK: - AI Military Strength Evolution

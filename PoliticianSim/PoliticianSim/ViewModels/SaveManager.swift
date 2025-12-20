@@ -94,7 +94,7 @@ class SaveManager: ObservableObject {
             try data.write(to: autosaveURL())
             lastAutosaveDate = Date()
             hasAutosave = true
-            print("Autosave successful at \(Date())")
+            // Autosave logging removed for cleaner console output
         } catch {
             print("Autosave failed: \(error)")
         }

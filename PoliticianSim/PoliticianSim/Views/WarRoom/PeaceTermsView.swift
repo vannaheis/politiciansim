@@ -12,8 +12,10 @@ struct PeaceTermsView: View {
     let war: War
     @Binding var isPresented: Bool
 
-    var defenderCountry: GlobalCountryState.CountryState? {
-        gameManager.globalCountryState.getCountry(code: isPlayerAttacker ? war.defender : war.attacker)
+    var loserCountry: GlobalCountryState.CountryState? {
+        // Determine loser based on war outcome
+        let loserCode = war.outcome == .attackerVictory ? war.defender : war.attacker
+        return gameManager.globalCountryState.getCountry(code: loserCode)
     }
 
     var isPlayerAttacker: Bool {
@@ -100,7 +102,7 @@ struct PeaceTermsView: View {
                         ForEach(availablePeaceTerms, id: \.self) { term in
                             PeaceTermButton(
                                 term: term,
-                                defenderCountry: defenderCountry,
+                                loserCountry: loserCountry,
                                 war: war,
                                 isPlayerAttacker: isPlayerAttacker,
                                 action: {
@@ -127,6 +129,13 @@ struct PeaceTermsView: View {
     private func selectPeaceTerm(_ term: War.PeaceTerm) {
         guard let character = gameManager.character else { return }
 
+        print("\n=== WAR CONCLUSION DEBUG ===")
+        print("Player selected peace term: \(term.rawValue)")
+        print("War: \(war.attacker) vs \(war.defender)")
+        print("Outcome: \(war.outcome?.rawValue ?? "none")")
+        print("Player is attacker: \(isPlayerAttacker)")
+        print("Territory conquered %: \(war.territoryConquered ?? 0)")
+
         // Apply peace terms
         let result = gameManager.warEngine.applyPeaceTerms(
             warId: war.id,
@@ -135,6 +144,12 @@ struct PeaceTermsView: View {
             territoryManager: gameManager.territoryManager,
             currentDate: character.currentDate
         )
+
+        print("Peace terms result - Success: \(result.success)")
+        print("Territory transferred: \(result.territoryTransferred) sq mi")
+        print("Reparation amount: \(result.reparationAmount)")
+        print("Total territories in manager: \(gameManager.territoryManager.territories.count)")
+        print("Player territories: \(gameManager.territoryManager.territories.filter { $0.currentOwner == character.country }.count)")
 
         if result.success {
             // Apply reputation and approval impacts
@@ -158,11 +173,15 @@ struct PeaceTermsView: View {
                 )
 
                 gameManager.territoryManager.activeReparations.append(reparation)
+                print("Created reparation agreement: \(loserCode) → \(winnerCode)")
             }
 
             // End war
             gameManager.warEngine.endWar(warId: war.id)
+            print("War ended and moved to history")
         }
+
+        print("=== END WAR CONCLUSION DEBUG ===\n")
 
         // Close view
         isPresented = false
@@ -191,7 +210,7 @@ struct PeaceTermsView: View {
 
 struct PeaceTermButton: View {
     let term: War.PeaceTerm
-    let defenderCountry: GlobalCountryState.CountryState?
+    let loserCountry: GlobalCountryState.CountryState?
     let war: War
     let isPlayerAttacker: Bool
     let action: () -> Void
@@ -263,7 +282,7 @@ struct PeaceTermButton: View {
     }
 
     var estimatedTerritory: String? {
-        guard let country = defenderCountry else { return nil }
+        guard let country = loserCountry else { return nil }
 
         let percent = war.territoryConquered ?? term.territoryPercent
         if percent > 0 {
@@ -278,7 +297,7 @@ struct PeaceTermButton: View {
     }
 
     var estimatedReparations: String? {
-        guard let country = defenderCountry else { return nil }
+        guard let country = loserCountry else { return nil }
 
         let amount = term.getReparationAmount(loserGDP: country.currentGDP)
         if amount > 0 {

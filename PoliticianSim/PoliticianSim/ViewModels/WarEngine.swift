@@ -123,6 +123,10 @@ class WarEngine: ObservableObject {
             // Territory transfer
             let territoryPercent = war.territoryConquered ?? peaceTerm.territoryPercent
 
+            print("[WarEngine] Applying territory transfer:")
+            print("  Winner: \(winnerCode), Loser: \(loserCode)")
+            print("  Territory %: \(territoryPercent)")
+
             // Apply territory changes to GlobalCountryState
             globalCountryState.applyWarOutcome(
                 attackerCode: winnerCode,
@@ -135,6 +139,10 @@ class WarEngine: ObservableObject {
                 let conqueredSize = loserCountry.baseTerritory * territoryPercent
                 let conqueredPopulation = Int(Double(loserCountry.population) * pow(territoryPercent, 0.7))
 
+                print("  Loser country found: \(loserCountry.name)")
+                print("  Base territory: \(loserCountry.baseTerritory)")
+                print("  Conquered size: \(conqueredSize)")
+
                 let territory = Territory(
                     name: "\(loserCountry.name) (Conquered)",
                     formerOwner: loserCode,
@@ -146,11 +154,16 @@ class WarEngine: ObservableObject {
 
                 territoryManager.territories.append(territory)
                 territoryTransferred = conqueredSize
+                print("  Territory created and added: \(territory.name)")
+                print("  Total territories now: \(territoryManager.territories.count)")
+            } else {
+                print("  ERROR: Could not find loser country '\(loserCode)'")
             }
 
             // Also apply reparations if full conquest
             if peaceTerm == .fullConquest, let loserCountry = globalCountryState.getCountry(code: loserCode) {
                 reparationAmount = peaceTerm.getReparationAmount(loserGDP: loserCountry.currentGDP)
+                print("  Full conquest reparations: \(reparationAmount)")
             }
         }
 
