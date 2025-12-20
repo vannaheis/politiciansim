@@ -303,4 +303,230 @@ class WarEngine: ObservableObject {
 
         return defeats
     }
+
+    // MARK: - AI War System
+
+    /// Attempts to trigger AI-driven wars between countries
+    /// Called periodically (e.g., monthly) to simulate global conflicts
+    func evaluateAIWarDeclarations(
+        globalCountryState: GlobalCountryState,
+        playerCountry: String,
+        currentDate: Date
+    ) {
+        // Don't trigger too many wars simultaneously
+        guard activeWars.count < 5 else { return }
+
+        // Low probability - wars should be rare events
+        // 2% chance per month = ~24% chance per year for any given country
+        let warChance = Double.random(in: 0...1)
+        guard warChance < 0.02 else { return }
+
+        // Select a random aggressor from all countries
+        let allCountries = globalCountryState.countries
+        guard let aggressor = allCountries.randomElement() else { return }
+
+        // Check if this country can declare war
+        guard canAICountryDeclareWar(
+            aggressorCode: aggressor.code,
+            playerCountry: playerCountry,
+            globalCountryState: globalCountryState
+        ) else { return }
+
+        // Find a suitable target
+        guard let target = findSuitableTarget(
+            for: aggressor,
+            allCountries: allCountries,
+            playerCountry: playerCountry,
+            globalCountryState: globalCountryState
+        ) else { return }
+
+        // Select appropriate justification
+        let justification = selectJustification(aggressor: aggressor, target: target)
+
+        // Declare AI war
+        let war = declareWar(
+            attacker: aggressor.code,
+            defender: target.code,
+            type: .offensive,
+            justification: justification,
+            attackerStrength: aggressor.militaryStrength,
+            defenderStrength: target.militaryStrength,
+            currentDate: currentDate
+        )
+
+        if war != nil {
+            print("🤖 AI WAR: \(aggressor.name) declared war on \(target.name)")
+            print("   Justification: \(justification.rawValue)")
+            print("   Strength ratio: \(Double(aggressor.militaryStrength) / Double(target.militaryStrength))")
+        }
+    }
+
+    private func canAICountryDeclareWar(
+        aggressorCode: String,
+        playerCountry: String,
+        globalCountryState: GlobalCountryState
+    ) -> Bool {
+        guard globalCountryState.getCountry(code: aggressorCode) != nil else { return false }
+
+        // Already in too many wars
+        let warsInvolved = activeWars.filter { $0.attacker == aggressorCode || $0.defender == aggressorCode }
+        guard warsInvolved.count < 2 else { return false }
+
+        // Major powers (top 5 by GDP) are much less aggressive
+        let topPowers = globalCountryState.getRankedByGDP().prefix(5).map { $0.code }
+        if topPowers.contains(aggressorCode) {
+            // Major powers only have 10% the normal war chance
+            return Double.random(in: 0...1) < 0.1
+        }
+
+        // Mid-tier powers (rank 6-15) are moderately aggressive
+        let midTierPowers = globalCountryState.getRankedByGDP().dropFirst(5).prefix(10).map { $0.code }
+        if midTierPowers.contains(aggressorCode) {
+            // Mid-tier powers have 30% the normal war chance
+            return Double.random(in: 0...1) < 0.3
+        }
+
+        // Smaller countries are more aggressive (100% normal chance)
+        return true
+    }
+
+    private func findSuitableTarget(
+        for aggressor: GlobalCountryState.CountryState,
+        allCountries: [GlobalCountryState.CountryState],
+        playerCountry: String,
+        globalCountryState: GlobalCountryState
+    ) -> GlobalCountryState.CountryState? {
+        // Filter potential targets
+        let potentialTargets = allCountries.filter { target in
+            // Can't attack yourself
+            guard target.code != aggressor.code else { return false }
+
+            // Don't attack player (AI vs AI only)
+            guard target.code != playerCountry else { return false }
+
+            // Target must not be in too many wars already
+            let targetWars = activeWars.filter { $0.attacker == target.code || $0.defender == target.code }
+            guard targetWars.count < 2 else { return false }
+
+            // Calculate strength ratio
+            let strengthRatio = Double(aggressor.militaryStrength) / Double(max(1, target.militaryStrength))
+
+            // AI must have reasonable chance of winning (at least 50% strength)
+            guard strengthRatio >= 0.5 else { return false }
+
+            // AI won't attack targets more than 5x stronger
+            guard strengthRatio <= 5.0 else { return false }
+
+            // Prefer targets of similar strength (1:1 to 2:1 ratio)
+            return true
+        }
+
+        guard !potentialTargets.isEmpty else { return nil }
+
+        // Weight selection by strategic value
+        // Prefer weaker neighbors with valuable territory
+        let weightedTargets = potentialTargets.map { target -> (GlobalCountryState.CountryState, Double) in
+            let strengthRatio = Double(aggressor.militaryStrength) / Double(max(1, target.militaryStrength))
+
+            // Favor targets where aggressor is 1.5-3x stronger
+            var weight = 1.0
+            if strengthRatio >= 1.5 && strengthRatio <= 3.0 {
+                weight = 3.0  // Ideal target
+            } else if strengthRatio > 3.0 {
+                weight = 0.5  // Too weak, less interesting
+            } else if strengthRatio < 1.0 {
+                weight = 0.3  // Risky target
+            }
+
+            // Add territory value weight
+            let territoryValue = target.baseTerritory / 1_000_000.0  // Normalize to millions
+            weight *= (1.0 + territoryValue * 0.1)
+
+            return (target, weight)
+        }
+
+        // Select random target weighted by strategic value
+        let totalWeight = weightedTargets.reduce(0.0) { $0 + $1.1 }
+        var randomValue = Double.random(in: 0..<totalWeight)
+
+        for (target, weight) in weightedTargets {
+            randomValue -= weight
+            if randomValue <= 0 {
+                return target
+            }
+        }
+
+        return weightedTargets.first?.0
+    }
+
+    private func selectJustification(
+        aggressor: GlobalCountryState.CountryState,
+        target: GlobalCountryState.CountryState
+    ) -> War.WarJustification {
+        let strengthRatio = Double(aggressor.militaryStrength) / Double(max(1, target.militaryStrength))
+
+        // Strong aggressors use more aggressive justifications
+        if strengthRatio > 2.5 {
+            return [.regimeChange, .resourceControl, .territorialDispute].randomElement() ?? .territorialDispute
+        } else if strengthRatio > 1.5 {
+            return [.territorialDispute, .preemptiveStrike, .resourceControl].randomElement() ?? .territorialDispute
+        } else {
+            // Weaker aggressors use defensive justifications
+            return [.selfDefense, .retaliation, .territorialDispute].randomElement() ?? .territorialDispute
+        }
+    }
+
+    /// Resolves AI wars automatically when they conclude
+    func resolveAIWar(
+        war: War,
+        globalCountryState: GlobalCountryState,
+        territoryManager: TerritoryManager,
+        currentDate: Date
+    ) {
+        guard let outcome = war.outcome else { return }
+        guard outcome != .nuclearAnnihilation && outcome != .stalemate else {
+            // Just end the war for these outcomes
+            endWar(warId: war.id)
+            return
+        }
+
+        // Determine winner/loser
+        let isAttackerWinner = outcome == .attackerVictory
+        let winnerCode = isAttackerWinner ? war.attacker : war.defender
+        let loserCode = isAttackerWinner ? war.defender : war.attacker
+
+        // AI selects peace terms based on victory margin
+        let territoryConquered = war.territoryConquered ?? 0.0
+        let peaceTerm: War.PeaceTerm
+
+        if territoryConquered >= 0.30 {
+            // Decisive victory → Full Conquest
+            peaceTerm = .fullConquest
+        } else if territoryConquered >= 0.20 {
+            // Strong victory → Partial Territory
+            peaceTerm = .partialTerritory
+        } else if territoryConquered >= 0.10 {
+            // Narrow victory → Reparations
+            peaceTerm = .reparations
+        } else {
+            // Pyrrhic victory → Status Quo
+            peaceTerm = .statusQuo
+        }
+
+        // Apply peace terms
+        _ = applyPeaceTerms(
+            warId: war.id,
+            peaceTerm: peaceTerm,
+            globalCountryState: globalCountryState,
+            territoryManager: territoryManager,
+            currentDate: currentDate
+        )
+
+        // End the war
+        endWar(warId: war.id)
+
+        print("🤖 AI WAR RESOLVED: \(winnerCode) vs \(loserCode)")
+        print("   Outcome: \(outcome.rawValue)")
+        print("   Peace terms: \(peaceTerm.rawValue)")
+    }
 }

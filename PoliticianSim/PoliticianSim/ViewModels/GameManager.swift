@@ -38,6 +38,7 @@ class GameManager: ObservableObject {
 
     // Annual tracking for territory growth
     private var lastYearChecked: Int?
+    private var previousYearGDP: [String: Double] = [:]  // For military strength evolution
 
     // Monthly tracking for war updates
     private var lastMonthChecked: Int?
@@ -192,6 +193,9 @@ class GameManager: ObservableObject {
                 // TODO: Display notifications to player for territories reaching 90% integration
                 // For now, notifications are generated but not shown (will be added in UI phase)
                 _ = notifications
+
+                // PHASE 7: Evolve military strength for all countries based on GDP growth
+                self.updateGlobalMilitaryStrength()
             }
 
             // Check for monthly war updates (month change)
@@ -300,6 +304,9 @@ class GameManager: ObservableObject {
                 // TODO: Display notifications to player for territories reaching 90% integration
                 // For now, notifications are generated but not shown (will be added in UI phase)
                 _ = notifications
+
+                // PHASE 7: Evolve military strength for all countries based on GDP growth
+                self.updateGlobalMilitaryStrength()
             }
 
             // Check for monthly war updates (month change)
@@ -392,7 +399,15 @@ class GameManager: ObservableObject {
     // MARK: - Monthly War Updates
 
     private func checkForMonthlyWarUpdates(character: Character) {
-        // Only check if character is president and has active wars
+        // PHASE 7: AI War Declarations (monthly trigger)
+        // Evaluate if AI countries should declare war on each other
+        warEngine.evaluateAIWarDeclarations(
+            globalCountryState: globalCountryState,
+            playerCountry: character.country,
+            currentDate: character.currentDate
+        )
+
+        // Only show war updates if character is president and has active wars
         guard character.currentPosition?.level == 5 else { return }
         guard !warEngine.activeWars.isEmpty else { return }
 
@@ -672,16 +687,13 @@ class GameManager: ObservableObject {
             let isPlayerInvolved = isPlayerAttacker || isPlayerDefender
 
             if !isPlayerInvolved {
-                // AI vs AI war - auto-resolve with AI peace terms
-                let aiPeaceTerm = selectAIPeaceTerm(war: war)
-                _ = warEngine.applyPeaceTerms(
-                    warId: war.id,
-                    peaceTerm: aiPeaceTerm,
+                // AI vs AI war - auto-resolve using WarEngine's AI resolution logic
+                warEngine.resolveAIWar(
+                    war: war,
                     globalCountryState: globalCountryState,
                     territoryManager: territoryManager,
                     currentDate: character.currentDate
                 )
-                warEngine.endWar(warId: war.id)
                 continue
             }
 
@@ -701,25 +713,6 @@ class GameManager: ObservableObject {
                     triggerGameOver(reason: .warDefeat, war: war, character: character)
                 }
             }
-        }
-    }
-
-    private func selectAIPeaceTerm(war: War) -> War.PeaceTerm {
-        // Calculate victory margin based on attrition difference
-        let attritionDiff = war.defenderAttrition - war.attackerAttrition
-
-        if abs(attritionDiff) < 0.20 {
-            // Pyrrhic victory (<20% difference) - Status Quo
-            return .statusQuo
-        } else if abs(attritionDiff) >= 0.60 {
-            // Crushing victory (>60% difference) - Full Conquest
-            return .fullConquest
-        } else if abs(attritionDiff) >= 0.40 {
-            // Decisive victory (40-60% difference) - Partial Territory
-            return .partialTerritory
-        } else {
-            // Narrow victory (20-40% difference) - Reparations
-            return .reparations
         }
     }
 
@@ -757,6 +750,26 @@ class GameManager: ObservableObject {
             territoryLost: territoryLost,
             warCasualties: casualties
         )
+    }
+
+    // MARK: - AI Military Strength Evolution
+
+    private func updateGlobalMilitaryStrength() {
+        // Update military strength for all countries based on GDP growth
+        for country in globalCountryState.countries {
+            let previousGDP = previousYearGDP[country.code] ?? country.currentGDP
+
+            // Update strength using GlobalCountryState's built-in method
+            globalCountryState.updateMilitaryStrength(
+                countryCode: country.code,
+                previousYearGDP: previousGDP
+            )
+
+            // Store current GDP for next year's calculation
+            previousYearGDP[country.code] = country.currentGDP
+        }
+
+        print("📊 Annual military strength update complete")
     }
 }
 
