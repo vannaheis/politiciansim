@@ -80,6 +80,12 @@ struct MainGameRouter: View {
                     .ignoresSafeArea()
                     .transition(.opacity)
                     .zIndex(900)
+                    .onTapGesture {
+                        // Dismiss popup when tapping outside
+                        if !gameManager.pendingWarUpdates.isEmpty {
+                            gameManager.pendingWarUpdates.removeFirst()
+                        }
+                    }
 
                 WarUpdatePopup(update: firstUpdate)
                     .transition(.scale.combined(with: .opacity))
