@@ -68,6 +68,8 @@ struct MainGameRouter: View {
                     EconomicDataView()
                 case .warRoom:
                     WarRoomView()
+                case .warArchive:
+                    WarArchiveView()
                 default:
                     // Placeholder for other views
                     PlaceholderView(viewName: gameManager.navigationManager.currentView.rawValue)

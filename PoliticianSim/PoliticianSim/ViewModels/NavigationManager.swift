@@ -34,6 +34,7 @@ class NavigationManager: ObservableObject {
 
         // Military
         case warRoom = "War Room"
+        case warArchive = "War Archive"
 
         // Relations
         case diplomacy = "Diplomacy"
@@ -60,6 +61,7 @@ class NavigationManager: ObservableObject {
             case .laws: return "book.closed.fill"
             case .governmentStats: return "chart.bar.fill"
             case .warRoom: return "shield.fill"
+            case .warArchive: return "archivebox.fill"
             case .diplomacy: return "globe.americas.fill"
             case .publicOpinion: return "chart.line.uptrend.xyaxis"
             case .economy: return "banknote.fill"
@@ -73,7 +75,7 @@ class NavigationManager: ObservableObject {
             case .profile, .stats, .education: return .character
             case .position, .elections, .campaigns: return .career
             case .policies, .budget, .treasury, .laws, .governmentStats: return .governance
-            case .warRoom: return .military
+            case .warRoom, .warArchive: return .military
             case .diplomacy, .publicOpinion: return .relations
             case .economy: return .economy
             case .settings: return .settings

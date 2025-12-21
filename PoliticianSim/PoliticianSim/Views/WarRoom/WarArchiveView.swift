@@ -11,19 +11,56 @@ struct WarArchiveView: View {
     @EnvironmentObject var gameManager: GameManager
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 16) {
-                if gameManager.warEngine.warHistory.isEmpty {
-                    EmptyArchiveView()
-                } else {
-                    ForEach(sortedWarHistory) { war in
-                        WarArchiveCard(war: war)
+        ZStack {
+            StandardBackgroundView()
+
+            VStack(spacing: 0) {
+                // Top header
+                HStack {
+                    Button(action: {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            gameManager.navigationManager.toggleMenu()
+                        }
+                    }) {
+                        Image(systemName: "line.3.horizontal")
+                            .font(.system(size: 24, weight: .medium))
+                            .foregroundColor(.white)
+                            .frame(width: 44, height: 44)
                     }
+
+                    Spacer()
+
+                    Text("War Archive")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(.white)
+
+                    Spacer()
+
+                    Color.clear.frame(width: 44, height: 44)
                 }
+                .padding(.horizontal, 20)
+                .padding(.top, 16)
+
+                // Content
+                ScrollView {
+                    VStack(spacing: 16) {
+                        if gameManager.warEngine.warHistory.isEmpty {
+                            EmptyArchiveView()
+                        } else {
+                            ForEach(sortedWarHistory) { war in
+                                WarArchiveCard(war: war)
+                            }
+                        }
+                    }
+                    .padding(24)
+                }
+
+                Spacer()
             }
-            .padding(24)
+
+            // Side menu overlay
+            SideMenuView(isOpen: $gameManager.navigationManager.isMenuOpen)
         }
-        .background(Constants.Colors.background)
     }
 
     var sortedWarHistory: [War] {
