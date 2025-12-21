@@ -47,6 +47,7 @@ class GameManager: ObservableObject {
     // War conclusion tracking
     @Published var pendingPeaceTerms: War? = nil  // War awaiting peace term selection
     @Published var playerWarDefeat: War? = nil     // War that caused player death
+    @Published var pendingAIWarNotifications: [AIWarNotification] = []  // AI war conclusions
 
     // Convenience accessors
     var character: Character? {
@@ -697,12 +698,15 @@ class GameManager: ObservableObject {
 
             if !isPlayerInvolved {
                 // AI vs AI war - auto-resolve using WarEngine's AI resolution logic
-                warEngine.resolveAIWar(
+                if let notification = warEngine.resolveAIWar(
                     war: war,
                     globalCountryState: globalCountryState,
                     territoryManager: territoryManager,
                     currentDate: character.currentDate
-                )
+                ) {
+                    // Queue notification for display
+                    pendingAIWarNotifications.append(notification)
+                }
                 continue
             }
 

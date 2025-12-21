@@ -503,17 +503,18 @@ class WarEngine: ObservableObject {
     }
 
     /// Resolves AI wars automatically when they conclude
+    /// Returns notification data if a notification should be shown
     func resolveAIWar(
         war: War,
         globalCountryState: GlobalCountryState,
         territoryManager: TerritoryManager,
         currentDate: Date
-    ) {
-        guard let outcome = war.outcome else { return }
+    ) -> AIWarNotification? {
+        guard let outcome = war.outcome else { return nil }
         guard outcome != .nuclearAnnihilation && outcome != .stalemate else {
             // Just end the war for these outcomes
             endWar(warId: war.id)
-            return
+            return nil
         }
 
         // Determine winner/loser
@@ -540,7 +541,7 @@ class WarEngine: ObservableObject {
         }
 
         // Apply peace terms
-        _ = applyPeaceTerms(
+        let result = applyPeaceTerms(
             warId: war.id,
             peaceTerm: peaceTerm,
             globalCountryState: globalCountryState,
@@ -562,6 +563,18 @@ class WarEngine: ObservableObject {
         print("Peace terms: \(peaceTerm.rawValue)")
         print("Territory %: \(String(format: "%.1f", territoryConquered * 100))%")
         print("═══════════════════════════════════════\n")
+
+        // Create notification
+        let notification = AIWarNotification(
+            war: war,
+            winnerName: winnerName,
+            loserName: loserName,
+            peaceTerm: peaceTerm,
+            territoryTransferred: result.territoryTransferred,
+            reparationAmount: result.reparationAmount
+        )
+
+        return notification
     }
 
     // MARK: - Formatting Helpers

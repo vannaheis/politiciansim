@@ -16,6 +16,7 @@ struct WarRoomView: View {
         case wars
         case research
         case territories
+        case archive
     }
 
     var body: some View {
@@ -68,6 +69,8 @@ struct WarRoomView: View {
                                 TechnologyResearchView()
                             case .territories:
                                 TerritoryManagementView()
+                            case .archive:
+                                WarArchiveView()
                             }
                         }
                         .padding(.top, 16)
@@ -145,6 +148,14 @@ struct WarRoomTabSelector: View {
                 isSelected: selectedTab == .territories
             ) {
                 selectedTab = .territories
+            }
+
+            WarRoomTabButton(
+                title: "Archive",
+                icon: "archivebox.fill",
+                isSelected: selectedTab == .archive
+            ) {
+                selectedTab = .archive
             }
         }
     }

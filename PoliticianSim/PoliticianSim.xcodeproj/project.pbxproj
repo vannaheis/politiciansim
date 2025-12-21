@@ -108,6 +108,9 @@
 		7C6E47122EE77B6C005F7A3D /* WarUpdatePopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E47112EE77B6C005F7A3D /* WarUpdatePopup.swift */; };
 		7C6E47142EE7EF7D005F7A3D /* PeaceTermsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E47132EE7EF7D005F7A3D /* PeaceTermsView.swift */; };
 		7C6E47162EE7EF95005F7A3D /* ReparationAgreement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6E47152EE7EF95005F7A3D /* ReparationAgreement.swift */; };
+		7CF1AE902EF7AB1200E31456 /* AIWarNotificationPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF1AE8E2EF7AB1200E31456 /* AIWarNotificationPopup.swift */; };
+		7CF1AE912EF7AB1200E31456 /* WarArchiveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF1AE8F2EF7AB1200E31456 /* WarArchiveView.swift */; };
+		7CF1AE932EF7AB2900E31456 /* AIWarNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF1AE922EF7AB2900E31456 /* AIWarNotification.swift */; };
 		FB1BD9A2FE914F06F1F9D2BC /* CustomAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61D83AE85A5956CC2FFCB315 /* CustomAlert.swift */; };
 /* End PBXBuildFile section */
 
@@ -215,6 +218,9 @@
 		7C6E47112EE77B6C005F7A3D /* WarUpdatePopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarUpdatePopup.swift; sourceTree = "<group>"; };
 		7C6E47132EE7EF7D005F7A3D /* PeaceTermsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeaceTermsView.swift; sourceTree = "<group>"; };
 		7C6E47152EE7EF95005F7A3D /* ReparationAgreement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReparationAgreement.swift; sourceTree = "<group>"; };
+		7CF1AE8E2EF7AB1200E31456 /* AIWarNotificationPopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIWarNotificationPopup.swift; sourceTree = "<group>"; };
+		7CF1AE8F2EF7AB1200E31456 /* WarArchiveView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarArchiveView.swift; sourceTree = "<group>"; };
+		7CF1AE922EF7AB2900E31456 /* AIWarNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIWarNotification.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -294,6 +300,7 @@
 				7C6E46EF2ECC4970005F7A3D /* War.swift */,
 				7C6E470F2EE77B52005F7A3D /* WarUpdate.swift */,
 				7C6E47152EE7EF95005F7A3D /* ReparationAgreement.swift */,
+				7CF1AE922EF7AB2900E31456 /* AIWarNotification.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -557,6 +564,8 @@
 				7C6E46FE2ECD0F04005F7A3D /* WarRoomView.swift */,
 				7C6E47112EE77B6C005F7A3D /* WarUpdatePopup.swift */,
 				7C6E47132EE7EF7D005F7A3D /* PeaceTermsView.swift */,
+				7CF1AE8E2EF7AB1200E31456 /* AIWarNotificationPopup.swift */,
+				7CF1AE8F2EF7AB1200E31456 /* WarArchiveView.swift */,
 			);
 			path = WarRoom;
 			sourceTree = "<group>";
@@ -655,6 +664,8 @@
 				7C6E47002ECD0F04005F7A3D /* WarRoomView.swift in Sources */,
 				7C6E47012ECD0F04005F7A3D /* TerritoryManagementView.swift in Sources */,
 				7C6E47022ECD0F04005F7A3D /* TechnologyResearchView.swift in Sources */,
+				7CF1AE902EF7AB1200E31456 /* AIWarNotificationPopup.swift in Sources */,
+				7CF1AE912EF7AB1200E31456 /* WarArchiveView.swift in Sources */,
 				7C6E47032ECD0F04005F7A3D /* ActiveWarsView.swift in Sources */,
 				7C6E47102EE77B53005F7A3D /* WarUpdate.swift in Sources */,
 				7C6E47042ECD0F04005F7A3D /* MilitaryOverviewView.swift in Sources */,
@@ -712,6 +723,7 @@
 				7C6E47162EE7EF95005F7A3D /* ReparationAgreement.swift in Sources */,
 				7C6E453F2EC59BC8005F7A3D /* SaveGame.swift in Sources */,
 				037 /* QuickStatsView.swift in Sources */,
+				7CF1AE932EF7AB2900E31456 /* AIWarNotification.swift in Sources */,
 				7C6E46EB2ECAD875005F7A3D /* GameOverView.swift in Sources */,
 				7C6E453D2EC59BBC005F7A3D /* SaveManager.swift in Sources */,
 				038 /* SideMenuView.swift in Sources */,
