@@ -205,6 +205,9 @@ class GameManager: ObservableObject {
             if self.lastMonthChecked != currentMonth {
                 self.lastMonthChecked = currentMonth
                 self.checkForMonthlyWarUpdates(character: updatedChar)
+
+                // Process monthly reparation payments
+                self.processMonthlyReparations(character: &updatedChar)
             }
 
             // Check for war conclusions
@@ -316,6 +319,9 @@ class GameManager: ObservableObject {
             if self.lastMonthChecked != currentMonth {
                 self.lastMonthChecked = currentMonth
                 self.checkForMonthlyWarUpdates(character: updatedChar)
+
+                // Process monthly reparation payments
+                self.processMonthlyReparations(character: &updatedChar)
             }
 
             // Check for war conclusions
@@ -441,6 +447,101 @@ class GameManager: ObservableObject {
 
         // Set pending war updates to be shown
         self.pendingWarUpdates = updates
+    }
+
+    // MARK: - Reparation Payment Processing
+
+    private func processMonthlyReparations(character: inout Character) {
+        guard let treasury = treasuryManager.currentTreasury else { return }
+
+        let playerCountryCode = character.country
+        var paymentsReceived: Decimal = 0
+        var paymentsPaid: Decimal = 0
+
+        // Calculate monthly payment (1/12 of annual)
+        let monthlyMultiplier: Decimal = 1.0 / 12.0
+
+        // Process all active reparations
+        for i in 0..<territoryManager.activeReparations.count {
+            var agreement = territoryManager.activeReparations[i]
+
+            let monthlyPayment = agreement.yearlyPayment * monthlyMultiplier
+
+            // Player is receiving reparations
+            if agreement.recipientCountry == playerCountryCode {
+                // Credit to player's treasury
+                treasuryManager.recordReparationPayment(
+                    amount: monthlyPayment,
+                    description: "War reparations from \(getCountryName(agreement.payerCountry))",
+                    date: character.currentDate
+                )
+                paymentsReceived += monthlyPayment
+            }
+
+            // Player is paying reparations
+            if agreement.payerCountry == playerCountryCode {
+                // Check if player can afford payment
+                if treasury.cashOnHand >= monthlyPayment {
+                    // Deduct from player's treasury
+                    treasuryManager.recordReparationPayment(
+                        amount: -monthlyPayment,
+                        description: "War reparations to \(getCountryName(agreement.recipientCountry))",
+                        date: character.currentDate
+                    )
+                    paymentsPaid += monthlyPayment
+                } else {
+                    // Payment default - apply penalties
+                    handleReparationDefault(
+                        agreement: agreement,
+                        character: &character
+                    )
+                }
+            }
+        }
+
+        // Log payments if any occurred
+        if paymentsReceived > 0 || paymentsPaid > 0 {
+            print("\n💰 REPARATION PAYMENTS")
+            if paymentsReceived > 0 {
+                print("Received: \(formatMoney(paymentsReceived))")
+            }
+            if paymentsPaid > 0 {
+                print("Paid: \(formatMoney(paymentsPaid))")
+            }
+            print("")
+        }
+    }
+
+    private func handleReparationDefault(agreement: ReparationAgreement, character: inout Character) {
+        print("⚠️ REPARATION DEFAULT: \(character.country) cannot afford payment to \(agreement.recipientCountry)")
+
+        // Penalties for defaulting
+        // 1. Severe reputation hit
+        modifyStat(.reputation, by: -15, reason: "Defaulted on war reparations")
+
+        // 2. Diplomatic relations damage
+        modifyApproval(by: -5.0, reason: "War reparations default")
+
+        // 3. Increase stress
+        character.stress = min(100, character.stress + 5)
+
+        // Note: The agreement continues - missed payments accumulate as debt
+        // In a future enhancement, could add debt enforcement mechanics
+    }
+
+    private func getCountryName(_ code: String) -> String {
+        globalCountryState.getCountry(code: code)?.name ?? code
+    }
+
+    private func formatMoney(_ amount: Decimal) -> String {
+        let value = Double(truncating: amount as NSNumber)
+        if value >= 1_000_000_000 {
+            return "$\(String(format: "%.1f", value / 1_000_000_000))B"
+        } else if value >= 1_000_000 {
+            return "$\(String(format: "%.1f", value / 1_000_000))M"
+        } else {
+            return "$\(String(format: "%.0f", value))"
+        }
     }
 
     private func processMilitaryTreasury(character: inout Character, days: Int) {

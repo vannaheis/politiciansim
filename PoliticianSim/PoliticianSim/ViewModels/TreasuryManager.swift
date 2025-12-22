@@ -133,6 +133,42 @@ class TreasuryManager: ObservableObject {
         let recentEntries: [TreasuryEntry]
     }
 
+    // MARK: - Reparation Transactions
+
+    func recordReparationPayment(
+        amount: Decimal,
+        description: String,
+        date: Date
+    ) {
+        guard var treasury = currentTreasury else { return }
+
+        // Apply change to cash on hand
+        treasury.cashOnHand += amount
+
+        // Track cumulative totals
+        if amount > 0 {
+            // Receiving reparations - counts as surplus
+            treasury.totalSurplus += amount
+        } else if amount < 0 {
+            // Paying reparations - counts as debt
+            let cost = abs(amount)
+            treasury.totalDebt += cost
+        }
+
+        // Record entry
+        let fiscalYear = Calendar.current.component(.year, from: date)
+        let entry = TreasuryEntry(
+            date: date,
+            fiscalYear: fiscalYear,
+            cashChange: amount,
+            endingBalance: treasury.cashOnHand,
+            description: description
+        )
+        treasury.history.append(entry)
+
+        currentTreasury = treasury
+    }
+
     // MARK: - Helper Methods
 
     func adjustInterestRate(newRate: Double) {

@@ -80,6 +80,9 @@ struct TreasuryContentView: View {
 
                     // Recent History Card
                     RecentHistoryCard(summary: summary)
+
+                    // Active Reparations Card
+                    ActiveReparationsCard()
                 }
             }
             .padding(.horizontal, 20)
@@ -406,6 +409,140 @@ struct TreasuryHistoryRow: View {
         let formatter = DateFormatter()
         formatter.dateFormat = "MMM d, yyyy"
         return formatter.string(from: date)
+    }
+}
+
+// MARK: - Active Reparations Card
+
+struct ActiveReparationsCard: View {
+    @EnvironmentObject var gameManager: GameManager
+
+    var body: some View {
+        guard let character = gameManager.character else { return AnyView(EmptyView()) }
+
+        let playerCountry = character.country
+        let activeReparations = gameManager.territoryManager.activeReparations
+
+        // Filter reparations involving player
+        let playerReparations = activeReparations.filter {
+            $0.payerCountry == playerCountry || $0.recipientCountry == playerCountry
+        }
+
+        guard !playerReparations.isEmpty else {
+            return AnyView(EmptyView())
+        }
+
+        return AnyView(
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 8) {
+                    Image(systemName: "doc.text.fill")
+                        .font(.system(size: 12))
+                        .foregroundColor(.orange)
+
+                    Text("Active War Reparations")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(Constants.Colors.secondaryText)
+                }
+
+                VStack(spacing: 12) {
+                    ForEach(playerReparations) { agreement in
+                        TreasuryReparationRow(agreement: agreement, playerCountry: playerCountry)
+                    }
+                }
+            }
+            .padding(14)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.white.opacity(0.05))
+            )
+        )
+    }
+}
+
+struct TreasuryReparationRow: View {
+    let agreement: ReparationAgreement
+    let playerCountry: String
+
+    var body: some View {
+        VStack(spacing: 8) {
+            HStack(spacing: 8) {
+                // Direction indicator
+                Image(systemName: isReceiving ? "arrow.down.circle.fill" : "arrow.up.circle.fill")
+                    .font(.system(size: 12))
+                    .foregroundColor(isReceiving ? Constants.Colors.positive : Constants.Colors.negative)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(isReceiving ? "From \(otherCountry)" : "To \(otherCountry)")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.white)
+
+                    Text("Monthly: \(monthlyPayment) • \(yearsRemaining) years left")
+                        .font(.system(size: 11))
+                        .foregroundColor(Constants.Colors.secondaryText.opacity(0.7))
+                }
+
+                Spacer()
+
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text(agreement.formattedRemainingAmount)
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(isReceiving ? Constants.Colors.positive : Constants.Colors.negative)
+
+                    Text("remaining")
+                        .font(.system(size: 10))
+                        .foregroundColor(Constants.Colors.secondaryText.opacity(0.7))
+                }
+            }
+
+            // Progress bar
+            GeometryReader { geometry in
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 2)
+                        .fill(Color.white.opacity(0.1))
+                        .frame(height: 4)
+
+                    RoundedRectangle(cornerRadius: 2)
+                        .fill(isReceiving ? Constants.Colors.positive : .orange)
+                        .frame(width: geometry.size.width * agreement.progressPercent, height: 4)
+                }
+            }
+            .frame(height: 4)
+
+            Divider()
+                .background(Color.white.opacity(0.1))
+        }
+    }
+
+    private var isReceiving: Bool {
+        agreement.recipientCountry == playerCountry
+    }
+
+    private var otherCountry: String {
+        if isReceiving {
+            return agreement.payerCountry
+        } else {
+            return agreement.recipientCountry
+        }
+    }
+
+    private var monthlyPayment: String {
+        let monthly = agreement.yearlyPayment / 12
+        return formatMoney(monthly)
+    }
+
+    private var yearsRemaining: Int {
+        agreement.totalYears - agreement.yearsPaid
+    }
+
+    private func formatMoney(_ amount: Decimal) -> String {
+        let value = Double(truncating: amount as NSNumber)
+        if value >= 1_000_000_000 {
+            return "$\(String(format: "%.1f", value / 1_000_000_000))B"
+        } else if value >= 1_000_000 {
+            return "$\(String(format: "%.1f", value / 1_000_000))M"
+        } else {
+            return "$\(String(format: "%.0f", value))"
+        }
     }
 }
 
