@@ -46,7 +46,7 @@ class GameManager: ObservableObject {
 
     // War conclusion tracking
     @Published var pendingPeaceTerms: War? = nil  // War awaiting peace term selection
-    @Published var playerWarDefeat: War? = nil     // War that caused player death
+    @Published var pendingWarDefeatNotification: WarDefeatNotification? = nil  // Player defeat notification
     @Published var pendingAIWarNotifications: [AIWarNotification] = []  // AI war conclusions
 
     // Convenience accessors
@@ -821,13 +821,99 @@ class GameManager: ObservableObject {
                     pendingPeaceTerms = war
                 }
             } else {
-                // Player defeat - trigger game over
-                if playerWarDefeat == nil {  // Only set if not already set
-                    playerWarDefeat = war
-                    triggerGameOver(reason: .warDefeat, war: war, character: character)
+                // Player defeat - apply consequences but don't end game
+                if pendingWarDefeatNotification == nil {  // Only process once
+                    handleWarDefeat(war: war, character: character)
                 }
             }
         }
+    }
+
+    private func handleWarDefeat(war: War, character: Character) {
+        print("\n⚔️ PLAYER WAR DEFEAT")
+        print("War: \(war.attacker) vs \(war.defender)")
+        print("Outcome: \(war.outcome?.rawValue ?? "Unknown")")
+
+        // Apply peace terms automatically (enemy chooses harsh terms)
+        let isPlayerAttacker = war.attacker == character.country
+        let enemyCode = isPlayerAttacker ? war.defender : war.attacker
+        let territoryPercent = war.territoryConquered ?? 0.0
+
+        // Select peace terms based on defeat severity
+        let peaceTerm: War.PeaceTerm
+        if territoryPercent >= 0.30 {
+            peaceTerm = .fullConquest  // Catastrophic defeat
+        } else if territoryPercent >= 0.20 {
+            peaceTerm = .partialTerritory  // Major defeat
+        } else {
+            peaceTerm = .reparations  // Narrow defeat
+        }
+
+        print("Enemy imposing peace terms: \(peaceTerm.rawValue)")
+
+        // Apply peace terms
+        let result = warEngine.applyPeaceTerms(
+            warId: war.id,
+            peaceTerm: peaceTerm,
+            globalCountryState: globalCountryState,
+            territoryManager: territoryManager,
+            currentDate: character.currentDate
+        )
+
+        // Create reparation agreement if applicable
+        if result.reparationAmount > 0 {
+            let reparation = ReparationAgreement(
+                payerCountry: character.country,  // Player pays
+                recipientCountry: enemyCode,
+                totalAmount: result.reparationAmount,
+                startDate: character.currentDate,
+                warId: war.id
+            )
+            territoryManager.activeReparations.append(reparation)
+            print("Reparation imposed: \(reparation.formattedTotalAmount) over \(reparation.totalYears) years")
+        }
+
+        // End the war
+        warEngine.endWar(warId: war.id)
+
+        // Apply severe political consequences
+        // 1. Massive reputation hit
+        modifyStat(.reputation, by: -30, reason: "Catastrophic war defeat")
+
+        // 2. Major approval drop
+        modifyApproval(by: -20.0, reason: "Lost war to \(globalCountryState.getCountry(code: enemyCode)?.name ?? enemyCode)")
+
+        // 3. Significant stress increase
+        var updatedChar = character
+        updatedChar.stress = min(100, updatedChar.stress + 15)
+        characterManager.updateCharacter(updatedChar)
+
+        // 4. Log consequences
+        print("Political consequences:")
+        print("  - Reputation: -30")
+        print("  - Approval: -20.0")
+        print("  - Stress: +15")
+        if result.territoryTransferred > 0 {
+            print("  - Territory lost: \(String(format: "%.1fM sq mi", result.territoryTransferred / 1_000_000))")
+        }
+        print("═══════════════════════════════════════\n")
+
+        // Create notification for player
+        let notification = WarDefeatNotification(
+            war: war,
+            enemyName: globalCountryState.getCountry(code: enemyCode)?.name ?? enemyCode,
+            peaceTerm: peaceTerm,
+            territoryLost: result.territoryTransferred,
+            reparationAmount: result.reparationAmount,
+            reputationLoss: 30,
+            approvalLoss: 20.0,
+            stressGain: 15
+        )
+        pendingWarDefeatNotification = notification
+
+        // Note: Player continues game despite defeat
+        // They may face impeachment if approval/reputation drops too low
+        // This creates interesting comeback narratives
     }
 
     private func triggerGameOver(reason: GameOverData.GameOverReason, war: War?, character: Character) {

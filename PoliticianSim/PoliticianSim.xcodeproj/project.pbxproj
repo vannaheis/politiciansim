@@ -111,6 +111,8 @@
 		7CF1AE902EF7AB1200E31456 /* AIWarNotificationPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF1AE8E2EF7AB1200E31456 /* AIWarNotificationPopup.swift */; };
 		7CF1AE912EF7AB1200E31456 /* WarArchiveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF1AE8F2EF7AB1200E31456 /* WarArchiveView.swift */; };
 		7CF1AE932EF7AB2900E31456 /* AIWarNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF1AE922EF7AB2900E31456 /* AIWarNotification.swift */; };
+		7CF1AE952EFA091E00E31456 /* WarDefeatNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF1AE942EFA091E00E31456 /* WarDefeatNotification.swift */; };
+		7CF1AE972EFA098900E31456 /* WarDefeatNotificationPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF1AE962EFA098900E31456 /* WarDefeatNotificationPopup.swift */; };
 		FB1BD9A2FE914F06F1F9D2BC /* CustomAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61D83AE85A5956CC2FFCB315 /* CustomAlert.swift */; };
 /* End PBXBuildFile section */
 
@@ -221,6 +223,8 @@
 		7CF1AE8E2EF7AB1200E31456 /* AIWarNotificationPopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIWarNotificationPopup.swift; sourceTree = "<group>"; };
 		7CF1AE8F2EF7AB1200E31456 /* WarArchiveView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarArchiveView.swift; sourceTree = "<group>"; };
 		7CF1AE922EF7AB2900E31456 /* AIWarNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIWarNotification.swift; sourceTree = "<group>"; };
+		7CF1AE942EFA091E00E31456 /* WarDefeatNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarDefeatNotification.swift; sourceTree = "<group>"; };
+		7CF1AE962EFA098900E31456 /* WarDefeatNotificationPopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarDefeatNotificationPopup.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -301,6 +305,7 @@
 				7C6E470F2EE77B52005F7A3D /* WarUpdate.swift */,
 				7C6E47152EE7EF95005F7A3D /* ReparationAgreement.swift */,
 				7CF1AE922EF7AB2900E31456 /* AIWarNotification.swift */,
+				7CF1AE942EFA091E00E31456 /* WarDefeatNotification.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -566,6 +571,7 @@
 				7C6E47132EE7EF7D005F7A3D /* PeaceTermsView.swift */,
 				7CF1AE8E2EF7AB1200E31456 /* AIWarNotificationPopup.swift */,
 				7CF1AE8F2EF7AB1200E31456 /* WarArchiveView.swift */,
+				7CF1AE962EFA098900E31456 /* WarDefeatNotificationPopup.swift */,
 			);
 			path = WarRoom;
 			sourceTree = "<group>";
@@ -717,6 +723,7 @@
 				7C6E45342EC58E41005F7A3D /* DiplomacyManager.swift in Sources */,
 				034 /* HomeView.swift in Sources */,
 				7C6E45282EC58536005F7A3D /* Law.swift in Sources */,
+				7CF1AE952EFA091E00E31456 /* WarDefeatNotification.swift in Sources */,
 				7C6E46CF2EC965AF005F7A3D /* Treasury.swift in Sources */,
 				035 /* DateDisplayView.swift in Sources */,
 				036 /* CharacterOverviewCard.swift in Sources */,
@@ -729,6 +736,7 @@
 				038 /* SideMenuView.swift in Sources */,
 				039 /* NewHomeView.swift in Sources */,
 				040 /* ProfileView.swift in Sources */,
+				7CF1AE972EFA098900E31456 /* WarDefeatNotificationPopup.swift in Sources */,
 				041 /* StatsView.swift in Sources */,
 				7C6E46F02ECC4970005F7A3D /* MilitaryStats.swift in Sources */,
 				7C6E46F12ECC4970005F7A3D /* TechnologyResearch.swift in Sources */,

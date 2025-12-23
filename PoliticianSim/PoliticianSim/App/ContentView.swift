@@ -94,6 +94,18 @@ struct MainGameRouter: View {
                     .zIndex(901)
             }
 
+            // War Defeat Notification
+            if let defeatNotification = gameManager.pendingWarDefeatNotification {
+                Color.black.opacity(0.7)
+                    .ignoresSafeArea()
+                    .transition(.opacity)
+                    .zIndex(905)
+
+                WarDefeatNotificationPopup(notification: defeatNotification)
+                    .transition(.scale.combined(with: .opacity))
+                    .zIndex(906)
+            }
+
             // AI War Notification (shows sequential notifications)
             if let firstNotification = gameManager.pendingAIWarNotifications.first {
                 Color.black.opacity(0.7)
