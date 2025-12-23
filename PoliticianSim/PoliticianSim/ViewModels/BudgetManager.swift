@@ -19,7 +19,7 @@ class BudgetManager: ObservableObject {
 
     // MARK: - Budget Creation
 
-    func initializeBudget(for character: Character, gdp: Double? = nil, treasuryManager: TreasuryManager? = nil) {
+    func initializeBudget(for character: Character, gdp: Double? = nil, treasuryManager: TreasuryManager? = nil, territoryManager: TerritoryManager? = nil) {
         guard let position = character.currentPosition else { return }
 
         let fiscalYear = Calendar.current.component(.year, from: character.currentDate)
@@ -39,6 +39,13 @@ class BudgetManager: ObservableObject {
             budget.interestPayment = Decimal(treasury.interestRate / 100.0) * debt
         } else {
             budget.interestPayment = 0
+        }
+
+        // Calculate annual reparation payments owed
+        if let territoryMgr = territoryManager {
+            budget.reparationPayments = territoryMgr.getTotalAnnualReparationsOwed(payerCountryCode: character.country)
+        } else {
+            budget.reparationPayments = 0
         }
 
         currentBudget = budget
@@ -282,6 +289,17 @@ class BudgetManager: ObservableObject {
         let deficitPercentage: Double
         let averageDepartmentSatisfaction: Double
         let economicHealth: Double // 0-100
+    }
+
+    // MARK: - Reparation Updates
+
+    func updateReparationPayments(character: Character, territoryManager: TerritoryManager) {
+        guard var budget = currentBudget else { return }
+
+        // Recalculate annual reparation payments
+        budget.reparationPayments = territoryManager.getTotalAnnualReparationsOwed(payerCountryCode: character.country)
+
+        currentBudget = budget
     }
 
     // MARK: - Helper Methods

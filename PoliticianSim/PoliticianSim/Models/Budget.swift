@@ -13,12 +13,13 @@ struct Budget: Codable, Identifiable {
     var totalRevenue: Decimal
     var totalExpenses: Decimal  // Department expenses only
     var interestPayment: Decimal // Annual interest on debt
+    var reparationPayments: Decimal // Annual war reparation payments owed
     var departments: [Department]
     var taxRates: TaxRates
     var economicIndicators: EconomicIndicators
 
     var totalExpensesWithInterest: Decimal {
-        totalExpenses + interestPayment
+        totalExpenses + interestPayment + reparationPayments
     }
 
     var surplus: Decimal {
@@ -37,6 +38,7 @@ struct Budget: Codable, Identifiable {
         totalRevenue: Decimal = 0,
         totalExpenses: Decimal = 0,
         interestPayment: Decimal = 0,
+        reparationPayments: Decimal = 0,
         departments: [Department] = [],
         taxRates: TaxRates = TaxRates(),
         economicIndicators: EconomicIndicators = EconomicIndicators()
@@ -46,6 +48,7 @@ struct Budget: Codable, Identifiable {
         self.totalRevenue = totalRevenue
         self.totalExpenses = totalExpenses
         self.interestPayment = interestPayment
+        self.reparationPayments = reparationPayments
         self.departments = departments
         self.taxRates = taxRates
         self.economicIndicators = economicIndicators

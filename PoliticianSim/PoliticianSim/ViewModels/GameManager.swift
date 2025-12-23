@@ -197,6 +197,9 @@ class GameManager: ObservableObject {
 
                 // PHASE 7: Evolve military strength for all countries based on GDP growth
                 self.updateGlobalMilitaryStrength()
+
+                // Update budget with current reparation obligations
+                self.budgetManager.updateReparationPayments(character: updatedChar, territoryManager: self.territoryManager)
             }
 
             // Check for monthly war updates (month change)
@@ -311,6 +314,9 @@ class GameManager: ObservableObject {
 
                 // PHASE 7: Evolve military strength for all countries based on GDP growth
                 self.updateGlobalMilitaryStrength()
+
+                // Update budget with current reparation obligations
+                self.budgetManager.updateReparationPayments(character: updatedChar, territoryManager: self.territoryManager)
             }
 
             // Check for monthly war updates (month change)
@@ -871,6 +877,9 @@ class GameManager: ObservableObject {
             )
             territoryManager.activeReparations.append(reparation)
             print("Reparation imposed: \(reparation.formattedTotalAmount) over \(reparation.totalYears) years")
+
+            // Update budget with new reparation obligations
+            budgetManager.updateReparationPayments(character: character, territoryManager: territoryManager)
         }
 
         // End the war

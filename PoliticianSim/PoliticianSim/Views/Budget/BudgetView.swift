@@ -104,17 +104,24 @@ struct BudgetView: View {
                 gameManager.budgetManager.initializeBudget(
                     for: character,
                     gdp: gdp,
-                    treasuryManager: gameManager.treasuryManager
+                    treasuryManager: gameManager.treasuryManager,
+                    territoryManager: gameManager.territoryManager
                 )
             } else if let character = gameManager.character,
                       character.currentPosition != nil,
                       var budget = gameManager.budgetManager.currentBudget {
-                // Budget exists - just update interest payment based on current debt
+                // Budget exists - update interest payment and reparation payments
                 if let treasury = gameManager.treasuryManager.currentTreasury, treasury.cashOnHand < 0 {
                     let debt = abs(treasury.cashOnHand)
                     budget.interestPayment = Decimal(treasury.interestRate / 100.0) * debt
-                    gameManager.budgetManager.currentBudget = budget
                 }
+
+                // Update reparation payments
+                budget.reparationPayments = gameManager.territoryManager.getTotalAnnualReparationsOwed(
+                    payerCountryCode: character.country
+                )
+
+                gameManager.budgetManager.currentBudget = budget
             }
         }
         .customAlert(
@@ -269,10 +276,20 @@ struct FiscalSummaryCard: View {
                 )
             }
 
-            // Total Expenses with Interest
-            if budget.interestPayment > 0 {
+            // Reparation Payments (if any)
+            if budget.reparationPayments > 0 {
                 BudgetRow(
-                    label: "Total Expenses (incl. Interest)",
+                    label: "War Reparation Payments",
+                    amount: budget.reparationPayments,
+                    icon: "flag.fill",
+                    color: Constants.Colors.negative
+                )
+            }
+
+            // Total Expenses with Interest and Reparations
+            if budget.interestPayment > 0 || budget.reparationPayments > 0 {
+                BudgetRow(
+                    label: "Total Expenses (incl. Interest & Reparations)",
                     amount: budget.totalExpensesWithInterest,
                     icon: "sum",
                     color: Constants.Colors.negative
