@@ -198,8 +198,15 @@ class GameManager: ObservableObject {
                 // PHASE 7: Evolve military strength for all countries based on GDP growth
                 self.updateGlobalMilitaryStrength()
 
+                // Apply annual interest on debt
+                self.treasuryManager.applyAnnualInterest(character: updatedChar)
+
                 // Update budget with current reparation obligations
                 self.budgetManager.updateReparationPayments(character: updatedChar, territoryManager: self.territoryManager)
+
+                // Apply automatic budget surplus/deficit for the year
+                // This simulates ongoing government operations
+                self.applyAnnualBudgetDeficit(character: &updatedChar)
             }
 
             // Check for monthly war updates (month change)
@@ -315,8 +322,15 @@ class GameManager: ObservableObject {
                 // PHASE 7: Evolve military strength for all countries based on GDP growth
                 self.updateGlobalMilitaryStrength()
 
+                // Apply annual interest on debt
+                self.treasuryManager.applyAnnualInterest(character: updatedChar)
+
                 // Update budget with current reparation obligations
                 self.budgetManager.updateReparationPayments(character: updatedChar, territoryManager: self.territoryManager)
+
+                // Apply automatic budget surplus/deficit for the year
+                // This simulates ongoing government operations
+                self.applyAnnualBudgetDeficit(character: &updatedChar)
             }
 
             // Check for monthly war updates (month change)
@@ -548,6 +562,34 @@ class GameManager: ObservableObject {
         } else {
             return "$\(String(format: "%.0f", value))"
         }
+    }
+
+    // MARK: - Annual Budget Processing
+
+    private func applyAnnualBudgetDeficit(character: inout Character) {
+        guard let budget = budgetManager.currentBudget else { return }
+
+        // Calculate the annual surplus/deficit from current budget
+        let surplus = budget.surplus
+
+        // Apply to treasury (this simulates ongoing government operations)
+        treasuryManager.applyBudgetResult(
+            surplus: surplus,
+            fiscalYear: budget.fiscalYear,
+            character: character
+        )
+
+        // Log the automatic budget application
+        print("\n💰 ANNUAL BUDGET AUTOMATICALLY APPLIED")
+        print("Fiscal Year: \(budget.fiscalYear)")
+        print("Revenue: \(formatMoney(budget.totalRevenue))")
+        print("Expenses: \(formatMoney(budget.totalExpensesWithInterest))")
+        if surplus >= 0 {
+            print("Surplus: \(formatMoney(surplus))")
+        } else {
+            print("Deficit: \(formatMoney(abs(surplus)))")
+        }
+        print("")
     }
 
     private func processMilitaryTreasury(character: inout Character, days: Int) {
