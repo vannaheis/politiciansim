@@ -302,6 +302,25 @@ class BudgetManager: ObservableObject {
         currentBudget = budget
     }
 
+    // MARK: - Interest and Reparation Updates
+
+    func updateInterestAndReparations(character: Character, treasuryManager: TreasuryManager, territoryManager: TerritoryManager) {
+        guard var budget = currentBudget else { return }
+
+        // Update interest payment based on current debt
+        if let treasury = treasuryManager.currentTreasury, treasury.cashOnHand < 0 {
+            let debt = abs(treasury.cashOnHand)
+            budget.interestPayment = Decimal(treasury.interestRate / 100.0) * debt
+        } else {
+            budget.interestPayment = 0
+        }
+
+        // Update reparation payments
+        budget.reparationPayments = territoryManager.getTotalAnnualReparationsOwed(payerCountryCode: character.country)
+
+        currentBudget = budget
+    }
+
     // MARK: - Helper Methods
 
     private func updateRevenue(budget: inout Budget, gdp: Double? = nil, governmentLevel: Int = 1) {

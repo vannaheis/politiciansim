@@ -54,6 +54,8 @@ struct SaveGame: Codable {
     let territories: [Territory]
     let activeRebellions: [Rebellion]
     let rebellionHistory: [Rebellion]
+    let activeReparations: [ReparationAgreement]
+    let completedReparations: [ReparationAgreement]
 
     init(gameManager: GameManager) {
         self.id = UUID()
@@ -120,6 +122,8 @@ struct SaveGame: Codable {
         self.territories = gameManager.territoryManager.territories
         self.activeRebellions = gameManager.territoryManager.activeRebellions
         self.rebellionHistory = gameManager.territoryManager.rebellionHistory
+        self.activeReparations = gameManager.territoryManager.activeReparations
+        self.completedReparations = gameManager.territoryManager.completedReparations
     }
 
     func restore(to gameManager: GameManager) {
@@ -181,6 +185,8 @@ struct SaveGame: Codable {
         gameManager.territoryManager.territories = territories
         gameManager.territoryManager.activeRebellions = activeRebellions
         gameManager.territoryManager.rebellionHistory = rebellionHistory
+        gameManager.territoryManager.activeReparations = activeReparations
+        gameManager.territoryManager.completedReparations = completedReparations
     }
 }
 

@@ -198,14 +198,10 @@ class GameManager: ObservableObject {
                 // PHASE 7: Evolve military strength for all countries based on GDP growth
                 self.updateGlobalMilitaryStrength()
 
-                // Apply annual interest on debt
-                self.treasuryManager.applyAnnualInterest(character: updatedChar)
-
-                // Update budget with current reparation obligations
-                self.budgetManager.updateReparationPayments(character: updatedChar, territoryManager: self.territoryManager)
-
                 // Apply automatic budget surplus/deficit for the year
-                // This simulates ongoing government operations
+                // This simulates ongoing government operations AND includes interest on debt
+                // Note: applyAnnualBudgetDeficit() updates interest and reparations first,
+                // then applies the deficit to treasury
                 self.applyAnnualBudgetDeficit(character: &updatedChar)
             }
 
@@ -322,14 +318,10 @@ class GameManager: ObservableObject {
                 // PHASE 7: Evolve military strength for all countries based on GDP growth
                 self.updateGlobalMilitaryStrength()
 
-                // Apply annual interest on debt
-                self.treasuryManager.applyAnnualInterest(character: updatedChar)
-
-                // Update budget with current reparation obligations
-                self.budgetManager.updateReparationPayments(character: updatedChar, territoryManager: self.territoryManager)
-
                 // Apply automatic budget surplus/deficit for the year
-                // This simulates ongoing government operations
+                // This simulates ongoing government operations AND includes interest on debt
+                // Note: applyAnnualBudgetDeficit() updates interest and reparations first,
+                // then applies the deficit to treasury
                 self.applyAnnualBudgetDeficit(character: &updatedChar)
             }
 
@@ -567,6 +559,14 @@ class GameManager: ObservableObject {
     // MARK: - Annual Budget Processing
 
     private func applyAnnualBudgetDeficit(character: inout Character) {
+        // CRITICAL: Update budget interest and reparations BEFORE calculating deficit
+        // This ensures we're using current debt levels, not stale values
+        budgetManager.updateInterestAndReparations(
+            character: character,
+            treasuryManager: treasuryManager,
+            territoryManager: territoryManager
+        )
+
         guard let budget = budgetManager.currentBudget else { return }
 
         // Calculate the annual surplus/deficit from current budget
@@ -583,7 +583,10 @@ class GameManager: ObservableObject {
         print("\n💰 ANNUAL BUDGET AUTOMATICALLY APPLIED")
         print("Fiscal Year: \(budget.fiscalYear)")
         print("Revenue: \(formatMoney(budget.totalRevenue))")
-        print("Expenses: \(formatMoney(budget.totalExpensesWithInterest))")
+        print("Expenses (Dept): \(formatMoney(budget.totalExpenses))")
+        print("Interest on Debt: \(formatMoney(budget.interestPayment))")
+        print("Reparation Payments: \(formatMoney(budget.reparationPayments))")
+        print("Total Expenses: \(formatMoney(budget.totalExpensesWithInterest))")
         if surplus >= 0 {
             print("Surplus: \(formatMoney(surplus))")
         } else {
