@@ -46,6 +46,9 @@ struct SaveGame: Codable {
     let socialMetrics: SocialMediaMetrics
     let enrollmentStatus: EnrollmentStatus
     let economicData: EconomicData
+    let currentTreasury: Treasury?
+    let currentStats: GovernmentStats?
+    let globalCountryState: GlobalCountryState
 
     // Military (President only)
     let activeResearch: [TechnologyResearch]
@@ -115,6 +118,11 @@ struct SaveGame: Codable {
         // Economic Data
         self.economicData = gameManager.economicDataManager.economicData
 
+        // Treasury & Stats
+        self.currentTreasury = gameManager.treasuryManager.currentTreasury
+        self.currentStats = gameManager.governmentStatsManager.currentStats
+        self.globalCountryState = gameManager.globalCountryState
+
         // Military
         self.activeResearch = gameManager.militaryManager.activeResearch
         self.activeWars = gameManager.warEngine.activeWars
@@ -177,6 +185,11 @@ struct SaveGame: Codable {
 
         // Restore economic data
         gameManager.economicDataManager.economicData = economicData
+
+        // Restore treasury & stats
+        gameManager.treasuryManager.currentTreasury = currentTreasury
+        gameManager.governmentStatsManager.currentStats = currentStats
+        gameManager.globalCountryState = globalCountryState
 
         // Restore military
         gameManager.militaryManager.activeResearch = activeResearch
