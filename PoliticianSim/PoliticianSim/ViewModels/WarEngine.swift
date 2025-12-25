@@ -308,15 +308,16 @@ class WarEngine: ObservableObject {
 
     /// Attempts to trigger AI-driven wars between countries
     /// Called periodically (e.g., monthly) to simulate global conflicts
+    /// Returns the war if one was declared, nil otherwise
     func evaluateAIWarDeclarations(
         globalCountryState: GlobalCountryState,
         playerCountry: String,
         currentDate: Date
-    ) {
+    ) -> War? {
         // Don't trigger too many wars simultaneously
         guard activeWars.count < 5 else {
             print("🤖 AI War Check: Max wars limit reached (5)")
-            return
+            return nil
         }
 
         // Low probability - wars should be rare events
@@ -324,7 +325,7 @@ class WarEngine: ObservableObject {
         let warChance = Double.random(in: 0...1)
         guard warChance < 0.02 else {
             print("🤖 AI War Check: No war this month (rolled \(String(format: "%.2f", warChance)))")
-            return
+            return nil
         }
 
         print("\n🎲 AI WAR EVALUATION")
@@ -332,7 +333,7 @@ class WarEngine: ObservableObject {
 
         // Select a random aggressor from all countries
         let allCountries = globalCountryState.countries
-        guard let aggressor = allCountries.randomElement() else { return }
+        guard let aggressor = allCountries.randomElement() else { return nil }
 
         print("Evaluating \(aggressor.name) as potential aggressor...")
 
@@ -343,7 +344,7 @@ class WarEngine: ObservableObject {
             globalCountryState: globalCountryState
         ) else {
             print("❌ \(aggressor.name) cannot declare war (tier restrictions or war limit)")
-            return
+            return nil
         }
 
         print("✅ \(aggressor.name) passed aggression check, searching for target...")
@@ -356,7 +357,7 @@ class WarEngine: ObservableObject {
             globalCountryState: globalCountryState
         ) else {
             print("❌ No suitable targets found for \(aggressor.name)")
-            return
+            return nil
         }
 
         print("🎯 Target selected: \(target.name)")
@@ -375,15 +376,17 @@ class WarEngine: ObservableObject {
             currentDate: currentDate
         )
 
-        if war != nil {
+        if let declaredWar = war {
             print("\n⚔️ AI WAR DECLARED")
             print("Attacker: \(aggressor.name) (strength: \(formatStrength(aggressor.militaryStrength)))")
             print("Defender: \(target.name) (strength: \(formatStrength(target.militaryStrength)))")
             print("Strength ratio: \(String(format: "%.2f", Double(aggressor.militaryStrength) / Double(target.militaryStrength))):1")
             print("Justification: \(justification.rawValue)")
             print("═══════════════════════════════════════\n")
+            return declaredWar
         } else {
             print("❌ Failed to declare war (internal error)")
+            return nil
         }
     }
 
@@ -426,9 +429,6 @@ class WarEngine: ObservableObject {
         let potentialTargets = allCountries.filter { target in
             // Can't attack yourself
             guard target.code != aggressor.code else { return false }
-
-            // Don't attack player (AI vs AI only)
-            guard target.code != playerCountry else { return false }
 
             // Target must not be in too many wars already
             let targetWars = activeWars.filter { $0.attacker == target.code || $0.defender == target.code }

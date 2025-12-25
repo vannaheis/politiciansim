@@ -94,6 +94,18 @@ struct MainGameRouter: View {
                     .zIndex(901)
             }
 
+            // Defensive War Notification (AI declares war on player)
+            if let defensiveWarNotification = gameManager.pendingDefensiveWarNotification {
+                Color.black.opacity(0.7)
+                    .ignoresSafeArea()
+                    .transition(.opacity)
+                    .zIndex(903)
+
+                DefensiveWarNotificationPopup(notification: defensiveWarNotification)
+                    .transition(.scale.combined(with: .opacity))
+                    .zIndex(904)
+            }
+
             // War Defeat Notification
             if let defeatNotification = gameManager.pendingWarDefeatNotification {
                 Color.black.opacity(0.7)

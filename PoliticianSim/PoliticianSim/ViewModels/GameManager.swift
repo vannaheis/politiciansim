@@ -47,6 +47,7 @@ class GameManager: ObservableObject {
     // War conclusion tracking
     @Published var pendingPeaceTerms: War? = nil  // War awaiting peace term selection
     @Published var pendingWarDefeatNotification: WarDefeatNotification? = nil  // Player defeat notification
+    @Published var pendingDefensiveWarNotification: DefensiveWarNotification? = nil  // AI declares war on player
     @Published var pendingAIWarNotifications: [AIWarNotification] = []  // AI war conclusions
 
     // Convenience accessors
@@ -425,12 +426,29 @@ class GameManager: ObservableObject {
         print("\n📅 MONTHLY UPDATE - \(month)/\(year)")
 
         // PHASE 7: AI War Declarations (monthly trigger)
-        // Evaluate if AI countries should declare war on each other
-        warEngine.evaluateAIWarDeclarations(
+        // Evaluate if AI countries should declare war on each other (or on player)
+        if let newWar = warEngine.evaluateAIWarDeclarations(
             globalCountryState: globalCountryState,
             playerCountry: character.country,
             currentDate: character.currentDate
-        )
+        ) {
+            // Check if player is the defender (under attack)
+            if newWar.defender == character.country && character.currentPosition?.level == 5 {
+                // Create defensive war notification
+                if let aggressorCountry = globalCountryState.getCountry(code: newWar.attacker) {
+                    let notification = DefensiveWarNotification(
+                        war: newWar,
+                        aggressorName: aggressorCountry.name,
+                        aggressorStrength: newWar.attackerStrength,
+                        playerStrength: newWar.defenderStrength,
+                        justification: newWar.justification
+                    )
+                    pendingDefensiveWarNotification = notification
+
+                    print("🚨 DEFENSIVE WAR NOTIFICATION: \(aggressorCountry.name) has attacked the player!")
+                }
+            }
+        }
 
         // Only show war updates if character is president and has active wars
         guard character.currentPosition?.level == 5 else { return }
