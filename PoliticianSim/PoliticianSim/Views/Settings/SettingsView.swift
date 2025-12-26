@@ -837,6 +837,7 @@ struct AdminCard: View {
                         ZStack {
                             Circle()
                                 .fill(Color.orange.opacity(0.2))
+                                .frame(width: 28, height: 28)
 
                             Image(systemName: "exclamationmark.shield.fill")
                                 .font(.system(size: 12))
