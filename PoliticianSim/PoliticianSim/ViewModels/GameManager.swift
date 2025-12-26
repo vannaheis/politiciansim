@@ -577,6 +577,38 @@ class GameManager: ObservableObject {
     // MARK: - Annual Budget Processing
 
     private func applyAnnualBudgetDeficit(character: inout Character) {
+        // Initialize budget and treasury if they don't exist yet
+        // This ensures automatic processing works even if player hasn't visited BudgetView
+        if budgetManager.currentBudget == nil {
+            // Get GDP for budget initialization
+            let gdp: Double?
+            if let position = character.currentPosition {
+                switch position.level {
+                case 1: gdp = economicDataManager.economicData.local.gdp.current
+                case 2: gdp = economicDataManager.economicData.state.gdp.current
+                case 3, 4, 5: gdp = economicDataManager.economicData.federal.gdp.current
+                default: gdp = nil
+                }
+            } else {
+                gdp = nil
+            }
+
+            // Initialize treasury if needed
+            if treasuryManager.currentTreasury == nil {
+                treasuryManager.initializeTreasury(for: character)
+            }
+
+            // Initialize budget
+            budgetManager.initializeBudget(
+                for: character,
+                gdp: gdp,
+                treasuryManager: treasuryManager,
+                territoryManager: territoryManager
+            )
+
+            print("💰 Auto-initialized budget and treasury for automatic annual processing")
+        }
+
         // CRITICAL: Update budget interest and reparations BEFORE calculating deficit
         // This ensures we're using current debt levels, not stale values
         budgetManager.updateInterestAndReparations(
