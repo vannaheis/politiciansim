@@ -780,7 +780,9 @@ struct LoadSlotCard: View {
 // MARK: - Admin Card
 
 struct AdminCard: View {
+    @EnvironmentObject var gameManager: GameManager
     @Binding var showAdminPanel: Bool
+    @State private var showWarConfirmation = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -825,6 +827,40 @@ struct AdminCard: View {
                         .fill(Color.white.opacity(0.05))
                 )
             }
+
+            // Force Defensive War Button
+            if gameManager.character?.currentPosition?.level == 5 {
+                Button(action: {
+                    showWarConfirmation = true
+                }) {
+                    HStack(spacing: 10) {
+                        ZStack {
+                            Circle()
+                                .fill(Color.orange.opacity(0.2))
+
+                            Image(systemName: "exclamationmark.shield.fill")
+                                .font(.system(size: 12))
+                                .foregroundColor(.orange)
+                        }
+
+                        Text("Force Defensive War")
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(.white)
+
+                        Spacer()
+
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 12))
+                            .foregroundColor(Constants.Colors.secondaryText)
+                    }
+                    .padding(.vertical, 10)
+                    .padding(.horizontal, 12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color.white.opacity(0.05))
+                    )
+                }
+            }
         }
         .padding(14)
         .background(
@@ -835,6 +871,75 @@ struct AdminCard: View {
                         .strokeBorder(Color.red.opacity(0.3), lineWidth: 1)
                 )
         )
+        .customAlert(
+            isPresented: $showWarConfirmation,
+            title: "Force Defensive War?",
+            message: "This will immediately trigger a random AI country to declare war on the USA for testing purposes.",
+            primaryButton: "Declare War",
+            primaryAction: { forceDefensiveWar() },
+            secondaryButton: "Cancel"
+        )
+    }
+
+    private func forceDefensiveWar() {
+        guard let character = gameManager.character else { return }
+        guard character.currentPosition?.level == 5 else { return }
+
+        let playerCountryCode = character.country
+        let allCountries = gameManager.globalCountryState.countries
+
+        // Find a suitable aggressor (exclude player)
+        let potentialAggressors = allCountries.filter { country in
+            country.code != playerCountryCode && country.militaryStrength > 0
+        }
+
+        guard let aggressor = potentialAggressors.randomElement() else {
+            print("❌ No suitable aggressor found")
+            return
+        }
+
+        // Get player's military strength
+        guard let playerCountry = allCountries.first(where: { $0.code == playerCountryCode }) else {
+            print("❌ Player country not found")
+            return
+        }
+
+        // Select a random justification
+        let justifications: [War.WarJustification] = [
+            .territorialDispute,
+            .resourceControl,
+            .regimeChange,
+            .preemptiveStrike,
+            .retaliation
+        ]
+        let justification = justifications.randomElement() ?? .territorialDispute
+
+        // Declare war
+        if let war = gameManager.warEngine.declareWar(
+            attacker: aggressor.code,
+            defender: playerCountryCode,
+            type: .offensive,
+            justification: justification,
+            attackerStrength: aggressor.militaryStrength,
+            defenderStrength: playerCountry.militaryStrength,
+            currentDate: character.currentDate
+        ) {
+            // Create and show defensive war notification
+            let notification = DefensiveWarNotification(
+                war: war,
+                aggressorName: aggressor.name,
+                aggressorStrength: aggressor.militaryStrength,
+                playerStrength: playerCountry.militaryStrength,
+                justification: justification
+            )
+            gameManager.pendingDefensiveWarNotification = notification
+
+            print("\n🚨 ADMIN: FORCED DEFENSIVE WAR")
+            print("Aggressor: \(aggressor.name)")
+            print("Defender: USA")
+            print("Justification: \(justification.rawValue)")
+            print("═══════════════════════════════════════\n")
+        }
     }
 }
 
