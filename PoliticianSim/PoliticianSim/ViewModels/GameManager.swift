@@ -178,7 +178,8 @@ class GameManager: ObservableObject {
             }
 
             // ALWAYS simulate economic changes (even if character is dead)
-            self.economicDataManager.simulateEconomicChanges(character: updatedChar)
+            // Pass active wars to apply war economic effects
+            self.economicDataManager.simulateEconomicChanges(character: updatedChar, activeWars: self.warEngine.activeWars)
 
             // Update player's GDP to include conquered territories
             self.economicDataManager.applyTerritoryGDPImpact(
@@ -301,7 +302,8 @@ class GameManager: ObservableObject {
             }
 
             // ALWAYS simulate economic changes (even if character is dead)
-            self.economicDataManager.simulateEconomicChanges(character: updatedChar)
+            // Pass active wars to apply war economic effects
+            self.economicDataManager.simulateEconomicChanges(character: updatedChar, activeWars: self.warEngine.activeWars)
 
             // Update player's GDP to include conquered territories
             self.economicDataManager.applyTerritoryGDPImpact(

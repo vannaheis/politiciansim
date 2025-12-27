@@ -45,6 +45,80 @@ class EconomicDataManager: ObservableObject {
         return fiscalCapitalStock.getTotalFiscalImpact(population: population)
     }
 
+    // MARK: - War Economic Effects
+
+    /// Calculate total economic impact from active wars
+    /// Returns GDP growth modifier (negative during wars, includes defense boost early on)
+    func getWarEconomicImpact(activeWars: [War], playerCountry: String, currentDate: Date) -> (gdpModifier: Double, inflationImpact: Double) {
+        var totalGDPImpact: Double = 0.0
+        var totalInflationImpact: Double = 0.0
+
+        for war in activeWars where war.isActive {
+            // Only count wars involving the player
+            let isPlayerInvolved = war.attacker == playerCountry || war.defender == playerCountry
+            guard isPlayerInvolved else { continue }
+
+            // Get war cost per year for this country
+            let warCost = Double(truncating: (war.costByCountry[playerCountry] ?? 0) as NSNumber)
+            let daysOfWar = max(1, war.daysSinceStart)
+            let annualWarCost = (warCost / Double(daysOfWar)) * 365.0
+
+            // === GDP Impact (mostly negative, but early defense boost) ===
+
+            // 1. War intensity penalty based on spending
+            let warIntensityPenalty: Double
+            if annualWarCost >= 150_000_000_000 {
+                // Large war (>$150B/year): -1.5% GDP growth
+                warIntensityPenalty = -0.015
+            } else if annualWarCost >= 50_000_000_000 {
+                // Medium war ($50B-$150B/year): -0.8% GDP growth
+                warIntensityPenalty = -0.008
+            } else {
+                // Small war (<$50B/year): -0.3% GDP growth
+                warIntensityPenalty = -0.003
+            }
+
+            // 2. Defense industrial boost (only first 2 years, then fades)
+            let defenseBoost: Double
+            if war.daysSinceStart < 365 {
+                // Year 1: +0.5% boost from mobilization
+                defenseBoost = 0.005
+            } else if war.daysSinceStart < 730 {
+                // Year 2: +0.2% boost (fading)
+                defenseBoost = 0.002
+            } else {
+                // Year 3+: no boost
+                defenseBoost = 0.0
+            }
+
+            // 3. War exhaustion economic drag
+            let exhaustionPenalty = war.warExhaustion * -0.01  // Up to -1% at critical exhaustion
+
+            // Total GDP impact for this war
+            let warGDPImpact = warIntensityPenalty + defenseBoost + exhaustionPenalty
+            totalGDPImpact += warGDPImpact
+
+            // === Inflation Impact ===
+
+            // War spending drives inflation (especially large wars)
+            let warInflation: Double
+            if annualWarCost >= 150_000_000_000 {
+                // Large war: +2% annual inflation
+                warInflation = 2.0 / 52.0  // Weekly
+            } else if annualWarCost >= 50_000_000_000 {
+                // Medium war: +1% annual inflation
+                warInflation = 1.0 / 52.0
+            } else {
+                // Small war: +0.3% annual inflation
+                warInflation = 0.3 / 52.0
+            }
+
+            totalInflationImpact += warInflation
+        }
+
+        return (gdpModifier: totalGDPImpact, inflationImpact: totalInflationImpact)
+    }
+
     /// Apply a policy's direct GDP growth impact
     /// This is called when a policy is enacted or repealed
     func applyPolicyGDPImpact(_ annualGrowthImpact: Double) {
@@ -119,7 +193,7 @@ class EconomicDataManager: ObservableObject {
     ///   - Low income (<$4k): 1.5-2.5% growth (high fertility, young populations)
     /// - Reflects demographic transition: developing countries have higher birth rates
     /// - Population rankings update as countries grow at different rates
-    func simulateEconomicChanges(character: Character) {
+    func simulateEconomicChanges(character: Character, activeWars: [War]) {
         let currentDate = character.currentDate
 
         // Process pending fiscal investments (capital stocks maturing)
@@ -142,8 +216,8 @@ class EconomicDataManager: ObservableObject {
         // Get US population for fiscal growth calculations
         let usPopulation = getUSPopulation()
 
-        // Simulate federal economic changes
-        simulateFederalEconomy(date: currentDate, population: usPopulation)
+        // Simulate federal economic changes (with war effects)
+        simulateFederalEconomy(date: currentDate, population: usPopulation, activeWars: activeWars, playerCountry: character.country)
 
         // Simulate state economic changes
         simulateStateEconomy(date: currentDate)
@@ -162,7 +236,7 @@ class EconomicDataManager: ObservableObject {
         return 335_000_000 // Default
     }
 
-    private func simulateFederalEconomy(date: Date, population: Int) {
+    private func simulateFederalEconomy(date: Date, population: Int, activeWars: [War], playerCountry: String) {
         let currentGDP = economicData.federal.gdp.current
         let currentUnemployment = economicData.federal.unemploymentRate.current
         let currentInflation = economicData.federal.inflationRate.current
@@ -173,7 +247,7 @@ class EconomicDataManager: ObservableObject {
         let naturalUnemployment = 4.5 // NAIRU (Non-Accelerating Inflation Rate of Unemployment)
         let inflationTarget = 2.0
 
-        // 1. Calculate GDP growth with interest rate impact + fiscal policy
+        // 1. Calculate GDP growth with interest rate impact + fiscal policy + war effects
         // Interest rates affect GDP growth symmetrically:
         // - Rates above neutral (5%) slow growth (monetary tightening)
         // - Rates below neutral (5%) boost growth (monetary stimulus)
@@ -183,7 +257,13 @@ class EconomicDataManager: ObservableObject {
 
         // Add fiscal policy impact (government spending, taxes, deficit effects from capital stocks)
         let fiscalModifier = getFiscalGrowthModifier(population: population)
-        let annualGrowthRate = baseGrowthRate - rateEffect + fiscalModifier
+
+        // Add war economic impact (GDP penalty and inflation)
+        let warImpact = getWarEconomicImpact(activeWars: activeWars, playerCountry: playerCountry, currentDate: date)
+        let warGDPModifier = warImpact.gdpModifier
+        let warInflationImpact = warImpact.inflationImpact
+
+        let annualGrowthRate = baseGrowthRate - rateEffect + fiscalModifier + warGDPModifier
         let weeklyGrowthRate = annualGrowthRate / 52.0
         let newGDP = currentGDP * (1 + weeklyGrowthRate)
 
@@ -194,18 +274,18 @@ class EconomicDataManager: ObservableObject {
         let randomShock = Double.random(in: -0.08...0.08)
         let newUnemployment = max(3.0, min(8.0, currentUnemployment + unemploymentChange + randomShock))
 
-        // 3. Update inflation using Phillips Curve
+        // 3. Update inflation using Phillips Curve + war effects
         // Inflation increases when unemployment is below natural rate
         let unemploymentGap = naturalUnemployment - newUnemployment
         let phillipsCurveEffect = 0.5 * unemploymentGap / 52.0 // Phillips coefficient: 0.5
 
-        // Inflation dynamics: persistence + Phillips curve + target anchor + shock
+        // Inflation dynamics: persistence + Phillips curve + target anchor + shock + war spending
         let inflationPersistence = currentInflation * 0.7 // 70% of current inflation carries forward
         let targetAnchor = inflationTarget * 0.3 // 30% weight on 2% target (anchors expectations)
         let inflationShock = Double.random(in: -0.1...0.1)
 
         let newInflation = max(1.0, min(5.0,
-            inflationPersistence + targetAnchor + phillipsCurveEffect + inflationShock))
+            inflationPersistence + targetAnchor + phillipsCurveEffect + inflationShock + warInflationImpact))
 
         // 4. Update interest rate using Taylor Rule
         // Fed responds to inflation gap and unemployment gap
