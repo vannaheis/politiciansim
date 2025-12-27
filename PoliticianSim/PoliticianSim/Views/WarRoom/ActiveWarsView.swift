@@ -10,6 +10,7 @@ import SwiftUI
 struct ActiveWarsView: View {
     @EnvironmentObject var gameManager: GameManager
     @State private var showDeclareWarSheet = false
+    @State private var selectedWar: War? = nil
 
     var body: some View {
         ScrollView {
@@ -51,7 +52,12 @@ struct ActiveWarsView: View {
                 } else {
                     // Active Wars List
                     ForEach(gameManager.warEngine.activeWars) { war in
-                        WarCard(war: war)
+                        Button(action: {
+                            selectedWar = war
+                        }) {
+                            WarCard(war: war)
+                        }
+                        .buttonStyle(PlainButtonStyle())
                     }
 
                     // Can declare another war (max 3)
@@ -78,6 +84,10 @@ struct ActiveWarsView: View {
         }
         .sheet(isPresented: $showDeclareWarSheet) {
             DeclareWarSheet()
+                .environmentObject(gameManager)
+        }
+        .sheet(item: $selectedWar) { war in
+            WarDetailsView(war: war)
                 .environmentObject(gameManager)
         }
     }

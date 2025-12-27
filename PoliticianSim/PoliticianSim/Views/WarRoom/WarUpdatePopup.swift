@@ -10,6 +10,7 @@ import SwiftUI
 struct WarUpdatePopup: View {
     @EnvironmentObject var gameManager: GameManager
     let update: WarUpdate
+    @State private var showWarDetails = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -162,7 +163,7 @@ struct WarUpdatePopup: View {
                 }
 
                 Button(action: {
-                    // TODO: Navigate to war details
+                    showWarDetails = true
                     dismissUpdate()
                 }) {
                     Text("War Details")
@@ -180,6 +181,10 @@ struct WarUpdatePopup: View {
         .background(Constants.Colors.cardBackground)
         .cornerRadius(16)
         .shadow(color: Color.black.opacity(0.3), radius: 20, x: 0, y: 10)
+        .sheet(isPresented: $showWarDetails) {
+            WarDetailsView(war: update.war)
+                .environmentObject(gameManager)
+        }
     }
 
     private func dismissUpdate() {
