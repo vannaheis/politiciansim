@@ -30,12 +30,8 @@ struct LineChartView: View {
                         // Grid lines
                         GridLines(geometry: geometry)
 
-                        // Line chart
-                        LineShape(dataPoints: dataPoints, geometry: geometry)
-                            .stroke(color, lineWidth: 2)
-
-                        // Gradient fill
-                        LineShape(dataPoints: dataPoints, geometry: geometry)
+                        // Gradient fill (closed path)
+                        LineShapeFilled(dataPoints: dataPoints, geometry: geometry)
                             .fill(
                                 LinearGradient(
                                     gradient: Gradient(colors: [color.opacity(0.3), color.opacity(0.0)]),
@@ -43,6 +39,10 @@ struct LineChartView: View {
                                     endPoint: .bottom
                                 )
                             )
+
+                        // Line chart (stroke only, not closed)
+                        LineShapeStroke(dataPoints: dataPoints, geometry: geometry)
+                            .stroke(color, lineWidth: 2)
 
                         // Value labels
                         ValueLabels(
@@ -78,9 +78,9 @@ struct GridLines: View {
     }
 }
 
-// MARK: - Line Shape
+// MARK: - Line Shape (Stroke - no closure)
 
-struct LineShape: Shape {
+struct LineShapeStroke: Shape {
     let dataPoints: [EconomicDataPoint]
     let geometry: GeometryProxy
 
@@ -107,7 +107,41 @@ struct LineShape: Shape {
             }
         }
 
-        // Close the path for fill
+        // DO NOT close the path for stroke - this prevents the drop to bottom
+        return path
+    }
+}
+
+// MARK: - Line Shape (Filled - with closure)
+
+struct LineShapeFilled: Shape {
+    let dataPoints: [EconomicDataPoint]
+    let geometry: GeometryProxy
+
+    func path(in rect: CGRect) -> Path {
+        guard dataPoints.count >= 2 else { return Path() }
+
+        let values = dataPoints.map { $0.value }
+        guard let minValue = values.min(), let maxValue = values.max() else { return Path() }
+
+        let range = maxValue - minValue
+        let safeRange = range > 0 ? range : 1.0
+
+        var path = Path()
+
+        for (index, point) in dataPoints.enumerated() {
+            let x = rect.width * CGFloat(index) / CGFloat(max(dataPoints.count - 1, 1))
+            let normalizedValue = (point.value - minValue) / safeRange
+            let y = rect.height * (1 - CGFloat(normalizedValue))
+
+            if index == 0 {
+                path.move(to: CGPoint(x: x, y: y))
+            } else {
+                path.addLine(to: CGPoint(x: x, y: y))
+            }
+        }
+
+        // Close the path for gradient fill
         if !dataPoints.isEmpty {
             let lastX = rect.width
             path.addLine(to: CGPoint(x: lastX, y: rect.height))
