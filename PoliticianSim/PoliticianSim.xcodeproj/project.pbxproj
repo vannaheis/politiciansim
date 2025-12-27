@@ -115,6 +115,7 @@
 		7CF1AE972EFA098900E31456 /* WarDefeatNotificationPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF1AE962EFA098900E31456 /* WarDefeatNotificationPopup.swift */; };
 		7CF1AE992EFC8ADC00E31456 /* DefensiveWarNotificationPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF1AE982EFC8ADC00E31456 /* DefensiveWarNotificationPopup.swift */; };
 		7CF1AE9B2EFC8B0600E31456 /* DefensiveWarNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF1AE9A2EFC8B0600E31456 /* DefensiveWarNotification.swift */; };
+		7CF1AE9D2EFF5D0900E31456 /* WarExhaustionWarningPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF1AE9C2EFF5D0900E31456 /* WarExhaustionWarningPopup.swift */; };
 		FB1BD9A2FE914F06F1F9D2BC /* CustomAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61D83AE85A5956CC2FFCB315 /* CustomAlert.swift */; };
 /* End PBXBuildFile section */
 
@@ -229,6 +230,7 @@
 		7CF1AE962EFA098900E31456 /* WarDefeatNotificationPopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarDefeatNotificationPopup.swift; sourceTree = "<group>"; };
 		7CF1AE982EFC8ADC00E31456 /* DefensiveWarNotificationPopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefensiveWarNotificationPopup.swift; sourceTree = "<group>"; };
 		7CF1AE9A2EFC8B0600E31456 /* DefensiveWarNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefensiveWarNotification.swift; sourceTree = "<group>"; };
+		7CF1AE9C2EFF5D0900E31456 /* WarExhaustionWarningPopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarExhaustionWarningPopup.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -578,6 +580,7 @@
 				7CF1AE8F2EF7AB1200E31456 /* WarArchiveView.swift */,
 				7CF1AE962EFA098900E31456 /* WarDefeatNotificationPopup.swift */,
 				7CF1AE982EFC8ADC00E31456 /* DefensiveWarNotificationPopup.swift */,
+				7CF1AE9C2EFF5D0900E31456 /* WarExhaustionWarningPopup.swift */,
 			);
 			path = WarRoom;
 			sourceTree = "<group>";
@@ -728,6 +731,7 @@
 				031 /* AttributeGenerationView.swift in Sources */,
 				032 /* CharacterSummaryView.swift in Sources */,
 				033 /* CharacterCreationContainerView.swift in Sources */,
+				7CF1AE9D2EFF5D0900E31456 /* WarExhaustionWarningPopup.swift in Sources */,
 				7C6E45342EC58E41005F7A3D /* DiplomacyManager.swift in Sources */,
 				034 /* HomeView.swift in Sources */,
 				7C6E45282EC58536005F7A3D /* Law.swift in Sources */,

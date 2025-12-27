@@ -49,6 +49,10 @@ class GameManager: ObservableObject {
     @Published var pendingWarDefeatNotification: WarDefeatNotification? = nil  // Player defeat notification
     @Published var pendingDefensiveWarNotification: DefensiveWarNotification? = nil  // AI declares war on player
     @Published var pendingAIWarNotifications: [AIWarNotification] = []  // AI war conclusions
+    @Published var pendingExhaustionWarning: WarExhaustionWarning? = nil  // War exhaustion warnings
+
+    // Track which wars have already triggered exhaustion warnings
+    private var exhaustionWarningsShown: Set<UUID> = []
 
     // Convenience accessors
     var character: Character? {
@@ -278,6 +282,9 @@ class GameManager: ObservableObject {
                     for _ in 0..<7 {
                         self.warEngine.simulateDay()
                     }
+
+                    // Apply weekly war exhaustion penalties
+                    self.applyWarExhaustionPenalties(character: &updatedChar)
 
                     // Process military treasury for the week
                     self.processMilitaryTreasury(character: &updatedChar, days: 7)
@@ -1054,6 +1061,76 @@ class GameManager: ObservableObject {
             territoryLost: territoryLost,
             warCasualties: casualties
         )
+    }
+
+    // MARK: - War Exhaustion Penalties
+
+    private func applyWarExhaustionPenalties(character: inout Character) {
+        guard !warEngine.activeWars.isEmpty else { return }
+
+        var totalApprovalPenalty: Double = 0.0
+        var totalStressIncrease: Int = 0
+
+        // Apply penalties for each active war involving the player
+        for war in warEngine.activeWars where war.isActive {
+            let isPlayerInvolved = war.attacker == character.country || war.defender == character.country
+            guard isPlayerInvolved else { continue }
+
+            let exhaustionLevel = war.exhaustionLevel
+            totalApprovalPenalty += exhaustionLevel.weeklyApprovalPenalty
+            totalStressIncrease += exhaustionLevel.weeklyStressIncrease
+
+            // Check if we should show exhaustion warning
+            checkForExhaustionWarning(war: war, character: character)
+        }
+
+        // Apply cumulative penalties
+        if totalApprovalPenalty != 0.0 {
+            character.approvalRating = max(0, character.approvalRating + totalApprovalPenalty)
+        }
+
+        if totalStressIncrease > 0 {
+            character.stress = min(100, character.stress + totalStressIncrease)
+        }
+
+        // Log if significant exhaustion
+        if totalApprovalPenalty < -1.0 || totalStressIncrease > 2 {
+            print("\n⚠️ WAR EXHAUSTION PENALTIES")
+            print("Approval: \(totalApprovalPenalty)")
+            print("Stress: +\(totalStressIncrease)")
+            print("")
+        }
+    }
+
+    private func checkForExhaustionWarning(war: War, character: Character) {
+        // Only warn for moderate or higher exhaustion
+        guard war.exhaustionLevel == .moderate ||
+              war.exhaustionLevel == .high ||
+              war.exhaustionLevel == .critical else {
+            return
+        }
+
+        // Only show warning once per war
+        guard !exhaustionWarningsShown.contains(war.id) else { return }
+
+        // Only show if no other warning is pending
+        guard pendingExhaustionWarning == nil else { return }
+
+        // Create and show warning
+        let warning = WarExhaustionWarning(
+            war: war,
+            exhaustionLevel: war.exhaustionLevel,
+            playerCountry: character.country
+        )
+
+        pendingExhaustionWarning = warning
+        exhaustionWarningsShown.insert(war.id)
+
+        print("\n⚠️ WAR EXHAUSTION WARNING")
+        print("War: \(war.attacker) vs \(war.defender)")
+        print("Level: \(war.exhaustionLevel.rawValue)")
+        print("Exhaustion: \(war.formattedExhaustion)")
+        print("")
     }
 
     // MARK: - AI Military Strength Evolution

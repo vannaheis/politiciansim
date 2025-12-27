@@ -130,10 +130,68 @@ struct WarCard: View {
                         .foregroundColor(Constants.Colors.negative)
                 }
             }
+
+            // War Exhaustion Display
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    Image(systemName: war.exhaustionLevel.icon)
+                        .font(.system(size: 12))
+                        .foregroundColor(exhaustionColor)
+
+                    Text("War Exhaustion: \(war.exhaustionLevel.rawValue)")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(exhaustionColor)
+
+                    Spacer()
+
+                    Text(war.formattedExhaustion)
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(exhaustionColor)
+                }
+
+                // Exhaustion progress bar
+                GeometryReader { geometry in
+                    ZStack(alignment: .leading) {
+                        Rectangle()
+                            .fill(Color.white.opacity(0.1))
+                            .frame(height: 6)
+                            .cornerRadius(3)
+
+                        Rectangle()
+                            .fill(exhaustionColor)
+                            .frame(width: geometry.size.width * CGFloat(war.warExhaustion), height: 6)
+                            .cornerRadius(3)
+                    }
+                }
+                .frame(height: 6)
+
+                // Warning text for high exhaustion
+                if war.exhaustionLevel == .high || war.exhaustionLevel == .critical {
+                    HStack(spacing: 4) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .font(.system(size: 10))
+                        Text("Public demands peace")
+                            .font(.system(size: 11))
+                    }
+                    .foregroundColor(Constants.Colors.negative)
+                    .padding(.top, 2)
+                }
+            }
+            .padding(.top, 4)
         }
         .padding(16)
         .background(Color(red: 0.15, green: 0.17, blue: 0.22))
         .cornerRadius(12)
+    }
+
+    var exhaustionColor: Color {
+        switch war.exhaustionLevel.color {
+        case "green": return Constants.Colors.positive
+        case "yellow": return .yellow
+        case "orange": return .orange
+        case "red": return Constants.Colors.negative
+        default: return .white
+        }
     }
 
     private func formatMoney(_ amount: Decimal) -> String {

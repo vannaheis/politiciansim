@@ -26,6 +26,7 @@ struct War: Codable, Identifiable {
     var peaceTerm: PeaceTerm?  // Peace terms selected by winner
     var territoryConquered: Double?  // Percentage of defender's territory (0.0-0.4)
     var daysSinceStart: Int
+    var warExhaustion: Double  // 0.0 to 1.0 - represents public fatigue with war
 
     enum WarType: String, Codable {
         case defensive = "Defensive War"
@@ -199,6 +200,7 @@ struct War: Codable, Identifiable {
         self.peaceTerm = nil
         self.territoryConquered = nil
         self.daysSinceStart = 0
+        self.warExhaustion = 0.0
     }
 
     var isActive: Bool {
@@ -215,10 +217,109 @@ struct War: Codable, Identifiable {
         }
     }
 
+    // MARK: - War Exhaustion
+
+    /// Calculates current war exhaustion based on duration and casualties
+    /// Returns 0.0 to 1.0 where 1.0 is total exhaustion
+    mutating func updateWarExhaustion() {
+        // Duration component (wars longer than 1 year = high exhaustion)
+        let daysInYear: Double = 365.0
+        let durationFactor = min(1.0, Double(daysSinceStart) / daysInYear)
+
+        // Casualty component (relative to initial strength)
+        let attackerCasualties = Double(casualtiesByCountry[attacker] ?? 0)
+        let defenderCasualties = Double(casualtiesByCountry[defender] ?? 0)
+        let totalInitialStrength = Double(attackerStrength + defenderStrength)
+        let totalCasualties = attackerCasualties + defenderCasualties
+
+        let casualtyFactor = min(1.0, totalCasualties / (totalInitialStrength * 0.5))  // 50% casualties = max exhaustion
+
+        // Cost component (wars costing > $500B = high exhaustion)
+        let attackerCost = Double(truncating: (costByCountry[attacker] ?? 0) as NSNumber)
+        let defenderCost = Double(truncating: (costByCountry[defender] ?? 0) as NSNumber)
+        let totalCost = attackerCost + defenderCost
+        let costFactor = min(1.0, totalCost / 500_000_000_000.0)  // $500B threshold
+
+        // Weighted average (duration has most impact, then casualties, then cost)
+        warExhaustion = (durationFactor * 0.5) + (casualtyFactor * 0.35) + (costFactor * 0.15)
+        warExhaustion = min(1.0, max(0.0, warExhaustion))
+    }
+
+    var exhaustionLevel: ExhaustionLevel {
+        if warExhaustion >= 0.8 {
+            return .critical
+        } else if warExhaustion >= 0.6 {
+            return .high
+        } else if warExhaustion >= 0.4 {
+            return .moderate
+        } else if warExhaustion >= 0.2 {
+            return .low
+        } else {
+            return .minimal
+        }
+    }
+
+    enum ExhaustionLevel: String {
+        case minimal = "Minimal"
+        case low = "Low"
+        case moderate = "Moderate"
+        case high = "High"
+        case critical = "Critical"
+
+        var color: String {
+            switch self {
+            case .minimal: return "green"
+            case .low: return "yellow"
+            case .moderate: return "orange"
+            case .high: return "red"
+            case .critical: return "red"
+            }
+        }
+
+        var icon: String {
+            switch self {
+            case .minimal: return "checkmark.circle.fill"
+            case .low: return "exclamationmark.circle.fill"
+            case .moderate: return "exclamationmark.triangle.fill"
+            case .high: return "exclamationmark.triangle.fill"
+            case .critical: return "exclamationmark.octagon.fill"
+            }
+        }
+
+        /// Weekly approval penalty for this exhaustion level
+        var weeklyApprovalPenalty: Double {
+            switch self {
+            case .minimal: return 0.0
+            case .low: return -0.5
+            case .moderate: return -1.0
+            case .high: return -2.0
+            case .critical: return -4.0
+            }
+        }
+
+        /// Weekly stress increase for this exhaustion level
+        var weeklyStressIncrease: Int {
+            switch self {
+            case .minimal: return 0
+            case .low: return 1
+            case .moderate: return 2
+            case .high: return 3
+            case .critical: return 5
+            }
+        }
+    }
+
+    var formattedExhaustion: String {
+        return "\(Int(warExhaustion * 100))%"
+    }
+
     mutating func simulateDay() {
         guard isActive else { return }
 
         daysSinceStart += 1
+
+        // Update war exhaustion daily
+        updateWarExhaustion()
 
         // Safely calculate daily attrition with zero-strength protection
         guard attackerStrength > 0 && defenderStrength > 0 else {

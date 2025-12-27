@@ -130,6 +130,18 @@ struct MainGameRouter: View {
                     .zIndex(911)
             }
 
+            // War Exhaustion Warning
+            if let exhaustionWarning = gameManager.pendingExhaustionWarning {
+                Color.black.opacity(0.7)
+                    .ignoresSafeArea()
+                    .transition(.opacity)
+                    .zIndex(920)
+
+                WarExhaustionWarningPopup(warning: exhaustionWarning)
+                    .transition(.scale.combined(with: .opacity))
+                    .zIndex(921)
+            }
+
             // Peace Terms Selection (war victory)
             if let war = gameManager.pendingPeaceTerms {
                 PeaceTermsView(
