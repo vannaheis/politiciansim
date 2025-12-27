@@ -314,21 +314,21 @@ struct WarDetailsView: View {
                 }
             }
         }
-        .alert("Negotiate Peace", isPresented: $showNegotiatePeaceConfirm) {
-            Button("Cancel", role: .cancel) {}
-            Button("Negotiate", role: .destructive) {
-                negotiatePeace()
-            }
-        } message: {
-            Text("Attempt to negotiate a peace settlement. The outcome depends on the current battle situation. This will end the war but may require concessions.\n\nContinue?")
+        .fullScreenCover(isPresented: $showNegotiatePeaceConfirm) {
+            PeaceNegotiationPopup(
+                war: war,
+                playerCountry: playerCountry,
+                isPlayerAttacker: isPlayerAttacker
+            )
+            .environmentObject(gameManager)
         }
-        .alert("Surrender", isPresented: $showSurrenderConfirm) {
-            Button("Cancel", role: .cancel) {}
-            Button("Surrender", role: .destructive) {
-                surrender()
-            }
-        } message: {
-            Text("Unconditional surrender will end the war immediately but with severe consequences:\n\n• Enemy chooses peace terms\n• Massive reputation loss\n• Severe approval penalty\n• Potential territory loss\n\nAre you sure?")
+        .fullScreenCover(isPresented: $showSurrenderConfirm) {
+            SurrenderConfirmationPopup(
+                war: war,
+                playerCountry: playerCountry,
+                isPlayerAttacker: isPlayerAttacker
+            )
+            .environmentObject(gameManager)
         }
     }
 
@@ -341,62 +341,6 @@ struct WarDetailsView: View {
         } else {
             return "arrow.down.circle.fill"
         }
-    }
-
-    private func negotiatePeace() {
-        guard let index = gameManager.warEngine.activeWars.firstIndex(where: { $0.id == war.id }) else {
-            return
-        }
-
-        var updatedWar = gameManager.warEngine.activeWars[index]
-
-        // Determine outcome based on attrition difference
-        let attritionDiff = enemyAttrition - playerAttrition
-
-        if attritionDiff > 0.15 {
-            // Player is winning decisively → peace on favorable terms
-            updatedWar.resolveWar(outcome: isPlayerAttacker ? .attackerVictory : .defenderVictory)
-        } else if attritionDiff > 0 {
-            // Player has slight advantage → status quo ante bellum
-            updatedWar.outcome = .peaceTreaty
-            updatedWar.territoryConquered = 0.0
-        } else if attritionDiff > -0.15 {
-            // Relatively even → status quo
-            updatedWar.outcome = .stalemate
-            updatedWar.territoryConquered = 0.0
-        } else {
-            // Player is losing → unfavorable peace
-            updatedWar.resolveWar(outcome: isPlayerAttacker ? .defenderVictory : .attackerVictory)
-        }
-
-        gameManager.warEngine.activeWars[index] = updatedWar
-
-        // Apply small approval boost for ending war diplomatically
-        if var character = gameManager.character {
-            character.approvalRating = min(100, character.approvalRating + 5.0)
-            character.stress = max(0, character.stress - 10)
-            gameManager.characterManager.updateCharacter(character)
-        }
-
-        dismiss()
-    }
-
-    private func surrender() {
-        guard let index = gameManager.warEngine.activeWars.firstIndex(where: { $0.id == war.id }) else {
-            return
-        }
-
-        var updatedWar = gameManager.warEngine.activeWars[index]
-
-        // Player surrenders → enemy victory
-        updatedWar.resolveWar(outcome: isPlayerAttacker ? .defenderVictory : .attackerVictory)
-
-        // Set higher territory conquered for surrender
-        updatedWar.territoryConquered = 0.35  // Maximum territory loss
-
-        gameManager.warEngine.activeWars[index] = updatedWar
-
-        dismiss()
     }
 
     private func formatNumber(_ value: Int) -> String {
