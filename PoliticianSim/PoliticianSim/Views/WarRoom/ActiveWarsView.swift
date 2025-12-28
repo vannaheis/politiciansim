@@ -11,6 +11,7 @@ struct ActiveWarsView: View {
     @EnvironmentObject var gameManager: GameManager
     @State private var showDeclareWarSheet = false
     @State private var selectedWar: War? = nil
+    @State private var selectedRebellion: Rebellion? = nil
 
     var body: some View {
         ScrollView {
@@ -63,10 +64,15 @@ struct ActiveWarsView: View {
                                 .padding(.horizontal, 4)
 
                             ForEach(gameManager.territoryManager.activeRebellions) { rebellion in
-                                RebellionCard(
-                                    rebellion: rebellion,
-                                    playerStrength: gameManager.character?.militaryStats?.strength ?? 0
-                                )
+                                Button(action: {
+                                    selectedRebellion = rebellion
+                                }) {
+                                    RebellionCard(
+                                        rebellion: rebellion,
+                                        playerStrength: gameManager.character?.militaryStats?.strength ?? 0
+                                    )
+                                }
+                                .buttonStyle(PlainButtonStyle())
                             }
                         }
                     }
@@ -120,6 +126,10 @@ struct ActiveWarsView: View {
         }
         .sheet(item: $selectedWar) { war in
             WarDetailsView(war: war)
+                .environmentObject(gameManager)
+        }
+        .sheet(item: $selectedRebellion) { rebellion in
+            RebellionDetailView(rebellion: rebellion)
                 .environmentObject(gameManager)
         }
     }

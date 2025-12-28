@@ -122,6 +122,7 @@
 		7CF1AEA52F00F34E00E31456 /* TerritoryDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF1AEA42F00F34E00E31456 /* TerritoryDetailView.swift */; };
 		7CF1AEA72F0102D300E31456 /* RebellionNotificationPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF1AEA62F0102D300E31456 /* RebellionNotificationPopup.swift */; };
 		7CF1AEA92F0102E600E31456 /* RebellionNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF1AEA82F0102E600E31456 /* RebellionNotification.swift */; };
+		7CF1AEAB2F010BAE00E31456 /* RebellionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF1AEAA2F010BAE00E31456 /* RebellionDetailView.swift */; };
 		FB1BD9A2FE914F06F1F9D2BC /* CustomAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61D83AE85A5956CC2FFCB315 /* CustomAlert.swift */; };
 /* End PBXBuildFile section */
 
@@ -243,6 +244,7 @@
 		7CF1AEA42F00F34E00E31456 /* TerritoryDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerritoryDetailView.swift; sourceTree = "<group>"; };
 		7CF1AEA62F0102D300E31456 /* RebellionNotificationPopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RebellionNotificationPopup.swift; sourceTree = "<group>"; };
 		7CF1AEA82F0102E600E31456 /* RebellionNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RebellionNotification.swift; sourceTree = "<group>"; };
+		7CF1AEAA2F010BAE00E31456 /* RebellionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RebellionDetailView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -599,6 +601,7 @@
 				7CF1AEA12EFF6C6A00E31456 /* SurrenderConfirmationPopup.swift */,
 				7CF1AEA42F00F34E00E31456 /* TerritoryDetailView.swift */,
 				7CF1AEA62F0102D300E31456 /* RebellionNotificationPopup.swift */,
+				7CF1AEAA2F010BAE00E31456 /* RebellionDetailView.swift */,
 			);
 			path = WarRoom;
 			sourceTree = "<group>";
@@ -713,6 +716,7 @@
 				7C6E46D42EC965C4005F7A3D /* TreasuryView.swift in Sources */,
 				7C6E47142EE7EF7D005F7A3D /* PeaceTermsView.swift in Sources */,
 				017 /* InfoCard.swift in Sources */,
+				7CF1AEAB2F010BAE00E31456 /* RebellionDetailView.swift in Sources */,
 				7C6E46F92ECD09F2005F7A3D /* TerritoryManager.swift in Sources */,
 				018 /* ProgressBar.swift in Sources */,
 				019 /* Badge.swift in Sources */,
