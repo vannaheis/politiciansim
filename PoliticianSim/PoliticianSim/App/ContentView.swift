@@ -154,6 +154,30 @@ struct MainGameRouter: View {
                     .zIndex(931)
             }
 
+            // Civil War Victory Notification (rebellion suppression)
+            if let firstVictory = gameManager.pendingCivilWarVictoryNotifications.first {
+                Color.black.opacity(0.7)
+                    .ignoresSafeArea()
+                    .transition(.opacity)
+                    .zIndex(935)
+
+                CivilWarVictoryNotificationPopup(notification: firstVictory)
+                    .transition(.scale.combined(with: .opacity))
+                    .zIndex(936)
+            }
+
+            // Civil War Defeat Notification (rebellion victory)
+            if let firstDefeat = gameManager.pendingCivilWarDefeatNotifications.first {
+                Color.black.opacity(0.7)
+                    .ignoresSafeArea()
+                    .transition(.opacity)
+                    .zIndex(940)
+
+                CivilWarDefeatNotificationPopup(notification: firstDefeat)
+                    .transition(.scale.combined(with: .opacity))
+                    .zIndex(941)
+            }
+
             // Peace Terms Selection (war victory)
             if let war = gameManager.pendingPeaceTerms {
                 PeaceTermsView(

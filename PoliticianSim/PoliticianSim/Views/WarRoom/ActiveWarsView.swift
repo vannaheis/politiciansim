@@ -264,6 +264,7 @@ struct WarCard: View {
 }
 
 struct RebellionCard: View {
+    @EnvironmentObject var gameManager: GameManager
     let rebellion: Rebellion
     let playerStrength: Int
 
@@ -334,7 +335,10 @@ struct RebellionCard: View {
     }
 
     var durationText: String {
-        let days = Calendar.current.dateComponents([.day], from: rebellion.startDate, to: Date()).day ?? 0
+        guard let currentDate = gameManager.character?.currentDate else {
+            return "Unknown"
+        }
+        let days = Calendar.current.dateComponents([.day], from: rebellion.startDate, to: currentDate).day ?? 0
         if days == 0 {
             return "Just started"
         } else if days == 1 {

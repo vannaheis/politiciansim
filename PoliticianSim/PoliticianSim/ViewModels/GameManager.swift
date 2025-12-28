@@ -51,6 +51,8 @@ class GameManager: ObservableObject {
     @Published var pendingAIWarNotifications: [AIWarNotification] = []  // AI war conclusions
     @Published var pendingExhaustionWarning: WarExhaustionWarning? = nil  // War exhaustion warnings
     @Published var pendingRebellionNotifications: [RebellionNotification] = []  // Rebellion notifications
+    @Published var pendingCivilWarVictoryNotifications: [CivilWarVictoryNotification] = []  // Civil war victories
+    @Published var pendingCivilWarDefeatNotifications: [CivilWarDefeatNotification] = []  // Civil war defeats
 
     // Track which wars have already triggered exhaustion warnings
     private var exhaustionWarningsShown: Set<UUID> = []
@@ -937,15 +939,25 @@ class GameManager: ObservableObject {
             let isPlayerWinner = (war.outcome == .attackerVictory && isPlayerAttacker) ||
                                (war.outcome == .defenderVictory && isPlayerDefender)
 
-            if isPlayerWinner {
-                // Player victory - show peace terms selection
-                if pendingPeaceTerms == nil {  // Only set if not already pending
-                    pendingPeaceTerms = war
+            // Handle civil wars (rebellion suppression) differently
+            if war.type == .civil {
+                if isPlayerWinner {
+                    handleCivilWarVictory(war: war, character: character)
+                } else {
+                    handleCivilWarDefeat(war: war, character: character)
                 }
             } else {
-                // Player defeat - apply consequences but don't end game
-                if pendingWarDefeatNotification == nil {  // Only process once
-                    handleWarDefeat(war: war, character: character)
+                // Standard war handling
+                if isPlayerWinner {
+                    // Player victory - show peace terms selection
+                    if pendingPeaceTerms == nil {  // Only set if not already pending
+                        pendingPeaceTerms = war
+                    }
+                } else {
+                    // Player defeat - apply consequences but don't end game
+                    if pendingWarDefeatNotification == nil {  // Only process once
+                        handleWarDefeat(war: war, character: character)
+                    }
                 }
             }
         }
@@ -1039,6 +1051,124 @@ class GameManager: ObservableObject {
         // Note: Player continues game despite defeat
         // They may face impeachment if approval/reputation drops too low
         // This creates interesting comeback narratives
+    }
+
+    private func handleCivilWarVictory(war: War, character: Character) {
+        print("\n✅ CIVIL WAR VICTORY - REBELLION SUPPRESSED")
+        print("War: \(war.attacker) vs \(war.defender)")
+
+        // Find the rebellion that triggered this civil war
+        guard let rebellion = territoryManager.activeRebellions.first(where: { $0.territory.formerOwner + "_REBELS" == war.defender }) else {
+            print("⚠️ Could not find matching rebellion for civil war")
+            warEngine.endWar(warId: war.id)
+            return
+        }
+
+        // Find the territory
+        guard let territoryIndex = territoryManager.territories.firstIndex(where: { $0.id == rebellion.territory.id }) else {
+            print("⚠️ Could not find matching territory")
+            warEngine.endWar(warId: war.id)
+            return
+        }
+
+        // Victory: Retain territory and set morale to 50%
+        territoryManager.territories[territoryIndex].morale = 0.5
+        print("Territory morale set to 50%")
+
+        // Remove rebellion from active rebellions
+        if let rebellionIndex = territoryManager.activeRebellions.firstIndex(where: { $0.id == rebellion.id }) {
+            territoryManager.activeRebellions[rebellionIndex].outcome = .suppressed
+            territoryManager.activeRebellions[rebellionIndex].endDate = character.currentDate
+            let completedRebellion = territoryManager.activeRebellions.remove(at: rebellionIndex)
+            territoryManager.rebellionHistory.append(completedRebellion)
+        }
+
+        // Apply political consequences (minor approval gain for restoring order)
+        var updatedChar = character
+        updatedChar.approvalRating = min(100, updatedChar.approvalRating + 5.0)
+        characterManager.updateCharacter(updatedChar)
+
+        // Calculate war costs
+        let casualties = abs(war.casualtiesByCountry[character.country] ?? 0)
+        let warCost = war.costByCountry[character.country] ?? 0
+
+        // Create victory notification
+        let notification = CivilWarVictoryNotification(
+            war: war,
+            territoryName: rebellion.territory.name,
+            territorySize: rebellion.territory.size,
+            territoryPopulation: rebellion.territory.population,
+            newMorale: 0.5,
+            casualties: casualties,
+            warCost: warCost,
+            approvalGain: 5.0
+        )
+        pendingCivilWarVictoryNotifications.append(notification)
+
+        // End the war
+        warEngine.endWar(warId: war.id)
+    }
+
+    private func handleCivilWarDefeat(war: War, character: Character) {
+        print("\n❌ CIVIL WAR DEFEAT - REBELLION VICTORIOUS")
+        print("War: \(war.attacker) vs \(war.defender)")
+
+        // Find the rebellion that triggered this civil war
+        guard let rebellion = territoryManager.activeRebellions.first(where: { $0.territory.formerOwner + "_REBELS" == war.defender }) else {
+            print("⚠️ Could not find matching rebellion for civil war")
+            warEngine.endWar(warId: war.id)
+            return
+        }
+
+        // Find the territory
+        guard let territoryIndex = territoryManager.territories.firstIndex(where: { $0.id == rebellion.territory.id }) else {
+            print("⚠️ Could not find matching territory")
+            warEngine.endWar(warId: war.id)
+            return
+        }
+
+        let territory = territoryManager.territories[territoryIndex]
+
+        // Defeat: Territory gains independence
+        territoryManager.territories.remove(at: territoryIndex)
+        print("Territory \(territory.name) gained independence")
+
+        // Remove rebellion from active rebellions
+        if let rebellionIndex = territoryManager.activeRebellions.firstIndex(where: { $0.id == rebellion.id }) {
+            territoryManager.activeRebellions[rebellionIndex].outcome = .independence
+            territoryManager.activeRebellions[rebellionIndex].endDate = character.currentDate
+            let completedRebellion = territoryManager.activeRebellions.remove(at: rebellionIndex)
+            territoryManager.rebellionHistory.append(completedRebellion)
+        }
+
+        // Apply severe political consequences
+        var updatedChar = character
+        updatedChar.approvalRating = max(0, updatedChar.approvalRating - 15.0)
+        updatedChar.stress = min(100, updatedChar.stress + 10)
+        characterManager.updateCharacter(updatedChar)
+
+        modifyStat(.reputation, by: -20, reason: "Lost territory to rebellion")
+
+        // Calculate war costs
+        let casualties = abs(war.casualtiesByCountry[character.country] ?? 0)
+        let warCost = war.costByCountry[character.country] ?? 0
+
+        // Create defeat notification
+        let notification = CivilWarDefeatNotification(
+            war: war,
+            territoryName: territory.name,
+            territorySize: territory.size,
+            territoryPopulation: territory.population,
+            casualties: casualties,
+            warCost: warCost,
+            approvalLoss: -15.0,
+            reputationLoss: -20,
+            stressGain: 10
+        )
+        pendingCivilWarDefeatNotifications.append(notification)
+
+        // End the war
+        warEngine.endWar(warId: war.id)
     }
 
     private func triggerGameOver(reason: GameOverData.GameOverReason, war: War?, character: Character) {

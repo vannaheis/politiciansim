@@ -123,6 +123,10 @@
 		7CF1AEA72F0102D300E31456 /* RebellionNotificationPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF1AEA62F0102D300E31456 /* RebellionNotificationPopup.swift */; };
 		7CF1AEA92F0102E600E31456 /* RebellionNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF1AEA82F0102E600E31456 /* RebellionNotification.swift */; };
 		7CF1AEAB2F010BAE00E31456 /* RebellionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF1AEAA2F010BAE00E31456 /* RebellionDetailView.swift */; };
+		7CF1AEAE2F0114B900E31456 /* CivilWarVictoryNotificationPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF1AEAD2F0114B900E31456 /* CivilWarVictoryNotificationPopup.swift */; };
+		7CF1AEAF2F0114B900E31456 /* CivilWarDefeatNotificationPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF1AEAC2F0114B900E31456 /* CivilWarDefeatNotificationPopup.swift */; };
+		7CF1AEB22F01150300E31456 /* CivilWarVictoryNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF1AEB12F01150300E31456 /* CivilWarVictoryNotification.swift */; };
+		7CF1AEB32F01150300E31456 /* CivilWarDefeatNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF1AEB02F01150300E31456 /* CivilWarDefeatNotification.swift */; };
 		FB1BD9A2FE914F06F1F9D2BC /* CustomAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61D83AE85A5956CC2FFCB315 /* CustomAlert.swift */; };
 /* End PBXBuildFile section */
 
@@ -245,6 +249,10 @@
 		7CF1AEA62F0102D300E31456 /* RebellionNotificationPopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RebellionNotificationPopup.swift; sourceTree = "<group>"; };
 		7CF1AEA82F0102E600E31456 /* RebellionNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RebellionNotification.swift; sourceTree = "<group>"; };
 		7CF1AEAA2F010BAE00E31456 /* RebellionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RebellionDetailView.swift; sourceTree = "<group>"; };
+		7CF1AEAC2F0114B900E31456 /* CivilWarDefeatNotificationPopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CivilWarDefeatNotificationPopup.swift; sourceTree = "<group>"; };
+		7CF1AEAD2F0114B900E31456 /* CivilWarVictoryNotificationPopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CivilWarVictoryNotificationPopup.swift; sourceTree = "<group>"; };
+		7CF1AEB02F01150300E31456 /* CivilWarDefeatNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CivilWarDefeatNotification.swift; sourceTree = "<group>"; };
+		7CF1AEB12F01150300E31456 /* CivilWarVictoryNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CivilWarVictoryNotification.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -328,6 +336,8 @@
 				7CF1AE942EFA091E00E31456 /* WarDefeatNotification.swift */,
 				7CF1AE9A2EFC8B0600E31456 /* DefensiveWarNotification.swift */,
 				7CF1AEA82F0102E600E31456 /* RebellionNotification.swift */,
+				7CF1AEB02F01150300E31456 /* CivilWarDefeatNotification.swift */,
+				7CF1AEB12F01150300E31456 /* CivilWarVictoryNotification.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -602,6 +612,8 @@
 				7CF1AEA42F00F34E00E31456 /* TerritoryDetailView.swift */,
 				7CF1AEA62F0102D300E31456 /* RebellionNotificationPopup.swift */,
 				7CF1AEAA2F010BAE00E31456 /* RebellionDetailView.swift */,
+				7CF1AEAC2F0114B900E31456 /* CivilWarDefeatNotificationPopup.swift */,
+				7CF1AEAD2F0114B900E31456 /* CivilWarVictoryNotificationPopup.swift */,
 			);
 			path = WarRoom;
 			sourceTree = "<group>";
@@ -752,6 +764,8 @@
 				7C6E46E92ECACD92005F7A3D /* FiscalCapitalStock.swift in Sources */,
 				028 /* CharacterCreationViewModel.swift in Sources */,
 				029 /* CountrySelectionView.swift in Sources */,
+				7CF1AEAE2F0114B900E31456 /* CivilWarVictoryNotificationPopup.swift in Sources */,
+				7CF1AEAF2F0114B900E31456 /* CivilWarDefeatNotificationPopup.swift in Sources */,
 				030 /* CharacterDetailsView.swift in Sources */,
 				7C6E46F62ECC4AA6005F7A3D /* WarEngine.swift in Sources */,
 				7C6E46F72ECC4AA6005F7A3D /* MilitaryManager.swift in Sources */,
@@ -762,6 +776,8 @@
 				7C6E45342EC58E41005F7A3D /* DiplomacyManager.swift in Sources */,
 				034 /* HomeView.swift in Sources */,
 				7C6E45282EC58536005F7A3D /* Law.swift in Sources */,
+				7CF1AEB22F01150300E31456 /* CivilWarVictoryNotification.swift in Sources */,
+				7CF1AEB32F01150300E31456 /* CivilWarDefeatNotification.swift in Sources */,
 				7CF1AE952EFA091E00E31456 /* WarDefeatNotification.swift in Sources */,
 				7C6E46CF2EC965AF005F7A3D /* Treasury.swift in Sources */,
 				035 /* DateDisplayView.swift in Sources */,
