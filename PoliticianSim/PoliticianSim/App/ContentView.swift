@@ -142,6 +142,18 @@ struct MainGameRouter: View {
                     .zIndex(921)
             }
 
+            // Rebellion Notification (shows sequential notifications)
+            if let firstRebellion = gameManager.pendingRebellionNotifications.first {
+                Color.black.opacity(0.7)
+                    .ignoresSafeArea()
+                    .transition(.opacity)
+                    .zIndex(930)
+
+                RebellionNotificationPopup(notification: firstRebellion)
+                    .transition(.scale.combined(with: .opacity))
+                    .zIndex(931)
+            }
+
             // Peace Terms Selection (war victory)
             if let war = gameManager.pendingPeaceTerms {
                 PeaceTermsView(

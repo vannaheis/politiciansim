@@ -15,7 +15,11 @@ struct ActiveWarsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                if gameManager.warEngine.activeWars.isEmpty {
+                let hasActiveWars = !gameManager.warEngine.activeWars.isEmpty
+                let hasActiveRebellions = !gameManager.territoryManager.activeRebellions.isEmpty
+                let hasAnyConflicts = hasActiveWars || hasActiveRebellions
+
+                if !hasAnyConflicts {
                     VStack(spacing: 16) {
                         Image(systemName: "flag.slash")
                             .font(.system(size: 50))
@@ -50,14 +54,41 @@ struct ActiveWarsView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.top, 60)
                 } else {
-                    // Active Wars List
-                    ForEach(gameManager.warEngine.activeWars) { war in
-                        Button(action: {
-                            selectedWar = war
-                        }) {
-                            WarCard(war: war)
+                    // Active Rebellions Section
+                    if hasActiveRebellions {
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("ACTIVE REBELLIONS")
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundColor(Constants.Colors.secondaryText)
+                                .padding(.horizontal, 4)
+
+                            ForEach(gameManager.territoryManager.activeRebellions) { rebellion in
+                                RebellionCard(
+                                    rebellion: rebellion,
+                                    playerStrength: gameManager.character?.militaryStats?.strength ?? 0
+                                )
+                            }
                         }
-                        .buttonStyle(PlainButtonStyle())
+                    }
+
+                    // Active Wars Section
+                    if hasActiveWars {
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("ACTIVE WARS")
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundColor(Constants.Colors.secondaryText)
+                                .padding(.horizontal, 4)
+                                .padding(.top, hasActiveRebellions ? 16 : 0)
+
+                            ForEach(gameManager.warEngine.activeWars) { war in
+                                Button(action: {
+                                    selectedWar = war
+                                }) {
+                                    WarCard(war: war)
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                            }
+                        }
                     }
 
                     // Can declare another war (max 3)
@@ -76,6 +107,7 @@ struct ActiveWarsView: View {
                             .background(Constants.Colors.buttonPrimary.opacity(0.15))
                             .cornerRadius(8)
                         }
+                        .padding(.top, 8)
                     }
                 }
             }
@@ -217,6 +249,114 @@ struct WarCard: View {
             return String(format: "$%.1fM", value / 1_000_000)
         } else {
             return formatter.string(from: amount as NSNumber) ?? "$0"
+        }
+    }
+}
+
+struct RebellionCard: View {
+    let rebellion: Rebellion
+    let playerStrength: Int
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundColor(Constants.Colors.negative)
+
+                Text("Rebellion")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundColor(.white)
+
+                Spacer()
+
+                Text(durationText)
+                    .font(.system(size: 13))
+                    .foregroundColor(Constants.Colors.secondaryText)
+            }
+
+            Text(rebellion.territory.name)
+                .font(.system(size: 14))
+                .foregroundColor(.white)
+
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Rebel Forces")
+                        .font(.system(size: 12))
+                        .foregroundColor(Constants.Colors.secondaryText)
+
+                    Text("\(rebellion.strength)")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(Constants.Colors.negative)
+                }
+
+                Spacer()
+
+                VStack(alignment: .trailing, spacing: 4) {
+                    Text("Popular Support")
+                        .font(.system(size: 12))
+                        .foregroundColor(Constants.Colors.secondaryText)
+
+                    Text("\(Int(rebellion.support * 100))%")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(Constants.Colors.negative)
+                }
+            }
+
+            // Threat Assessment
+            HStack {
+                Image(systemName: "shield.lefthalf.filled")
+                    .font(.system(size: 12))
+                    .foregroundColor(threatColor)
+
+                Text(threatLevel)
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(threatColor)
+
+                Spacer()
+            }
+            .padding(8)
+            .background(threatColor.opacity(0.15))
+            .cornerRadius(6)
+        }
+        .padding(16)
+        .background(Color(red: 0.15, green: 0.17, blue: 0.22))
+        .cornerRadius(12)
+    }
+
+    var durationText: String {
+        let days = Calendar.current.dateComponents([.day], from: rebellion.startDate, to: Date()).day ?? 0
+        if days == 0 {
+            return "Just started"
+        } else if days == 1 {
+            return "1 day"
+        } else {
+            return "\(days) days"
+        }
+    }
+
+    var strengthRatio: Double {
+        Double(playerStrength) / Double(max(1, rebellion.strength))
+    }
+
+    var threatLevel: String {
+        if strengthRatio >= 10.0 {
+            return "Minor Uprising"
+        } else if strengthRatio >= 5.0 {
+            return "Moderate Threat"
+        } else if strengthRatio >= 2.0 {
+            return "Serious Threat"
+        } else {
+            return "Critical Threat"
+        }
+    }
+
+    var threatColor: Color {
+        if strengthRatio >= 10.0 {
+            return .yellow
+        } else if strengthRatio >= 5.0 {
+            return .orange
+        } else {
+            return Constants.Colors.negative
         }
     }
 }

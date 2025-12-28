@@ -50,6 +50,7 @@ class GameManager: ObservableObject {
     @Published var pendingDefensiveWarNotification: DefensiveWarNotification? = nil  // AI declares war on player
     @Published var pendingAIWarNotifications: [AIWarNotification] = []  // AI war conclusions
     @Published var pendingExhaustionWarning: WarExhaustionWarning? = nil  // War exhaustion warnings
+    @Published var pendingRebellionNotifications: [RebellionNotification] = []  // Rebellion notifications
 
     // Track which wars have already triggered exhaustion warnings
     private var exhaustionWarningsShown: Set<UUID> = []
@@ -292,7 +293,16 @@ class GameManager: ObservableObject {
                     self.processMilitaryTreasury(character: &updatedChar, days: 7)
 
                     // Update territories and check for rebellions
-                    self.territoryManager.processWeekly(currentDate: updatedChar.currentDate)
+                    let newRebellions = self.territoryManager.processWeekly(currentDate: updatedChar.currentDate)
+
+                    // Create notifications for new rebellions
+                    for rebellion in newRebellions {
+                        let notification = RebellionNotification(
+                            rebellion: rebellion,
+                            playerMilitaryStrength: updatedChar.militaryStats?.strength ?? 0
+                        )
+                        self.pendingRebellionNotifications.append(notification)
+                    }
 
                     // Recalculate military strength if militaryStats exists
                     if var militaryStats = updatedChar.militaryStats {

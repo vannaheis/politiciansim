@@ -95,7 +95,9 @@ class TerritoryManager: ObservableObject {
 
     // MARK: - Rebellion System
 
-    func checkForRebellions(currentDate: Date) {
+    func checkForRebellions(currentDate: Date) -> [Rebellion] {
+        var newRebellions: [Rebellion] = []
+
         for territory in territories {
             // Skip if already has active rebellion
             if activeRebellions.contains(where: { $0.territory.id == territory.id }) {
@@ -109,8 +111,11 @@ class TerritoryManager: ObservableObject {
             if roll < rebellionChance {
                 let rebellion = Rebellion(territory: territory, currentDate: currentDate)
                 activeRebellions.append(rebellion)
+                newRebellions.append(rebellion)
             }
         }
+
+        return newRebellions
     }
 
     func suppressRebellion(
@@ -246,12 +251,13 @@ class TerritoryManager: ObservableObject {
         }
     }
 
-    func processWeekly(currentDate: Date) {
+    func processWeekly(currentDate: Date) -> [Rebellion] {
         // Update territory morale (weekly decay)
         updateTerritories(days: 7)
 
         // Check for new rebellions (weekly check)
-        checkForRebellions(currentDate: currentDate)
+        let newRebellions = checkForRebellions(currentDate: currentDate)
+        return newRebellions
     }
 
     // MARK: - Annual Territory Growth

@@ -120,6 +120,8 @@
 		7CF1AEA22EFF6C6A00E31456 /* PeaceNegotiationPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF1AEA02EFF6C6A00E31456 /* PeaceNegotiationPopup.swift */; };
 		7CF1AEA32EFF6C6A00E31456 /* SurrenderConfirmationPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF1AEA12EFF6C6A00E31456 /* SurrenderConfirmationPopup.swift */; };
 		7CF1AEA52F00F34E00E31456 /* TerritoryDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF1AEA42F00F34E00E31456 /* TerritoryDetailView.swift */; };
+		7CF1AEA72F0102D300E31456 /* RebellionNotificationPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF1AEA62F0102D300E31456 /* RebellionNotificationPopup.swift */; };
+		7CF1AEA92F0102E600E31456 /* RebellionNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF1AEA82F0102E600E31456 /* RebellionNotification.swift */; };
 		FB1BD9A2FE914F06F1F9D2BC /* CustomAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61D83AE85A5956CC2FFCB315 /* CustomAlert.swift */; };
 /* End PBXBuildFile section */
 
@@ -239,6 +241,8 @@
 		7CF1AEA02EFF6C6A00E31456 /* PeaceNegotiationPopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeaceNegotiationPopup.swift; sourceTree = "<group>"; };
 		7CF1AEA12EFF6C6A00E31456 /* SurrenderConfirmationPopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SurrenderConfirmationPopup.swift; sourceTree = "<group>"; };
 		7CF1AEA42F00F34E00E31456 /* TerritoryDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerritoryDetailView.swift; sourceTree = "<group>"; };
+		7CF1AEA62F0102D300E31456 /* RebellionNotificationPopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RebellionNotificationPopup.swift; sourceTree = "<group>"; };
+		7CF1AEA82F0102E600E31456 /* RebellionNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RebellionNotification.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -321,6 +325,7 @@
 				7CF1AE922EF7AB2900E31456 /* AIWarNotification.swift */,
 				7CF1AE942EFA091E00E31456 /* WarDefeatNotification.swift */,
 				7CF1AE9A2EFC8B0600E31456 /* DefensiveWarNotification.swift */,
+				7CF1AEA82F0102E600E31456 /* RebellionNotification.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -593,6 +598,7 @@
 				7CF1AEA02EFF6C6A00E31456 /* PeaceNegotiationPopup.swift */,
 				7CF1AEA12EFF6C6A00E31456 /* SurrenderConfirmationPopup.swift */,
 				7CF1AEA42F00F34E00E31456 /* TerritoryDetailView.swift */,
+				7CF1AEA62F0102D300E31456 /* RebellionNotificationPopup.swift */,
 			);
 			path = WarRoom;
 			sourceTree = "<group>";
@@ -665,6 +671,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7CF1AEA72F0102D300E31456 /* RebellionNotificationPopup.swift in Sources */,
 				001 /* PoliticianSimApp.swift in Sources */,
 				002 /* ContentView.swift in Sources */,
 				7C6E45412EC684BF005F7A3D /* Education.swift in Sources */,
@@ -762,6 +769,7 @@
 				7C6E46EB2ECAD875005F7A3D /* GameOverView.swift in Sources */,
 				7C6E453D2EC59BBC005F7A3D /* SaveManager.swift in Sources */,
 				038 /* SideMenuView.swift in Sources */,
+				7CF1AEA92F0102E600E31456 /* RebellionNotification.swift in Sources */,
 				039 /* NewHomeView.swift in Sources */,
 				040 /* ProfileView.swift in Sources */,
 				7CF1AE972EFA098900E31456 /* WarDefeatNotificationPopup.swift in Sources */,
