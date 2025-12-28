@@ -193,6 +193,7 @@ struct CountryRankingRow: View {
 
 struct ConqueredTerritoriesView: View {
     @EnvironmentObject var gameManager: GameManager
+    @State private var selectedTerritory: Territory?
 
     var playerTerritories: [Territory] {
         let playerCode = gameManager.character?.country ?? "USA"
@@ -225,8 +226,18 @@ struct ConqueredTerritoriesView: View {
 
                 ForEach(playerTerritories) { territory in
                     TerritoryCard(territory: territory)
+                        .onTapGesture {
+                            selectedTerritory = territory
+                        }
                 }
             }
+        }
+        .sheet(item: $selectedTerritory) { territory in
+            TerritoryDetailView(
+                territory: territory,
+                playerCountry: gameManager.character?.country ?? "USA"
+            )
+            .environmentObject(gameManager)
         }
     }
 }
