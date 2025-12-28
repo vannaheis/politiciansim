@@ -454,20 +454,26 @@ class EconomicDataManager: ObservableObject {
         globalCountryState: GlobalCountryState,
         territoryManager: TerritoryManager
     ) {
-        // Get player's country from global state
-        guard let country = globalCountryState.getCountry(code: playerCountry) else { return }
-
         // Calculate total conquered territory GDP contribution
         let conqueredGDP = territoryManager.getTotalConqueredGDPContribution(
             playerCountry: playerCountry,
             globalCountryState: globalCountryState
         )
 
-        // Update federal GDP to include conquered territory GDP
-        let baseGDP = country.currentGDP
-        let totalGDP = baseGDP + conqueredGDP
+        // Add conquered territory GDP to the current federal GDP
+        // IMPORTANT: Use economicData.federal.gdp.current (which already has growth from simulateFederalEconomy)
+        // NOT country.currentGDP from GlobalCountryState (which is stale and doesn't reflect weekly growth)
+        let currentGDP = economicData.federal.gdp.current
+        let totalGDP = currentGDP + conqueredGDP
 
         economicData.federal.gdp.current = totalGDP
+
+        // Also update the country's GDP in GlobalCountryState to keep them in sync
+        if let country = globalCountryState.getCountry(code: playerCountry) {
+            var updatedCountry = country
+            updatedCountry.currentGDP = totalGDP
+            globalCountryState.updateCountry(updatedCountry)
+        }
     }
 
     func applyTerritoryChangeToCountryGDP(
