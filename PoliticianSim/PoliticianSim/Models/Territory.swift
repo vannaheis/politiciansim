@@ -134,6 +134,7 @@ struct Territory: Codable, Identifiable {
     }
 
     func gdpContributionMultiplier(currentDate: Date) -> Double {
+        let years = yearsSinceConquest(currentDate: currentDate)
         switch years {
         case 0: return 0.30  // Year 1: 30% productivity
         case 1: return 0.50  // Year 2: 50% productivity
