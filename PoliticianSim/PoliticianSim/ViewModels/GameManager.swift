@@ -185,7 +185,8 @@ class GameManager: ObservableObject {
             self.economicDataManager.applyTerritoryGDPImpact(
                 playerCountry: updatedChar.country,
                 globalCountryState: self.globalCountryState,
-                territoryManager: self.territoryManager
+                territoryManager: self.territoryManager,
+                currentDate: updatedChar.currentDate
             )
 
             // Check for annual territory growth (year change)
@@ -309,7 +310,8 @@ class GameManager: ObservableObject {
             self.economicDataManager.applyTerritoryGDPImpact(
                 playerCountry: updatedChar.country,
                 globalCountryState: self.globalCountryState,
-                territoryManager: self.territoryManager
+                territoryManager: self.territoryManager,
+                currentDate: updatedChar.currentDate
             )
 
             // Check for annual territory growth (year change)

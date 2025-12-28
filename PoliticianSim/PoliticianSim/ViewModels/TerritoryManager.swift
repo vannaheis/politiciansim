@@ -339,7 +339,7 @@ class TerritoryManager: ObservableObject {
 
     // MARK: - GDP Contribution Calculations
 
-    func getTotalConqueredGDPContribution(playerCountry: String, globalCountryState: GlobalCountryState) -> Double {
+    func getTotalConqueredGDPContribution(playerCountry: String, globalCountryState: GlobalCountryState, currentDate: Date) -> Double {
         var totalGDP: Double = 0
 
         for territory in territories where territory.currentOwner == playerCountry {
@@ -348,8 +348,8 @@ class TerritoryManager: ObservableObject {
                 let territoryPercentOfFormerCountry = territory.size / formerCountry.baseTerritory
                 let baseGDPForTerritory = formerCountry.currentGDP * territoryPercentOfFormerCountry
 
-                // Apply GDP contribution multiplier based on years since conquest
-                totalGDP += baseGDPForTerritory * territory.gdpContributionMultiplier
+                // Apply GDP contribution multiplier based on years since conquest (using game time)
+                totalGDP += baseGDPForTerritory * territory.gdpContributionMultiplier(currentDate: currentDate)
             }
         }
 

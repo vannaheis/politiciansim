@@ -119,8 +119,22 @@ struct Territory: Codable, Identifiable {
         Calendar.current.dateComponents([.year], from: conquestDate, to: Date()).year ?? 0
     }
 
+    func yearsSinceConquest(currentDate: Date) -> Int {
+        Calendar.current.dateComponents([.year], from: conquestDate, to: currentDate).year ?? 0
+    }
+
     var gdpContributionMultiplier: Double {
         switch yearsSinceConquest {
+        case 0: return 0.30  // Year 1: 30% productivity
+        case 1: return 0.50  // Year 2: 50% productivity
+        case 2: return 0.70  // Year 3: 70% productivity
+        case 3...: return morale >= 0.5 ? 0.90 : 0.70  // Year 4+: 90% if stable, else 70%
+        default: return 0.30
+        }
+    }
+
+    func gdpContributionMultiplier(currentDate: Date) -> Double {
+        switch years {
         case 0: return 0.30  // Year 1: 30% productivity
         case 1: return 0.50  // Year 2: 50% productivity
         case 2: return 0.70  // Year 3: 70% productivity

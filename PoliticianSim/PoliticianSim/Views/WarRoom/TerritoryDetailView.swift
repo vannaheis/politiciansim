@@ -22,12 +22,11 @@ struct TerritoryDetailView: View {
     }
 
     var territoryGDP: Double {
-        if let country = gameManager.globalCountryState.getCountry(code: territory.formerOwner) {
-            let territoryPercentOfFormerCountry = territory.size / country.baseTerritory
-            let baseGDPForTerritory = country.currentGDP * territoryPercentOfFormerCountry
-            return baseGDPForTerritory * territory.gdpContributionMultiplier
-        }
-        return 0
+        guard let country = gameManager.globalCountryState.getCountry(code: territory.formerOwner),
+              let character = gameManager.character else { return 0 }
+        let territoryPercentOfFormerCountry = territory.size / country.baseTerritory
+        let baseGDPForTerritory = country.currentGDP * territoryPercentOfFormerCountry
+        return baseGDPForTerritory * territory.gdpContributionMultiplier(currentDate: character.currentDate)
     }
 
     var moralStatus: (text: String, color: Color) {
@@ -67,6 +66,11 @@ struct TerritoryDetailView: View {
 
     var canGrantAutonomy: Bool {
         return territory.type == .conquered && territory.morale < 0.70
+    }
+
+    var yearsHeld: Int {
+        guard let character = gameManager.character else { return 0 }
+        return Calendar.current.dateComponents([.year], from: territory.conquestDate, to: character.currentDate).year ?? 0
     }
 
     var body: some View {
@@ -136,14 +140,14 @@ struct TerritoryDetailView: View {
                                 TerritoryStatCard(
                                     icon: "calendar",
                                     label: "Years Held",
-                                    value: "\(territory.yearsSinceConquest)",
+                                    value: "\(yearsHeld)",
                                     color: .white
                                 )
 
                                 TerritoryStatCard(
-                                    icon: "percent",
+                                    icon: "map",
                                     label: "Size",
-                                    value: String(format: "%.1f%%", territory.size * 100),
+                                    value: territory.formattedSize,
                                     color: .white
                                 )
                             }

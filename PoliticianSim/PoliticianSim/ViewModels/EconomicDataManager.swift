@@ -452,12 +452,14 @@ class EconomicDataManager: ObservableObject {
     func applyTerritoryGDPImpact(
         playerCountry: String,
         globalCountryState: GlobalCountryState,
-        territoryManager: TerritoryManager
+        territoryManager: TerritoryManager,
+        currentDate: Date
     ) {
         // Calculate total conquered territory GDP contribution
         let conqueredGDP = territoryManager.getTotalConqueredGDPContribution(
             playerCountry: playerCountry,
-            globalCountryState: globalCountryState
+            globalCountryState: globalCountryState,
+            currentDate: currentDate
         )
 
         // Add conquered territory GDP to the current federal GDP
