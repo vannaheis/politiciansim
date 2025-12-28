@@ -14,7 +14,6 @@ struct RebellionDetailView: View {
     @State private var showSuppressConfirm = false
     @State private var showGrantAutonomyConfirm = false
     @State private var showGrantIndependenceConfirm = false
-    @State private var suppressionResult: String? = nil
 
     var playerStrength: Int {
         gameManager.character?.militaryStats?.strength ?? 0
@@ -34,16 +33,6 @@ struct RebellionDetailView: View {
         } else {
             return ("Critical Threat", Constants.Colors.negative)
         }
-    }
-
-    var suppressionChance: Double {
-        let baseChance = 0.7
-        let adjustedChance = min(0.95, baseChance * strengthRatio)
-        return adjustedChance
-    }
-
-    var estimatedCasualties: Int {
-        Int(Double(rebellion.strength) * 0.10)  // Estimate 10% casualties
     }
 
     var estimatedCost: Decimal {
@@ -233,7 +222,7 @@ struct RebellionDetailView: View {
                         .background(Color(red: 0.15, green: 0.17, blue: 0.22))
                         .cornerRadius(12)
 
-                        // Suppression Options
+                        // Response Options
                         VStack(alignment: .leading, spacing: 12) {
                             Text("RESPONSE OPTIONS")
                                 .font(.system(size: 12, weight: .bold))
@@ -251,34 +240,25 @@ struct RebellionDetailView: View {
                                             .font(.system(size: 15, weight: .semibold))
                                             .foregroundColor(.white)
                                         Spacer()
+                                        Image(systemName: "chevron.right")
+                                            .font(.system(size: 12))
+                                            .foregroundColor(Constants.Colors.secondaryText)
                                     }
 
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        HStack {
-                                            Image(systemName: "chart.bar.fill")
-                                                .font(.system(size: 10))
-                                            Text("Success Chance: \(Int(suppressionChance * 100))%")
-                                                .font(.system(size: 11))
-                                        }
+                                    Text("Deploy military forces to suppress the rebellion. This will start a civil war.")
+                                        .font(.system(size: 12))
                                         .foregroundColor(Constants.Colors.secondaryText)
 
-                                        HStack {
+                                    HStack(spacing: 16) {
+                                        HStack(spacing: 4) {
                                             Image(systemName: "dollarsign.circle.fill")
                                                 .font(.system(size: 10))
-                                            Text("Estimated Cost: \(formatMoney(estimatedCost))")
+                                            Text("~\(formatMoney(estimatedCost))")
                                                 .font(.system(size: 11))
                                         }
                                         .foregroundColor(Constants.Colors.secondaryText)
 
-                                        HStack {
-                                            Image(systemName: "person.2.slash")
-                                                .font(.system(size: 10))
-                                            Text("Est. Casualties: ~\(formatNumber(estimatedCasualties))")
-                                                .font(.system(size: 11))
-                                        }
-                                        .foregroundColor(Constants.Colors.secondaryText)
-
-                                        HStack {
+                                        HStack(spacing: 4) {
                                             Image(systemName: "hand.thumbsdown.fill")
                                                 .font(.system(size: 10))
                                             Text("Approval: -10%")
@@ -304,6 +284,9 @@ struct RebellionDetailView: View {
                                             .font(.system(size: 15, weight: .semibold))
                                             .foregroundColor(.white)
                                         Spacer()
+                                        Image(systemName: "chevron.right")
+                                            .font(.system(size: 12))
+                                            .foregroundColor(Constants.Colors.secondaryText)
                                     }
 
                                     Text("Grant self-governance to end the rebellion peacefully. Territory remains under your control but with limited GDP contribution.")
@@ -327,6 +310,9 @@ struct RebellionDetailView: View {
                                             .font(.system(size: 15, weight: .semibold))
                                             .foregroundColor(.white)
                                         Spacer()
+                                        Image(systemName: "chevron.right")
+                                            .font(.system(size: 12))
+                                            .foregroundColor(Constants.Colors.secondaryText)
                                     }
 
                                     VStack(alignment: .leading, spacing: 4) {
@@ -334,7 +320,7 @@ struct RebellionDetailView: View {
                                             .font(.system(size: 11))
                                             .foregroundColor(Constants.Colors.secondaryText)
 
-                                        HStack {
+                                        HStack(spacing: 4) {
                                             Image(systemName: "star.fill")
                                                 .font(.system(size: 10))
                                             Text("Reputation: +20")
@@ -351,24 +337,67 @@ struct RebellionDetailView: View {
                         .padding(16)
                         .background(Color(red: 0.15, green: 0.17, blue: 0.22))
                         .cornerRadius(12)
-
-                        // Suppression result display
-                        if let result = suppressionResult {
-                            VStack(alignment: .leading, spacing: 8) {
-                                HStack {
-                                    Image(systemName: result.contains("Success") ? "checkmark.circle.fill" : "xmark.circle.fill")
-                                        .foregroundColor(result.contains("Success") ? Constants.Colors.positive : Constants.Colors.negative)
-                                    Text(result)
-                                        .font(.system(size: 13, weight: .semibold))
-                                        .foregroundColor(.white)
-                                }
-                            }
-                            .padding(12)
-                            .background(Constants.Colors.accent.opacity(0.15))
-                            .cornerRadius(8)
-                        }
                     }
                     .padding(20)
+                }
+
+                // Custom Confirmation Popups
+                if showSuppressConfirm {
+                    Color.black.opacity(0.7)
+                        .ignoresSafeArea()
+                        .onTapGesture {
+                            showSuppressConfirm = false
+                        }
+
+                    SuppressRebellionConfirmationPopup(
+                        rebellion: rebellion,
+                        playerStrength: playerStrength,
+                        onConfirm: {
+                            suppressRebellion()
+                            showSuppressConfirm = false
+                        },
+                        onCancel: {
+                            showSuppressConfirm = false
+                        }
+                    )
+                }
+
+                if showGrantAutonomyConfirm {
+                    Color.black.opacity(0.7)
+                        .ignoresSafeArea()
+                        .onTapGesture {
+                            showGrantAutonomyConfirm = false
+                        }
+
+                    GrantAutonomyConfirmationPopup(
+                        rebellion: rebellion,
+                        onConfirm: {
+                            grantAutonomy()
+                            showGrantAutonomyConfirm = false
+                        },
+                        onCancel: {
+                            showGrantAutonomyConfirm = false
+                        }
+                    )
+                }
+
+                if showGrantIndependenceConfirm {
+                    Color.black.opacity(0.7)
+                        .ignoresSafeArea()
+                        .onTapGesture {
+                            showGrantIndependenceConfirm = false
+                        }
+
+                    GrantIndependenceConfirmationPopup(
+                        rebellion: rebellion,
+                        onConfirm: {
+                            grantIndependence()
+                            showGrantIndependenceConfirm = false
+                        },
+                        onCancel: {
+                            showGrantIndependenceConfirm = false
+                        }
+                    )
                 }
             }
             .navigationTitle("Rebellion Details")
@@ -382,30 +411,6 @@ struct RebellionDetailView: View {
                 }
             }
         }
-        .alert("Suppress Rebellion", isPresented: $showSuppressConfirm) {
-            Button("Cancel", role: .cancel) {}
-            Button("Suppress", role: .destructive) {
-                suppressRebellion()
-            }
-        } message: {
-            Text("Deploy military forces to suppress the rebellion?\n\nSuccess Chance: \(Int(suppressionChance * 100))%\nCost: ~\(formatMoney(estimatedCost))\nApproval: -10%\n\nFailure may result in prolonged conflict.")
-        }
-        .alert("Grant Autonomy", isPresented: $showGrantAutonomyConfirm) {
-            Button("Cancel", role: .cancel) {}
-            Button("Grant Autonomy") {
-                grantAutonomy()
-            }
-        } message: {
-            Text("Grant self-governance to this territory to end the rebellion peacefully?\n\nThe territory will become autonomous but remain under your control with reduced GDP contribution.")
-        }
-        .alert("Grant Independence", isPresented: $showGrantIndependenceConfirm) {
-            Button("Cancel", role: .cancel) {}
-            Button("Grant Independence") {
-                grantIndependence()
-            }
-        } message: {
-            Text("Release this territory as an independent nation?\n\nYou will lose all control and GDP contribution, but gain +20 reputation.")
-        }
     }
 
     // MARK: - Actions
@@ -418,28 +423,23 @@ struct RebellionDetailView: View {
         updatedChar.approvalRating = max(0, updatedChar.approvalRating - 10.0)
         gameManager.characterManager.updateCharacter(updatedChar)
 
-        let result = gameManager.territoryManager.suppressRebellion(
-            rebellionId: rebellion.id,
-            militaryStrength: playerStrength
+        // Start a civil war instead of immediate resolution
+        let war = gameManager.warEngine.declareWar(
+            attacker: character.country,
+            defender: "\(rebellion.territory.formerOwner)_REBELS",  // Virtual rebel faction
+            type: .civil,
+            justification: .rebellion,
+            attackerStrength: playerStrength,
+            defenderStrength: rebellion.strength,
+            currentDate: character.currentDate
         )
 
-        if result.success {
-            // Deduct from treasury
-            gameManager.treasuryManager.recordReparationPayment(
-                amount: -result.cost,
-                description: "Rebellion Suppression - \(rebellion.territory.name)",
-                date: character.currentDate
-            )
-
-            suppressionResult = "Success! Rebellion suppressed. Cost: \(formatMoney(result.cost)), Casualties: \(formatNumber(result.casualties))"
-
-            // Auto-dismiss after showing result
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                dismiss()
-            }
-        } else {
-            suppressionResult = "Failed! The rebellion was not suppressed. Morale further declined."
+        if let _ = war {
+            // War started successfully - the rebellion is now represented as a civil war
+            print("✅ Rebellion suppression started as civil war")
         }
+
+        dismiss()
     }
 
     private func grantAutonomy() {
@@ -486,6 +486,343 @@ struct RebellionDetailView: View {
             return String(format: "$%.1fM", value / 1_000_000)
         } else {
             return String(format: "$%.0f", value)
+        }
+    }
+}
+
+// MARK: - Confirmation Popups
+
+struct SuppressRebellionConfirmationPopup: View {
+    let rebellion: Rebellion
+    let playerStrength: Int
+    let onConfirm: () -> Void
+    let onCancel: () -> Void
+
+    var strengthRatio: Double {
+        Double(playerStrength) / Double(max(1, rebellion.strength))
+    }
+
+    var successChance: Int {
+        let baseChance = 0.7
+        let adjustedChance = min(0.95, baseChance * strengthRatio)
+        return Int(adjustedChance * 100)
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // Header
+            VStack(spacing: 12) {
+                Image(systemName: "shield.lefthalf.filled")
+                    .font(.system(size: 48))
+                    .foregroundColor(Constants.Colors.negative)
+
+                Text("Suppress Rebellion")
+                    .font(.system(size: 24, weight: .bold))
+                    .foregroundColor(.white)
+
+                Text("Deploy military forces to suppress the rebellion in \(rebellion.territory.name)")
+                    .font(.system(size: 14))
+                    .foregroundColor(Constants.Colors.secondaryText)
+                    .multilineTextAlignment(.center)
+            }
+            .padding(.top, 24)
+            .padding(.horizontal, 24)
+
+            Divider()
+                .background(Color.white.opacity(0.2))
+                .padding(.vertical, 20)
+
+            // Consequences
+            VStack(alignment: .leading, spacing: 16) {
+                Text("CONSEQUENCES")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(Constants.Colors.secondaryText)
+
+                VStack(alignment: .leading, spacing: 12) {
+                    RebellionConsequenceRow(
+                        icon: "exclamationmark.triangle.fill",
+                        text: "This will start a civil war",
+                        color: Constants.Colors.negative
+                    )
+
+                    RebellionConsequenceRow(
+                        icon: "chart.bar.fill",
+                        text: "Est. victory chance: ~\(successChance)%",
+                        color: successChance >= 70 ? Constants.Colors.positive : .orange
+                    )
+
+                    RebellionConsequenceRow(
+                        icon: "hand.thumbsdown.fill",
+                        text: "Approval rating: -10%",
+                        color: Constants.Colors.negative
+                    )
+
+                    RebellionConsequenceRow(
+                        icon: "person.2.slash",
+                        text: "Significant casualties expected",
+                        color: Constants.Colors.secondaryText
+                    )
+
+                    RebellionConsequenceRow(
+                        icon: "dollarsign.circle.fill",
+                        text: "Ongoing war costs",
+                        color: Constants.Colors.secondaryText
+                    )
+                }
+            }
+            .padding(.horizontal, 24)
+
+            Divider()
+                .background(Color.white.opacity(0.2))
+                .padding(.vertical, 20)
+
+            // Actions
+            HStack(spacing: 12) {
+                Button(action: onCancel) {
+                    Text("Cancel")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(Color(red: 0.25, green: 0.27, blue: 0.32))
+                        .cornerRadius(8)
+                }
+
+                Button(action: onConfirm) {
+                    Text("Begin Suppression")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(Constants.Colors.negative)
+                        .cornerRadius(8)
+                }
+            }
+            .padding(.horizontal, 24)
+            .padding(.bottom, 24)
+        }
+        .frame(width: 420)
+        .background(Constants.Colors.cardBackground)
+        .cornerRadius(16)
+        .shadow(color: Color.black.opacity(0.3), radius: 20, x: 0, y: 10)
+    }
+}
+
+struct GrantAutonomyConfirmationPopup: View {
+    let rebellion: Rebellion
+    let onConfirm: () -> Void
+    let onCancel: () -> Void
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // Header
+            VStack(spacing: 12) {
+                Image(systemName: "checkmark.seal.fill")
+                    .font(.system(size: 48))
+                    .foregroundColor(.yellow)
+
+                Text("Grant Autonomy")
+                    .font(.system(size: 24, weight: .bold))
+                    .foregroundColor(.white)
+
+                Text("Grant self-governance to \(rebellion.territory.name)")
+                    .font(.system(size: 14))
+                    .foregroundColor(Constants.Colors.secondaryText)
+                    .multilineTextAlignment(.center)
+            }
+            .padding(.top, 24)
+            .padding(.horizontal, 24)
+
+            Divider()
+                .background(Color.white.opacity(0.2))
+                .padding(.vertical, 20)
+
+            // Effects
+            VStack(alignment: .leading, spacing: 16) {
+                Text("EFFECTS")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(Constants.Colors.secondaryText)
+
+                VStack(alignment: .leading, spacing: 12) {
+                    RebellionConsequenceRow(
+                        icon: "checkmark.circle.fill",
+                        text: "Rebellion ends peacefully",
+                        color: Constants.Colors.positive
+                    )
+
+                    RebellionConsequenceRow(
+                        icon: "star.fill",
+                        text: "Reputation: +10",
+                        color: Constants.Colors.positive
+                    )
+
+                    RebellionConsequenceRow(
+                        icon: "chart.line.downtrend.xyaxis",
+                        text: "Reduced GDP contribution",
+                        color: .orange
+                    )
+
+                    RebellionConsequenceRow(
+                        icon: "building.2.fill",
+                        text: "Territory becomes autonomous",
+                        color: Constants.Colors.secondaryText
+                    )
+                }
+            }
+            .padding(.horizontal, 24)
+
+            Divider()
+                .background(Color.white.opacity(0.2))
+                .padding(.vertical, 20)
+
+            // Actions
+            HStack(spacing: 12) {
+                Button(action: onCancel) {
+                    Text("Cancel")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(Color(red: 0.25, green: 0.27, blue: 0.32))
+                        .cornerRadius(8)
+                }
+
+                Button(action: onConfirm) {
+                    Text("Grant Autonomy")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(.yellow)
+                        .cornerRadius(8)
+                }
+            }
+            .padding(.horizontal, 24)
+            .padding(.bottom, 24)
+        }
+        .frame(width: 420)
+        .background(Constants.Colors.cardBackground)
+        .cornerRadius(16)
+        .shadow(color: Color.black.opacity(0.3), radius: 20, x: 0, y: 10)
+    }
+}
+
+struct GrantIndependenceConfirmationPopup: View {
+    let rebellion: Rebellion
+    let onConfirm: () -> Void
+    let onCancel: () -> Void
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // Header
+            VStack(spacing: 12) {
+                Image(systemName: "flag.fill")
+                    .font(.system(size: 48))
+                    .foregroundColor(Constants.Colors.positive)
+
+                Text("Grant Independence")
+                    .font(.system(size: 24, weight: .bold))
+                    .foregroundColor(.white)
+
+                Text("Release \(rebellion.territory.name) as an independent nation")
+                    .font(.system(size: 14))
+                    .foregroundColor(Constants.Colors.secondaryText)
+                    .multilineTextAlignment(.center)
+            }
+            .padding(.top, 24)
+            .padding(.horizontal, 24)
+
+            Divider()
+                .background(Color.white.opacity(0.2))
+                .padding(.vertical, 20)
+
+            // Effects
+            VStack(alignment: .leading, spacing: 16) {
+                Text("EFFECTS")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(Constants.Colors.secondaryText)
+
+                VStack(alignment: .leading, spacing: 12) {
+                    RebellionConsequenceRow(
+                        icon: "checkmark.circle.fill",
+                        text: "Rebellion ends immediately",
+                        color: Constants.Colors.positive
+                    )
+
+                    RebellionConsequenceRow(
+                        icon: "star.fill",
+                        text: "Reputation: +20",
+                        color: Constants.Colors.positive
+                    )
+
+                    RebellionConsequenceRow(
+                        icon: "xmark.circle.fill",
+                        text: "Lose all territory control",
+                        color: Constants.Colors.negative
+                    )
+
+                    RebellionConsequenceRow(
+                        icon: "chart.line.downtrend.xyaxis",
+                        text: "Lose all GDP contribution",
+                        color: Constants.Colors.negative
+                    )
+                }
+            }
+            .padding(.horizontal, 24)
+
+            Divider()
+                .background(Color.white.opacity(0.2))
+                .padding(.vertical, 20)
+
+            // Actions
+            HStack(spacing: 12) {
+                Button(action: onCancel) {
+                    Text("Cancel")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(Color(red: 0.25, green: 0.27, blue: 0.32))
+                        .cornerRadius(8)
+                }
+
+                Button(action: onConfirm) {
+                    Text("Grant Independence")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(Constants.Colors.positive)
+                        .cornerRadius(8)
+                }
+            }
+            .padding(.horizontal, 24)
+            .padding(.bottom, 24)
+        }
+        .frame(width: 420)
+        .background(Constants.Colors.cardBackground)
+        .cornerRadius(16)
+        .shadow(color: Color.black.opacity(0.3), radius: 20, x: 0, y: 10)
+    }
+}
+
+struct RebellionConsequenceRow: View {
+    let icon: String
+    let text: String
+    let color: Color
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.system(size: 12))
+                .foregroundColor(color)
+                .frame(width: 20)
+
+            Text(text)
+                .font(.system(size: 13))
+                .foregroundColor(.white)
+
+            Spacer()
         }
     }
 }
