@@ -466,7 +466,10 @@ struct TerritoryDetailView: View {
     }
 
     private func grantAutonomy() {
-        let success = gameManager.territoryManager.grantAutonomy(territoryId: territory.id)
+        let success = gameManager.territoryManager.grantAutonomy(
+            territoryId: territory.id,
+            globalCountryState: gameManager.globalCountryState
+        )
 
         if success {
             // Reputation boost for granting autonomy
@@ -480,10 +483,12 @@ struct TerritoryDetailView: View {
     }
 
     private func grantIndependence() {
-        // Remove the territory from control
-        if let territoryIndex = gameManager.territoryManager.territories.firstIndex(where: { $0.id == territory.id }) {
-            gameManager.territoryManager.territories.remove(at: territoryIndex)
+        let success = gameManager.territoryManager.grantIndependence(
+            territoryId: territory.id,
+            globalCountryState: gameManager.globalCountryState
+        )
 
+        if success {
             // Reputation boost for granting independence
             if var character = gameManager.character {
                 character.reputation = min(100, character.reputation + 20)

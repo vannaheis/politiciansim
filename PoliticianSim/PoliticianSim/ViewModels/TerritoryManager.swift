@@ -79,7 +79,7 @@ class TerritoryManager: ObservableObject {
         return true
     }
 
-    func grantAutonomy(territoryId: UUID) -> Bool {
+    func grantAutonomy(territoryId: UUID, globalCountryState: GlobalCountryState) -> Bool {
         guard let index = territories.firstIndex(where: { $0.id == territoryId }) else {
             return false
         }
@@ -89,7 +89,62 @@ class TerritoryManager: ObservableObject {
             return false
         }
 
+        let territory = territories[index]
+
+        // Subtract territory from player's nation in GlobalCountryState
+        if var playerCountry = globalCountryState.getCountry(code: territory.currentOwner) {
+            print("📊 [AUTONOMY-DIRECT] Before update for \(territory.currentOwner):")
+            print("  - conqueredTerritory: \(playerCountry.conqueredTerritory)")
+            print("  - lostTerritory: \(playerCountry.lostTerritory)")
+            print("  - Territory size: \(territory.size)")
+
+            playerCountry.conqueredTerritory = max(0, playerCountry.conqueredTerritory - territory.size)
+            playerCountry.lostTerritory += territory.size
+
+            print("📊 [AUTONOMY-DIRECT] After calculation:")
+            print("  - conqueredTerritory: \(playerCountry.conqueredTerritory)")
+            print("  - lostTerritory: \(playerCountry.lostTerritory)")
+
+            globalCountryState.updateCountry(playerCountry)
+        }
+
         territories[index].grantAutonomy()
+        return true
+    }
+
+    func grantIndependence(territoryId: UUID, globalCountryState: GlobalCountryState) -> Bool {
+        guard let index = territories.firstIndex(where: { $0.id == territoryId }) else {
+            return false
+        }
+
+        let territory = territories[index]
+
+        // Subtract territory from player's nation in GlobalCountryState
+        if var playerCountry = globalCountryState.getCountry(code: territory.currentOwner) {
+            print("📊 [INDEPENDENCE-DIRECT] Before update for \(territory.currentOwner):")
+            print("  - conqueredTerritory: \(playerCountry.conqueredTerritory)")
+            print("  - lostTerritory: \(playerCountry.lostTerritory)")
+            print("  - Territory size: \(territory.size)")
+
+            playerCountry.conqueredTerritory = max(0, playerCountry.conqueredTerritory - territory.size)
+            playerCountry.lostTerritory += territory.size
+
+            print("📊 [INDEPENDENCE-DIRECT] After calculation:")
+            print("  - conqueredTerritory: \(playerCountry.conqueredTerritory)")
+            print("  - lostTerritory: \(playerCountry.lostTerritory)")
+
+            globalCountryState.updateCountry(playerCountry)
+
+            // Verify
+            if let updated = globalCountryState.getCountry(code: territory.currentOwner) {
+                print("📊 [INDEPENDENCE-DIRECT] Verified:")
+                print("  - conqueredTerritory: \(updated.conqueredTerritory)")
+                print("  - lostTerritory: \(updated.lostTerritory)")
+                print("  - totalTerritory: \(updated.totalTerritory)")
+            }
+        }
+
+        territories.remove(at: index)
         return true
     }
 
@@ -174,7 +229,7 @@ class TerritoryManager: ObservableObject {
         let cost: Decimal
     }
 
-    func grantIndependence(rebellionId: UUID) -> Bool {
+    func grantIndependence(rebellionId: UUID, globalCountryState: GlobalCountryState) -> Bool {
         guard let index = activeRebellions.firstIndex(where: { $0.id == rebellionId }) else {
             return false
         }
@@ -188,13 +243,44 @@ class TerritoryManager: ObservableObject {
 
         // Remove territory from control
         if let territoryIndex = territories.firstIndex(where: { $0.id == completedRebellion.territory.id }) {
+            let territory = territories[territoryIndex]
+
+            // Subtract territory from player's nation in GlobalCountryState
+            if var playerCountry = globalCountryState.getCountry(code: territory.currentOwner) {
+                print("📊 [INDEPENDENCE] Before update for \(territory.currentOwner):")
+                print("  - conqueredTerritory: \(playerCountry.conqueredTerritory)")
+                print("  - lostTerritory: \(playerCountry.lostTerritory)")
+                print("  - totalTerritory: \(playerCountry.totalTerritory)")
+                print("  - Territory size being lost: \(territory.size)")
+
+                playerCountry.conqueredTerritory = max(0, playerCountry.conqueredTerritory - territory.size)
+                playerCountry.lostTerritory += territory.size  // Track as lost territory
+
+                print("📊 [INDEPENDENCE] After calculation:")
+                print("  - conqueredTerritory: \(playerCountry.conqueredTerritory)")
+                print("  - lostTerritory: \(playerCountry.lostTerritory)")
+                print("  - totalTerritory: \(playerCountry.totalTerritory)")
+
+                globalCountryState.updateCountry(playerCountry)
+
+                // Verify the update worked
+                if let updatedCountry = globalCountryState.getCountry(code: territory.currentOwner) {
+                    print("📊 [INDEPENDENCE] Verified in GlobalCountryState:")
+                    print("  - conqueredTerritory: \(updatedCountry.conqueredTerritory)")
+                    print("  - lostTerritory: \(updatedCountry.lostTerritory)")
+                    print("  - totalTerritory: \(updatedCountry.totalTerritory)")
+                } else {
+                    print("⚠️ [INDEPENDENCE] Could not verify update - country not found!")
+                }
+            }
+
             territories.remove(at: territoryIndex)
         }
 
         return true
     }
 
-    func grantAutonomyToRebellion(rebellionId: UUID) -> Bool {
+    func grantAutonomyToRebellion(rebellionId: UUID, globalCountryState: GlobalCountryState) -> Bool {
         guard let index = activeRebellions.firstIndex(where: { $0.id == rebellionId }) else {
             return false
         }
@@ -208,6 +294,16 @@ class TerritoryManager: ObservableObject {
 
         // Grant autonomy to territory
         if let territoryIndex = territories.firstIndex(where: { $0.id == completedRebellion.territory.id }) {
+            let territory = territories[territoryIndex]
+
+            // Subtract territory from player's nation in GlobalCountryState
+            // Autonomous territories are no longer part of the player's direct control
+            if var playerCountry = globalCountryState.getCountry(code: territory.currentOwner) {
+                playerCountry.conqueredTerritory = max(0, playerCountry.conqueredTerritory - territory.size)
+                playerCountry.lostTerritory += territory.size  // Track as lost territory
+                globalCountryState.updateCountry(playerCountry)
+            }
+
             territories[territoryIndex].grantAutonomy()
         }
 

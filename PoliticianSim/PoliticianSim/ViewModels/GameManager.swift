@@ -1129,6 +1129,14 @@ class GameManager: ObservableObject {
 
         let territory = territoryManager.territories[territoryIndex]
 
+        // Subtract territory from player's nation in GlobalCountryState
+        if var playerCountry = globalCountryState.getCountry(code: character.country) {
+            playerCountry.conqueredTerritory = max(0, playerCountry.conqueredTerritory - territory.size)
+            playerCountry.lostTerritory += territory.size  // Track as lost territory
+            globalCountryState.updateCountry(playerCountry)
+            print("Subtracted \(territory.size) sq mi from player's conquered territory and added to lost territory")
+        }
+
         // Defeat: Territory gains independence
         territoryManager.territories.remove(at: territoryIndex)
         print("Territory \(territory.name) gained independence")

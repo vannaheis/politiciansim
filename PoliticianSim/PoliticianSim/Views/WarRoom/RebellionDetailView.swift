@@ -443,7 +443,10 @@ struct RebellionDetailView: View {
     }
 
     private func grantAutonomy() {
-        let success = gameManager.territoryManager.grantAutonomyToRebellion(rebellionId: rebellion.id)
+        let success = gameManager.territoryManager.grantAutonomyToRebellion(
+            rebellionId: rebellion.id,
+            globalCountryState: gameManager.globalCountryState
+        )
 
         if success {
             // Reputation boost
@@ -457,7 +460,10 @@ struct RebellionDetailView: View {
     }
 
     private func grantIndependence() {
-        let success = gameManager.territoryManager.grantIndependence(rebellionId: rebellion.id)
+        let success = gameManager.territoryManager.grantIndependence(
+            rebellionId: rebellion.id,
+            globalCountryState: gameManager.globalCountryState
+        )
 
         if success {
             // Reputation boost
