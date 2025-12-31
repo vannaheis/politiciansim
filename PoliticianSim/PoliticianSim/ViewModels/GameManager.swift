@@ -760,6 +760,7 @@ class GameManager: ObservableObject {
         militaryManager = MilitaryManager()
         warEngine = WarEngine()
         territoryManager = TerritoryManager()
+        globalCountryState = GlobalCountryState()
 
         // Reset game state
         gameState = GameState()
@@ -1129,12 +1130,13 @@ class GameManager: ObservableObject {
 
         let territory = territoryManager.territories[territoryIndex]
 
-        // Subtract territory from player's nation in GlobalCountryState
+        // Update GlobalCountryState - only subtract from conquered territory
+        // Do NOT add to lostTerritory (that's only for base territory lost to conquest)
         if var playerCountry = globalCountryState.getCountry(code: character.country) {
             playerCountry.conqueredTerritory = max(0, playerCountry.conqueredTerritory - territory.size)
-            playerCountry.lostTerritory += territory.size  // Track as lost territory
+            // Do NOT modify lostTerritory - that's only for our base territory lost to others
             globalCountryState.updateCountry(playerCountry)
-            print("Subtracted \(territory.size) sq mi from player's conquered territory and added to lost territory")
+            print("Subtracted \(territory.size) sq mi from player's conquered territory (rebellion victory)")
         }
 
         // Defeat: Territory gains independence

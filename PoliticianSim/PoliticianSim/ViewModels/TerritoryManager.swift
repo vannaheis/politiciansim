@@ -91,15 +91,17 @@ class TerritoryManager: ObservableObject {
 
         let territory = territories[index]
 
-        // Subtract territory from player's nation in GlobalCountryState
+        // Update GlobalCountryState - only subtract from conquered territory
+        // Do NOT add to lostTerritory (that's only for base territory lost to conquest)
         if var playerCountry = globalCountryState.getCountry(code: territory.currentOwner) {
             print("📊 [AUTONOMY-DIRECT] Before update for \(territory.currentOwner):")
             print("  - conqueredTerritory: \(playerCountry.conqueredTerritory)")
             print("  - lostTerritory: \(playerCountry.lostTerritory)")
             print("  - Territory size: \(territory.size)")
 
+            // Subtract from conquered territory (giving back what we conquered)
             playerCountry.conqueredTerritory = max(0, playerCountry.conqueredTerritory - territory.size)
-            playerCountry.lostTerritory += territory.size
+            // Do NOT modify lostTerritory - that's only for our base territory lost to others
 
             print("📊 [AUTONOMY-DIRECT] After calculation:")
             print("  - conqueredTerritory: \(playerCountry.conqueredTerritory)")
@@ -119,15 +121,17 @@ class TerritoryManager: ObservableObject {
 
         let territory = territories[index]
 
-        // Subtract territory from player's nation in GlobalCountryState
+        // Update GlobalCountryState - only subtract from conquered territory
+        // Do NOT add to lostTerritory (that's only for base territory lost to conquest)
         if var playerCountry = globalCountryState.getCountry(code: territory.currentOwner) {
             print("📊 [INDEPENDENCE-DIRECT] Before update for \(territory.currentOwner):")
             print("  - conqueredTerritory: \(playerCountry.conqueredTerritory)")
             print("  - lostTerritory: \(playerCountry.lostTerritory)")
             print("  - Territory size: \(territory.size)")
 
+            // Subtract from conquered territory (giving back what we conquered)
             playerCountry.conqueredTerritory = max(0, playerCountry.conqueredTerritory - territory.size)
-            playerCountry.lostTerritory += territory.size
+            // Do NOT modify lostTerritory - that's only for our base territory lost to others
 
             print("📊 [INDEPENDENCE-DIRECT] After calculation:")
             print("  - conqueredTerritory: \(playerCountry.conqueredTerritory)")
@@ -141,6 +145,7 @@ class TerritoryManager: ObservableObject {
                 print("  - conqueredTerritory: \(updated.conqueredTerritory)")
                 print("  - lostTerritory: \(updated.lostTerritory)")
                 print("  - totalTerritory: \(updated.totalTerritory)")
+                print("  - territoryChangePercent: \(updated.territoryChangePercent * 100)%")
             }
         }
 
@@ -245,7 +250,8 @@ class TerritoryManager: ObservableObject {
         if let territoryIndex = territories.firstIndex(where: { $0.id == completedRebellion.territory.id }) {
             let territory = territories[territoryIndex]
 
-            // Subtract territory from player's nation in GlobalCountryState
+            // Update GlobalCountryState - only subtract from conquered territory
+            // Do NOT add to lostTerritory (that's only for base territory lost to conquest)
             if var playerCountry = globalCountryState.getCountry(code: territory.currentOwner) {
                 print("📊 [INDEPENDENCE] Before update for \(territory.currentOwner):")
                 print("  - conqueredTerritory: \(playerCountry.conqueredTerritory)")
@@ -253,8 +259,9 @@ class TerritoryManager: ObservableObject {
                 print("  - totalTerritory: \(playerCountry.totalTerritory)")
                 print("  - Territory size being lost: \(territory.size)")
 
+                // Subtract from conquered territory (giving back what we conquered)
                 playerCountry.conqueredTerritory = max(0, playerCountry.conqueredTerritory - territory.size)
-                playerCountry.lostTerritory += territory.size  // Track as lost territory
+                // Do NOT modify lostTerritory - that's only for our base territory lost to others
 
                 print("📊 [INDEPENDENCE] After calculation:")
                 print("  - conqueredTerritory: \(playerCountry.conqueredTerritory)")
@@ -296,11 +303,12 @@ class TerritoryManager: ObservableObject {
         if let territoryIndex = territories.firstIndex(where: { $0.id == completedRebellion.territory.id }) {
             let territory = territories[territoryIndex]
 
-            // Subtract territory from player's nation in GlobalCountryState
+            // Update GlobalCountryState - only subtract from conquered territory
             // Autonomous territories are no longer part of the player's direct control
+            // Do NOT add to lostTerritory (that's only for base territory lost to conquest)
             if var playerCountry = globalCountryState.getCountry(code: territory.currentOwner) {
                 playerCountry.conqueredTerritory = max(0, playerCountry.conqueredTerritory - territory.size)
-                playerCountry.lostTerritory += territory.size  // Track as lost territory
+                // Do NOT modify lostTerritory - that's only for our base territory lost to others
                 globalCountryState.updateCountry(playerCountry)
             }
 

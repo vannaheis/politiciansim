@@ -17,6 +17,7 @@ struct SaveGame: Codable {
     let currentPosition: String
     let approvalRating: Double
     let gameDate: Date
+    let territoryBaselineMigrated: Bool  // Flag to track if territory baseline has been reset
 
     // All game state
     let character: Character?
@@ -70,6 +71,7 @@ struct SaveGame: Codable {
         self.approvalRating = character?.approvalRating ?? 0
         self.gameDate = character?.currentDate ?? Date()
         self.gameName = "\(characterName) - \(currentPosition)"
+        self.territoryBaselineMigrated = true  // All new saves have correct baseline
 
         // Character & Stats
         self.character = character
@@ -190,6 +192,13 @@ struct SaveGame: Codable {
         gameManager.treasuryManager.currentTreasury = currentTreasury
         gameManager.governmentStatsManager.currentStats = currentStats
         gameManager.globalCountryState = globalCountryState
+
+        // ONE-TIME MIGRATION: Reset territory baseline for old saves (before the flag existed)
+        // This fixes corrupted data from the old bug, but only runs once
+        if !territoryBaselineMigrated {
+            print("🔧 [ONE-TIME MIGRATION] Old save detected - resetting territory baseline")
+            gameManager.globalCountryState.resetTerritoryBaseline()
+        }
 
         // Restore military
         gameManager.militaryManager.activeResearch = activeResearch

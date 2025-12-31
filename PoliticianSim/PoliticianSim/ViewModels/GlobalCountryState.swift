@@ -138,6 +138,35 @@ class GlobalCountryState: ObservableObject, Codable {
         ]
     }
 
+    // MARK: - Data Migration
+
+    /// Resets territory tracking to use current state as baseline
+    /// Called after loading saved games to make current territory the new starting point (0% change)
+    func resetTerritoryBaseline() {
+        print("\n🔧 [DATA MIGRATION] Resetting territory baseline...")
+
+        for i in 0..<countries.count {
+            let currentTotal = countries[i].totalTerritory
+
+            print("  🔄 Resetting baseline for \(countries[i].name):")
+            print("     Old baseTerritory: \(countries[i].baseTerritory)")
+            print("     Old conqueredTerritory: \(countries[i].conqueredTerritory)")
+            print("     Old lostTerritory: \(countries[i].lostTerritory)")
+            print("     Current totalTerritory: \(currentTotal)")
+
+            // Set the current total as the new baseline
+            // This makes the current state the "starting point" with 0% change
+            countries[i].baseTerritory = currentTotal
+            countries[i].conqueredTerritory = 0.0
+            countries[i].lostTerritory = 0.0
+
+            print("     ✅ New baseTerritory: \(countries[i].baseTerritory)")
+            print("     ✅ New territoryChangePercent: \(countries[i].territoryChangePercent * 100)%")
+        }
+
+        print("✅ [DATA MIGRATION] Territory baseline reset complete")
+    }
+
     // MARK: - Query Methods
 
     func getCountry(code: String) -> CountryState? {
@@ -170,11 +199,21 @@ class GlobalCountryState: ObservableObject, Codable {
         // defenderCode = loser (loses territory)
         guard var winner = getCountry(code: attackerCode),
               var loser = getCountry(code: defenderCode) else {
+            print("⚠️ [WAR-OUTCOME] Could not find countries: winner=\(attackerCode), loser=\(defenderCode)")
             return
         }
 
+        print("\n📊 [WAR-OUTCOME] Applying war outcome:")
+        print("  Winner: \(winner.name) (\(attackerCode))")
+        print("  Loser: \(loser.name) (\(defenderCode))")
+        print("  Territory %: \(territoryPercentConquered * 100)%")
+        print("  Before - Winner conqueredTerritory: \(winner.conqueredTerritory)")
+        print("  Before - Winner lostTerritory: \(winner.lostTerritory)")
+        print("  Before - Loser lostTerritory: \(loser.lostTerritory)")
+
         // Calculate territory transfer
         let territoryTransferred = loser.baseTerritory * territoryPercentConquered
+        print("  Territory transferred: \(territoryTransferred) sq mi")
 
         // Calculate population transfer (non-linear)
         let populationPercentChange = pow(territoryPercentConquered, 0.7)
@@ -187,6 +226,10 @@ class GlobalCountryState: ObservableObject, Codable {
         // Update loser (loses territory)
         loser.lostTerritory += territoryTransferred
         loser.population -= populationTransferred
+
+        print("  After - Winner conqueredTerritory: \(winner.conqueredTerritory)")
+        print("  After - Winner lostTerritory: \(winner.lostTerritory)")
+        print("  Winner territoryChangePercent: \(winner.territoryChangePercent * 100)%")
 
         // Apply non-linear GDP impact
         let gdpPercentChange = pow(territoryPercentConquered, 0.7)
