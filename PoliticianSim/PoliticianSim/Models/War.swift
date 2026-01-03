@@ -7,6 +7,26 @@
 
 import Foundation
 
+// MARK: - Strategy Change History
+
+struct StrategyChange: Codable, Identifiable {
+    let id: UUID
+    let date: Date
+    let fromStrategy: War.WarStrategy
+    let toStrategy: War.WarStrategy
+    let dayOfWar: Int  // Which day of the war this change occurred
+
+    init(date: Date, from: War.WarStrategy, to: War.WarStrategy, dayOfWar: Int) {
+        self.id = UUID()
+        self.date = date
+        self.fromStrategy = from
+        self.toStrategy = to
+        self.dayOfWar = dayOfWar
+    }
+}
+
+// MARK: - War Model
+
 struct War: Codable, Identifiable {
     let id: UUID
     let attacker: String  // Country code
@@ -27,6 +47,12 @@ struct War: Codable, Identifiable {
     var territoryConquered: Double?  // Percentage of defender's territory (0.0-0.4)
     var daysSinceStart: Int
     var warExhaustion: Double  // 0.0 to 1.0 - represents public fatigue with war
+
+    // Strategy transition tracking
+    var targetStrategy: WarStrategy?           // Strategy we're transitioning to
+    var transitionStartDate: Date?             // When transition began
+    var transitionDurationDays: Int?           // How long transition takes
+    var strategyHistory: [StrategyChange] = [] // Historical strategy changes
 
     enum WarType: String, Codable {
         case defensive = "Defensive War"
@@ -100,6 +126,63 @@ struct War: Codable, Identifiable {
             case .balanced: return "equal.circle.fill"
             case .defensive: return "shield.fill"
             case .attrition: return "clock.fill"
+            }
+        }
+
+        var exhaustionMultiplier: Double {
+            switch self {
+            case .aggressive: return 1.2  // Faster exhaustion
+            case .balanced: return 1.0    // Normal
+            case .defensive: return 0.7   // Much slower exhaustion
+            case .attrition: return 0.9   // Slightly slower
+            }
+        }
+
+        func strengthModifier(strengthRatio: Double, enemyExhaustion: Double) -> Double {
+            switch self {
+            case .aggressive:
+                // +10% when attacking (you're the aggressor)
+                return 1.1
+
+            case .balanced:
+                // No modifier
+                return 1.0
+
+            case .defensive:
+                // +15% when outnumbered (ratio < 0.8)
+                if strengthRatio < 0.8 {
+                    return 1.15
+                }
+                return 1.0
+
+            case .attrition:
+                // +10% when enemy is exhausted (> 0.5)
+                if enemyExhaustion > 0.5 {
+                    return 1.1
+                }
+                return 1.0
+            }
+        }
+
+        var description: String {
+            switch self {
+            case .aggressive:
+                return "Maximum offensive pressure. High casualties but fastest path to victory. Most effective when you have superior forces."
+            case .balanced:
+                return "Standard military doctrine with balanced offense and defense. Moderate casualties and steady progress."
+            case .defensive:
+                return "Minimize casualties and hold defensive positions. Slower progress but much lower losses. Very effective when outnumbered."
+            case .attrition:
+                return "Gradual pressure to wear down the enemy. Lower casualties and steady exhaustion of enemy forces over time."
+            }
+        }
+
+        var transitionDifficulty: Int {
+            switch self {
+            case .aggressive: return 3
+            case .balanced: return 1
+            case .defensive: return 2
+            case .attrition: return 2
             }
         }
     }
@@ -221,7 +304,7 @@ struct War: Codable, Identifiable {
 
     /// Calculates current war exhaustion based on duration and casualties
     /// Returns 0.0 to 1.0 where 1.0 is total exhaustion
-    mutating func updateWarExhaustion() {
+    mutating func updateWarExhaustion(exhaustionMultiplier: Double = 1.0) {
         // Duration component (wars longer than 1 year = high exhaustion)
         let daysInYear: Double = 365.0
         let durationFactor = min(1.0, Double(daysSinceStart) / daysInYear)
@@ -241,8 +324,10 @@ struct War: Codable, Identifiable {
         let costFactor = min(1.0, totalCost / 500_000_000_000.0)  // $500B threshold
 
         // Weighted average (duration has most impact, then casualties, then cost)
-        warExhaustion = (durationFactor * 0.5) + (casualtyFactor * 0.35) + (costFactor * 0.15)
-        warExhaustion = min(1.0, max(0.0, warExhaustion))
+        let baseExhaustion = (durationFactor * 0.5) + (casualtyFactor * 0.35) + (costFactor * 0.15)
+
+        // Apply strategy exhaustion multiplier
+        warExhaustion = min(1.0, max(0.0, baseExhaustion * exhaustionMultiplier))
     }
 
     var exhaustionLevel: ExhaustionLevel {
@@ -318,8 +403,19 @@ struct War: Codable, Identifiable {
 
         daysSinceStart += 1
 
-        // Update war exhaustion daily
-        updateWarExhaustion()
+        // Check if transition is complete
+        if isTransitioning {
+            let progress = transitionProgress(currentDate: Date())
+            if progress >= 1.0 {
+                completeTransition()
+            }
+        }
+
+        // Get effective strategy multipliers (blended if transitioning)
+        let effectiveMultipliers = effectiveStrategyMultipliers(currentDate: Date())
+
+        // Update war exhaustion with strategy-modified rate
+        updateWarExhaustion(exhaustionMultiplier: effectiveMultipliers.exhaustion)
 
         // Safely calculate daily attrition with zero-strength protection
         guard attackerStrength > 0 && defenderStrength > 0 else {
@@ -332,13 +428,29 @@ struct War: Codable, Identifiable {
             return
         }
 
-        // Calculate daily attrition
-        let strengthRatio = Double(attackerStrength) / Double(defenderStrength)
+        // Calculate base strength ratio
+        let baseStrengthRatio = Double(attackerStrength) / Double(defenderStrength)
+
+        // Apply strategy modifiers
+        let attackerStrategyMod = currentStrategy.strengthModifier(
+            strengthRatio: baseStrengthRatio,
+            enemyExhaustion: defenderAttrition
+        )
+
+        // Defender uses balanced strategy for now (AI strategy coming later)
+        let defenderStrategyMod = 1.0
+
+        let adjustedAttackerStrength = Double(attackerStrength) * attackerStrategyMod
+        let adjustedDefenderStrength = Double(defenderStrength) * defenderStrategyMod
+        let adjustedRatio = adjustedAttackerStrength / adjustedDefenderStrength
+
+        // Calculate daily attrition with strategy multipliers
         let baseAttrition = 0.001 // 0.1% per day baseline
 
         // Attacker takes more losses when weaker, less when stronger
-        let attackerDailyAttrition = baseAttrition * currentStrategy.attritionMultiplier * (2.0 - strengthRatio)
-        let defenderDailyAttrition = baseAttrition * currentStrategy.attritionMultiplier * strengthRatio
+        // Now modified by strategy
+        let attackerDailyAttrition = baseAttrition * effectiveMultipliers.attrition * (2.0 - adjustedRatio)
+        let defenderDailyAttrition = baseAttrition * 1.0 * adjustedRatio  // Defender uses balanced
 
         // Ensure values are finite before use
         guard attackerDailyAttrition.isFinite && defenderDailyAttrition.isFinite else { return }
@@ -398,5 +510,83 @@ struct War: Codable, Identifiable {
 
     mutating func changeStrategy(to newStrategy: WarStrategy) {
         currentStrategy = newStrategy
+    }
+
+    // MARK: - Strategy Transition
+
+    /// Check if war is currently transitioning between strategies
+    var isTransitioning: Bool {
+        return targetStrategy != nil && transitionStartDate != nil
+    }
+
+    /// Get transition progress (0.0 to 1.0)
+    func transitionProgress(currentDate: Date) -> Double {
+        guard let startDate = transitionStartDate,
+              let duration = transitionDurationDays else {
+            return 1.0  // No transition, fully using current strategy
+        }
+
+        let daysPassed = Calendar.current.dateComponents([.day], from: startDate, to: currentDate).day ?? 0
+        return min(1.0, Double(daysPassed) / Double(duration))
+    }
+
+    /// Get the effective strategy multipliers (blended during transition)
+    func effectiveStrategyMultipliers(currentDate: Date) -> (attrition: Double, speed: Double, exhaustion: Double) {
+        if !isTransitioning {
+            return (
+                attrition: currentStrategy.attritionMultiplier,
+                speed: currentStrategy.speedMultiplier,
+                exhaustion: currentStrategy.exhaustionMultiplier
+            )
+        }
+
+        guard let target = targetStrategy else {
+            return (
+                attrition: currentStrategy.attritionMultiplier,
+                speed: currentStrategy.speedMultiplier,
+                exhaustion: currentStrategy.exhaustionMultiplier
+            )
+        }
+
+        let progress = transitionProgress(currentDate: currentDate)
+
+        // Blend old and new strategy effects
+        let oldAttrition = currentStrategy.attritionMultiplier
+        let newAttrition = target.attritionMultiplier
+        let blendedAttrition = oldAttrition * (1.0 - progress) + newAttrition * progress
+
+        let oldSpeed = currentStrategy.speedMultiplier
+        let newSpeed = target.speedMultiplier
+        let blendedSpeed = oldSpeed * (1.0 - progress) + newSpeed * progress
+
+        let oldExhaustion = currentStrategy.exhaustionMultiplier
+        let newExhaustion = target.exhaustionMultiplier
+        let blendedExhaustion = oldExhaustion * (1.0 - progress) + newExhaustion * progress
+
+        return (attrition: blendedAttrition, speed: blendedSpeed, exhaustion: blendedExhaustion)
+    }
+
+    /// Finalize a strategy transition
+    mutating func completeTransition() {
+        guard let target = targetStrategy else { return }
+
+        // Record the change in history
+        if let startDate = transitionStartDate {
+            let change = StrategyChange(
+                date: startDate,
+                from: currentStrategy,
+                to: target,
+                dayOfWar: daysSinceStart
+            )
+            strategyHistory.append(change)
+        }
+
+        // Apply new strategy
+        currentStrategy = target
+
+        // Clear transition state
+        targetStrategy = nil
+        transitionStartDate = nil
+        transitionDurationDays = nil
     }
 }

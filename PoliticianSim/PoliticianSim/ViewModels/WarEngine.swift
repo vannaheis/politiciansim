@@ -60,9 +60,151 @@ class WarEngine: ObservableObject {
         }
     }
 
-    func changeStrategy(warId: UUID, to strategy: War.WarStrategy) {
-        guard let index = activeWars.firstIndex(where: { $0.id == warId }) else { return }
-        activeWars[index].changeStrategy(to: strategy)
+    func changeStrategy(
+        warId: UUID,
+        newStrategy: War.WarStrategy,
+        currentDate: Date
+    ) -> Bool {
+        guard let index = activeWars.firstIndex(where: { $0.id == warId }) else {
+            return false
+        }
+
+        let currentStrategy = activeWars[index].currentStrategy
+
+        // Don't change if already using this strategy
+        guard newStrategy != currentStrategy else {
+            return false
+        }
+
+        // Don't change if already transitioning to this strategy
+        if activeWars[index].targetStrategy == newStrategy {
+            return false
+        }
+
+        // Calculate transition duration
+        let transitionDays = getTransitionDuration(from: currentStrategy, to: newStrategy)
+
+        // Start transition
+        activeWars[index].targetStrategy = newStrategy
+        activeWars[index].transitionStartDate = currentDate
+        activeWars[index].transitionDurationDays = transitionDays
+
+        print("🔄 Strategy change initiated: \(currentStrategy.rawValue) → \(newStrategy.rawValue)")
+        print("   Transition will take \(transitionDays) days")
+
+        return true
+    }
+
+    private func getTransitionDuration(from: War.WarStrategy, to: War.WarStrategy) -> Int {
+        // Aggressive ↔ Defensive is hardest
+        if (from == .aggressive && to == .defensive) || (from == .defensive && to == .aggressive) {
+            return 90
+        }
+
+        // Major shifts based on difficulty
+        let fromDiff = from.transitionDifficulty
+        let toDiff = to.transitionDifficulty
+        let delta = abs(fromDiff - toDiff)
+
+        if delta >= 2 {
+            return 30 + (delta * 15)
+        }
+
+        // Standard transition
+        return 30
+    }
+
+    // MARK: - AI Strategy Changes
+
+    /// AI evaluates and potentially changes strategy based on war state
+    /// Returns new strategy if AI decides to change, nil otherwise
+    func evaluateAIStrategyChange(war: War, playerCountry: String) -> War.WarStrategy? {
+        // Only for wars involving the player
+        guard war.attacker == playerCountry || war.defender == playerCountry else { return nil }
+
+        // Don't change if already transitioning
+        guard !war.isTransitioning else { return nil }
+
+        // Check every 30 days
+        guard war.daysSinceStart % 30 == 0 else { return nil }
+
+        // Determine AI's side
+        let isAIAttacker = war.attacker != playerCountry
+        let aiStrength = isAIAttacker ? war.attackerStrength : war.defenderStrength
+        let playerStrength = isAIAttacker ? war.defenderStrength : war.attackerStrength
+        let strengthRatio = Double(aiStrength) / Double(max(1, playerStrength))
+
+        let aiCasualties = war.casualtiesByCountry[isAIAttacker ? war.attacker : war.defender] ?? 0
+        let initialStrength = isAIAttacker ? war.attackerStrength : war.defenderStrength
+        let casualtyRate = Double(aiCasualties) / Double(max(1, initialStrength))
+
+        let warExhaustion = war.warExhaustion
+
+        // AI decision logic
+        var newStrategy: War.WarStrategy?
+
+        // If winning decisively (2:1 advantage), go aggressive
+        if strengthRatio >= 2.0 && casualtyRate < 0.3 {
+            newStrategy = .aggressive
+        }
+        // If losing badly (1:2 disadvantage), go defensive
+        else if strengthRatio <= 0.5 {
+            newStrategy = .defensive
+        }
+        // If high exhaustion or casualties, switch to attrition
+        else if warExhaustion >= 0.6 || casualtyRate >= 0.4 {
+            newStrategy = .attrition
+        }
+        // If evenly matched, use balanced
+        else if strengthRatio >= 0.8 && strengthRatio <= 1.2 {
+            newStrategy = .balanced
+        }
+
+        // Only change if different from current
+        if let new = newStrategy, new != war.currentStrategy {
+            return new
+        }
+
+        return nil
+    }
+
+    /// Process AI strategy evaluations for all active wars involving the player
+    /// Returns notifications for strategy changes
+    func processAIStrategyChanges(playerCountry: String, currentDate: Date, globalCountryState: GlobalCountryState) -> [AIStrategyChangeNotification] {
+        var notifications: [AIStrategyChangeNotification] = []
+
+        for i in 0..<activeWars.count {
+            guard let newStrategy = evaluateAIStrategyChange(war: activeWars[i], playerCountry: playerCountry) else {
+                continue
+            }
+
+            let war = activeWars[i]
+            let oldStrategy = war.currentStrategy
+
+            // Change strategy
+            let success = changeStrategy(
+                warId: war.id,
+                newStrategy: newStrategy,
+                currentDate: currentDate
+            )
+
+            if success {
+                // Determine enemy country
+                let enemyCountry = war.attacker == playerCountry ? war.defender : war.attacker
+                let enemyCountryName = globalCountryState.getCountry(code: enemyCountry)?.name ?? enemyCountry
+
+                // Create notification
+                let notification = AIStrategyChangeNotification(
+                    war: war,
+                    enemyCountryName: enemyCountryName,
+                    oldStrategy: oldStrategy,
+                    newStrategy: newStrategy
+                )
+                notifications.append(notification)
+            }
+        }
+
+        return notifications
     }
 
     // MARK: - Peace Negotiation

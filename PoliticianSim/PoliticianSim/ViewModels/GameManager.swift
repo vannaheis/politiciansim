@@ -53,6 +53,7 @@ class GameManager: ObservableObject {
     @Published var pendingRebellionNotifications: [RebellionNotification] = []  // Rebellion notifications
     @Published var pendingCivilWarVictoryNotifications: [CivilWarVictoryNotification] = []  // Civil war victories
     @Published var pendingCivilWarDefeatNotifications: [CivilWarDefeatNotification] = []  // Civil war defeats
+    @Published var pendingAIStrategyChangeNotifications: [AIStrategyChangeNotification] = []  // AI strategy changes
 
     // Track which wars have already triggered exhaustion warnings
     private var exhaustionWarningsShown: Set<UUID> = []
@@ -165,6 +166,14 @@ class GameManager: ObservableObject {
 
                     // Simulate active wars
                     self.warEngine.simulateDay()
+
+                    // Check for AI strategy changes
+                    let strategyNotifications = self.warEngine.processAIStrategyChanges(
+                        playerCountry: updatedChar.country,
+                        currentDate: updatedChar.currentDate,
+                        globalCountryState: self.globalCountryState
+                    )
+                    self.pendingAIStrategyChangeNotifications.append(contentsOf: strategyNotifications)
 
                     // Process military treasury
                     self.processMilitaryTreasury(character: &updatedChar, days: 1)

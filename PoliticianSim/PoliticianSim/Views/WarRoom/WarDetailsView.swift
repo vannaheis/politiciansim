@@ -13,11 +13,10 @@ struct WarDetailsView: View {
     let war: War
     @State private var showNegotiatePeaceConfirm = false
     @State private var showSurrenderConfirm = false
-    @State private var selectedStrategy: War.WarStrategy
+    @State private var showStrategySelector = false
 
     init(war: War) {
         self.war = war
-        _selectedStrategy = State(initialValue: war.currentStrategy)
     }
 
     var playerCountry: String {
@@ -219,29 +218,13 @@ struct WarDetailsView: View {
                             .cornerRadius(10)
                         }
 
-                        // War Strategy (placeholder for future)
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("CURRENT STRATEGY")
-                                .font(.system(size: 12, weight: .bold))
-                                .foregroundColor(Constants.Colors.secondaryText)
-
-                            HStack {
-                                Image(systemName: war.currentStrategy.icon)
-                                    .foregroundColor(Constants.Colors.buttonPrimary)
-
-                                Text(war.currentStrategy.rawValue)
-                                    .font(.system(size: 15, weight: .semibold))
-                                    .foregroundColor(.white)
-
-                                Spacer()
+                        // Current Strategy Section
+                        CurrentStrategySection(
+                            war: war,
+                            onTapChangeStrategy: {
+                                showStrategySelector = true
                             }
-                            .padding(12)
-                            .background(Color(red: 0.2, green: 0.22, blue: 0.27))
-                            .cornerRadius(8)
-                        }
-                        .padding(16)
-                        .background(Color(red: 0.15, green: 0.17, blue: 0.22))
-                        .cornerRadius(12)
+                        )
 
                         // Action Buttons
                         VStack(spacing: 12) {
@@ -330,6 +313,10 @@ struct WarDetailsView: View {
             )
             .environmentObject(gameManager)
         }
+        .sheet(isPresented: $showStrategySelector) {
+            StrategySelectionSheet(war: war)
+                .environmentObject(gameManager)
+        }
     }
 
     var battleStatusIcon: String {
@@ -359,6 +346,108 @@ struct WarDetailsView: View {
         } else {
             return String(format: "$%.0f", value)
         }
+    }
+}
+
+// MARK: - Current Strategy Section
+
+struct CurrentStrategySection: View {
+    let war: War
+    let onTapChangeStrategy: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("CURRENT STRATEGY")
+                .font(.system(size: 12, weight: .bold))
+                .foregroundColor(Constants.Colors.secondaryText)
+
+            Button(action: onTapChangeStrategy) {
+                HStack(spacing: 12) {
+                    Image(systemName: war.currentStrategy.icon)
+                        .font(.system(size: 20))
+                        .foregroundColor(Constants.Colors.buttonPrimary)
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack {
+                            Text(war.currentStrategy.rawValue)
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(.white)
+
+                            if war.isTransitioning {
+                                Image(systemName: "arrow.right")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.orange)
+
+                                Text(war.targetStrategy?.rawValue ?? "")
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(.orange)
+                            }
+                        }
+
+                        if war.isTransitioning, let target = war.targetStrategy {
+                            let progress = war.transitionProgress(currentDate: Date())
+                            Text("Transitioning... \(Int(progress * 100))% complete")
+                                .font(.system(size: 12))
+                                .foregroundColor(.orange)
+                        } else {
+                            Text(war.currentStrategy.description)
+                                .font(.system(size: 12))
+                                .foregroundColor(Constants.Colors.secondaryText)
+                                .lineLimit(2)
+                        }
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 14))
+                        .foregroundColor(Constants.Colors.secondaryText)
+                }
+                .padding(16)
+                .background(Color(red: 0.15, green: 0.17, blue: 0.22))
+                .cornerRadius(12)
+            }
+
+            // Transition progress bar (if transitioning)
+            if war.isTransitioning {
+                let progress = war.transitionProgress(currentDate: Date())
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack {
+                        Text("Transition Progress")
+                            .font(.system(size: 11))
+                            .foregroundColor(Constants.Colors.secondaryText)
+
+                        Spacer()
+
+                        if let days = war.transitionDurationDays {
+                            let daysRemaining = days - Int(Double(days) * progress)
+                            Text("\(daysRemaining) days remaining")
+                                .font(.system(size: 11))
+                                .foregroundColor(.orange)
+                        }
+                    }
+
+                    GeometryReader { geometry in
+                        ZStack(alignment: .leading) {
+                            Rectangle()
+                                .fill(Color.white.opacity(0.1))
+                                .frame(height: 6)
+                                .cornerRadius(3)
+
+                            Rectangle()
+                                .fill(.orange)
+                                .frame(width: geometry.size.width * CGFloat(progress), height: 6)
+                                .cornerRadius(3)
+                        }
+                    }
+                    .frame(height: 6)
+                }
+                .padding(.horizontal, 16)
+            }
+        }
+        .padding(16)
+        .background(Color(red: 0.15, green: 0.17, blue: 0.22).opacity(0.5))
+        .cornerRadius(12)
     }
 }
 

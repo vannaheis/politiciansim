@@ -127,6 +127,9 @@
 		7CF1AEAF2F0114B900E31456 /* CivilWarDefeatNotificationPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF1AEAC2F0114B900E31456 /* CivilWarDefeatNotificationPopup.swift */; };
 		7CF1AEB22F01150300E31456 /* CivilWarVictoryNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF1AEB12F01150300E31456 /* CivilWarVictoryNotification.swift */; };
 		7CF1AEB32F01150300E31456 /* CivilWarDefeatNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF1AEB02F01150300E31456 /* CivilWarDefeatNotification.swift */; };
+		7CF1AEB52F09AD3800E31456 /* AIStrategyChangeNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF1AEB42F09AD3800E31456 /* AIStrategyChangeNotification.swift */; };
+		7CF1AEB72F09AD5100E31456 /* AIStrategyChangeNotificationPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF1AEB62F09AD5100E31456 /* AIStrategyChangeNotificationPopup.swift */; };
+		7CF1AEB92F09AD6A00E31456 /* StrategySelectionSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF1AEB82F09AD6A00E31456 /* StrategySelectionSheet.swift */; };
 		FB1BD9A2FE914F06F1F9D2BC /* CustomAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61D83AE85A5956CC2FFCB315 /* CustomAlert.swift */; };
 /* End PBXBuildFile section */
 
@@ -253,6 +256,9 @@
 		7CF1AEAD2F0114B900E31456 /* CivilWarVictoryNotificationPopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CivilWarVictoryNotificationPopup.swift; sourceTree = "<group>"; };
 		7CF1AEB02F01150300E31456 /* CivilWarDefeatNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CivilWarDefeatNotification.swift; sourceTree = "<group>"; };
 		7CF1AEB12F01150300E31456 /* CivilWarVictoryNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CivilWarVictoryNotification.swift; sourceTree = "<group>"; };
+		7CF1AEB42F09AD3800E31456 /* AIStrategyChangeNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIStrategyChangeNotification.swift; sourceTree = "<group>"; };
+		7CF1AEB62F09AD5100E31456 /* AIStrategyChangeNotificationPopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIStrategyChangeNotificationPopup.swift; sourceTree = "<group>"; };
+		7CF1AEB82F09AD6A00E31456 /* StrategySelectionSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StrategySelectionSheet.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -309,6 +315,7 @@
 		311 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				7CF1AEB42F09AD3800E31456 /* AIStrategyChangeNotification.swift */,
 				103 /* Character.swift */,
 				7C6E450F2EC552FB005F7A3D /* Campaign.swift */,
 				104 /* GameState.swift */,
@@ -594,6 +601,8 @@
 		7C6E46FF2ECD0F04005F7A3D /* WarRoom */ = {
 			isa = PBXGroup;
 			children = (
+				7CF1AEB82F09AD6A00E31456 /* StrategySelectionSheet.swift */,
+				7CF1AEB62F09AD5100E31456 /* AIStrategyChangeNotificationPopup.swift */,
 				7C6E46FA2ECD0F04005F7A3D /* ActiveWarsView.swift */,
 				7C6E46FB2ECD0F04005F7A3D /* MilitaryOverviewView.swift */,
 				7C6E46FC2ECD0F04005F7A3D /* TechnologyResearchView.swift */,
@@ -691,6 +700,7 @@
 				002 /* ContentView.swift in Sources */,
 				7C6E45412EC684BF005F7A3D /* Education.swift in Sources */,
 				7C6E450E2EC54B3E005F7A3D /* EventDialog.swift in Sources */,
+				7CF1AEB52F09AD3800E31456 /* AIStrategyChangeNotification.swift in Sources */,
 				7C6E45152EC5532D005F7A3D /* CampaignView.swift in Sources */,
 				7C6E451A2EC55F08005F7A3D /* Policy.swift in Sources */,
 				003 /* Character.swift in Sources */,
@@ -702,9 +712,11 @@
 				7C6E45302EC58E22005F7A3D /* DiplomacyView.swift in Sources */,
 				006 /* Event.swift in Sources */,
 				007 /* Country.swift in Sources */,
+				7CF1AEB92F09AD6A00E31456 /* StrategySelectionSheet.swift in Sources */,
 				008 /* GameManager.swift in Sources */,
 				009 /* CharacterManager.swift in Sources */,
 				7C6E45432EC684D4005F7A3D /* EducationManager.swift in Sources */,
+				7CF1AEB72F09AD5100E31456 /* AIStrategyChangeNotificationPopup.swift in Sources */,
 				010 /* StatManager.swift in Sources */,
 				7C6E45222EC57F2B005F7A3D /* BudgetView.swift in Sources */,
 				011 /* TimeManager.swift in Sources */,
