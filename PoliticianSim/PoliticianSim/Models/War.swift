@@ -398,21 +398,21 @@ struct War: Codable, Identifiable {
         return "\(Int(warExhaustion * 100))%"
     }
 
-    mutating func simulateDay() {
+    mutating func simulateDay(currentDate: Date) {
         guard isActive else { return }
 
         daysSinceStart += 1
 
         // Check if transition is complete
         if isTransitioning {
-            let progress = transitionProgress(currentDate: Date())
+            let progress = transitionProgress(currentDate: currentDate)
             if progress >= 1.0 {
                 completeTransition()
             }
         }
 
         // Get effective strategy multipliers (blended if transitioning)
-        let effectiveMultipliers = effectiveStrategyMultipliers(currentDate: Date())
+        let effectiveMultipliers = effectiveStrategyMultipliers(currentDate: currentDate)
 
         // Update war exhaustion with strategy-modified rate
         updateWarExhaustion(exhaustionMultiplier: effectiveMultipliers.exhaustion)

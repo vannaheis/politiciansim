@@ -10,13 +10,18 @@ import SwiftUI
 struct WarDetailsView: View {
     @EnvironmentObject var gameManager: GameManager
     @Environment(\.dismiss) var dismiss
-    let war: War
+    let warId: UUID
     @State private var showNegotiatePeaceConfirm = false
     @State private var showSurrenderConfirm = false
     @State private var showStrategySelector = false
 
     init(war: War) {
-        self.war = war
+        self.warId = war.id
+    }
+
+    // Get live war data from gameManager
+    var war: War? {
+        gameManager.warEngine.activeWars.first(where: { $0.id == warId })
     }
 
     var playerCountry: String {
@@ -24,28 +29,31 @@ struct WarDetailsView: View {
     }
 
     var isPlayerAttacker: Bool {
-        war.attacker == playerCountry
+        war?.attacker == playerCountry
     }
 
     var playerCasualties: Int {
-        abs(war.casualtiesByCountry[playerCountry] ?? 0)
+        abs(war?.casualtiesByCountry[playerCountry] ?? 0)
     }
 
     var enemyCasualties: Int {
+        guard let war = war else { return 0 }
         let enemyCountry = isPlayerAttacker ? war.defender : war.attacker
         return abs(war.casualtiesByCountry[enemyCountry] ?? 0)
     }
 
     var playerCost: Decimal {
-        war.costByCountry[playerCountry] ?? 0
+        war?.costByCountry[playerCountry] ?? 0
     }
 
     var playerAttrition: Double {
-        isPlayerAttacker ? war.attackerAttrition : war.defenderAttrition
+        guard let war = war else { return 0 }
+        return isPlayerAttacker ? war.attackerAttrition : war.defenderAttrition
     }
 
     var enemyAttrition: Double {
-        isPlayerAttacker ? war.defenderAttrition : war.attackerAttrition
+        guard let war = war else { return 0 }
+        return isPlayerAttacker ? war.defenderAttrition : war.attackerAttrition
     }
 
     var battleStatus: String {
@@ -81,6 +89,7 @@ struct WarDetailsView: View {
     }
 
     var canNegotiatePeace: Bool {
+        guard let war = war else { return false }
         // Can negotiate if war exhaustion is high or player is winning
         return war.exhaustionLevel == .high ||
                war.exhaustionLevel == .critical ||
@@ -92,8 +101,9 @@ struct WarDetailsView: View {
             ZStack {
                 StandardBackgroundView()
 
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 20) {
+                if let war = war {
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 20) {
                         // War Header
                         VStack(spacing: 12) {
                             HStack {
@@ -221,6 +231,7 @@ struct WarDetailsView: View {
                         // Current Strategy Section
                         CurrentStrategySection(
                             war: war,
+                            currentDate: gameManager.character?.currentDate ?? Date(),
                             onTapChangeStrategy: {
                                 showStrategySelector = true
                             }
@@ -282,8 +293,9 @@ struct WarDetailsView: View {
                             }
                         }
                         .padding(.top, 10)
+                        }
+                        .padding(20)
                     }
-                    .padding(20)
                 }
             }
             .navigationTitle("War Details")
@@ -298,24 +310,30 @@ struct WarDetailsView: View {
             }
         }
         .fullScreenCover(isPresented: $showNegotiatePeaceConfirm) {
-            PeaceNegotiationPopup(
-                war: war,
-                playerCountry: playerCountry,
-                isPlayerAttacker: isPlayerAttacker
-            )
-            .environmentObject(gameManager)
+            if let war = war {
+                PeaceNegotiationPopup(
+                    war: war,
+                    playerCountry: playerCountry,
+                    isPlayerAttacker: isPlayerAttacker
+                )
+                .environmentObject(gameManager)
+            }
         }
         .fullScreenCover(isPresented: $showSurrenderConfirm) {
-            SurrenderConfirmationPopup(
-                war: war,
-                playerCountry: playerCountry,
-                isPlayerAttacker: isPlayerAttacker
-            )
-            .environmentObject(gameManager)
+            if let war = war {
+                SurrenderConfirmationPopup(
+                    war: war,
+                    playerCountry: playerCountry,
+                    isPlayerAttacker: isPlayerAttacker
+                )
+                .environmentObject(gameManager)
+            }
         }
         .sheet(isPresented: $showStrategySelector) {
-            StrategySelectionSheet(war: war)
-                .environmentObject(gameManager)
+            if let war = war {
+                StrategySelectionSheet(war: war)
+                    .environmentObject(gameManager)
+            }
         }
     }
 
@@ -353,6 +371,7 @@ struct WarDetailsView: View {
 
 struct CurrentStrategySection: View {
     let war: War
+    let currentDate: Date
     let onTapChangeStrategy: () -> Void
 
     var body: some View {
@@ -385,7 +404,7 @@ struct CurrentStrategySection: View {
                         }
 
                         if war.isTransitioning, let target = war.targetStrategy {
-                            let progress = war.transitionProgress(currentDate: Date())
+                            let progress = war.transitionProgress(currentDate: currentDate)
                             Text("Transitioning... \(Int(progress * 100))% complete")
                                 .font(.system(size: 12))
                                 .foregroundColor(.orange)
@@ -410,7 +429,7 @@ struct CurrentStrategySection: View {
 
             // Transition progress bar (if transitioning)
             if war.isTransitioning {
-                let progress = war.transitionProgress(currentDate: Date())
+                let progress = war.transitionProgress(currentDate: currentDate)
                 VStack(alignment: .leading, spacing: 6) {
                     HStack {
                         Text("Transition Progress")

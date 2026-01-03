@@ -50,9 +50,9 @@ class WarEngine: ObservableObject {
 
     // MARK: - War Simulation
 
-    func simulateDay() {
+    func simulateDay(currentDate: Date) {
         for i in 0..<activeWars.count {
-            activeWars[i].simulateDay()
+            activeWars[i].simulateDay(currentDate: currentDate)
 
             // NOTE: Don't automatically move resolved wars to history
             // Let GameManager.checkForWarConclusions() handle peace terms first

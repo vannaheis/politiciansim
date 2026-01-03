@@ -165,7 +165,7 @@ class GameManager: ObservableObject {
                     self.militaryManager.advanceResearch(days: 1)
 
                     // Simulate active wars
-                    self.warEngine.simulateDay()
+                    self.warEngine.simulateDay(currentDate: updatedChar.currentDate)
 
                     // Check for AI strategy changes
                     let strategyNotifications = self.warEngine.processAIStrategyChanges(
@@ -293,8 +293,9 @@ class GameManager: ObservableObject {
                     self.militaryManager.advanceResearch(days: 7)
 
                     // Simulate active wars (7 days)
-                    for _ in 0..<7 {
-                        self.warEngine.simulateDay()
+                    for dayOffset in 0..<7 {
+                        let simulationDate = updatedChar.currentDate.addingTimeInterval(TimeInterval(dayOffset * -86400))
+                        self.warEngine.simulateDay(currentDate: simulationDate)
                     }
 
                     // Apply weekly war exhaustion penalties
