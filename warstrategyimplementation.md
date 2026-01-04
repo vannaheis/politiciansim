@@ -1102,12 +1102,12 @@ Add to GameManager:
 - [ ] Test UI flow end-to-end
 
 ### Phase 5: AI Strategy Changes ✅
-- [ ] Add `evaluateAIStrategyChange()` to WarEngine
-- [ ] Integrate AI strategy evaluation into daily simulation
-- [ ] Create `AIStrategyChangeNotification` model
-- [ ] Create `AIStrategyChangeNotificationPopup` view
-- [ ] Add notification handling to GameManager
-- [ ] Add notification display to ContentView
+- [x] Add `evaluateAIStrategyChange()` to WarEngine
+- [x] Integrate AI strategy evaluation into daily simulation
+- [x] Create `AIStrategyChangeNotification` model
+- [x] Create `AIStrategyChangeNotificationPopup` view
+- [x] Add notification handling to GameManager
+- [x] Add notification display to ContentView
 - [ ] Test AI strategy changes with various war scenarios
 
 ### Phase 6: Testing & Polish ✅

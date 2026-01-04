@@ -142,6 +142,23 @@ struct MainGameRouter: View {
                     .zIndex(921)
             }
 
+            // AI Strategy Change Notification (shows sequential notifications)
+            if let firstStrategyChange = gameManager.pendingAIStrategyChangeNotifications.first {
+                Color.black.opacity(0.7)
+                    .ignoresSafeArea()
+                    .transition(.opacity)
+                    .zIndex(925)
+
+                AIStrategyChangeNotificationPopup(
+                    notification: firstStrategyChange,
+                    onDismiss: {
+                        gameManager.pendingAIStrategyChangeNotifications.removeFirst()
+                    }
+                )
+                .transition(.scale.combined(with: .opacity))
+                .zIndex(926)
+            }
+
             // Rebellion Notification (shows sequential notifications)
             if let firstRebellion = gameManager.pendingRebellionNotifications.first {
                 Color.black.opacity(0.7)
