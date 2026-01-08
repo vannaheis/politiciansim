@@ -1031,9 +1031,9 @@ class GameManager: ObservableObject {
         // 2. Major approval drop
         modifyApproval(by: -20.0, reason: "Lost war to \(globalCountryState.getCountry(code: enemyCode)?.name ?? enemyCode)")
 
-        // 3. Significant stress increase
+        // 3. Stress increase (REDUCED from +15 to +5)
         var updatedChar = character
-        updatedChar.stress = min(100, updatedChar.stress + 15)
+        updatedChar.stress = min(100, updatedChar.stress + 5)
         characterManager.updateCharacter(updatedChar)
 
         // 4. Log consequences
@@ -1164,7 +1164,7 @@ class GameManager: ObservableObject {
         // Apply severe political consequences
         var updatedChar = character
         updatedChar.approvalRating = max(0, updatedChar.approvalRating - 15.0)
-        updatedChar.stress = min(100, updatedChar.stress + 10)
+        updatedChar.stress = min(100, updatedChar.stress + 3)  // REDUCED from +10 to +3
         characterManager.updateCharacter(updatedChar)
 
         modifyStat(.reputation, by: -20, reason: "Lost territory to rebellion")

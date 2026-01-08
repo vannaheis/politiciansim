@@ -179,8 +179,8 @@ class EducationManager: ObservableObject {
         enrollmentStatus.isEnrolled = false
         enrollmentStatus.currentDegree = nil
 
-        // Add stress from dropping out
-        character.stress = min(100, character.stress + 10)
+        // Add stress from dropping out (REDUCED from +10 to +3)
+        character.stress = min(100, character.stress + 3)
 
         return true
     }
@@ -230,8 +230,8 @@ class EducationManager: ObservableObject {
             enrollmentStatus.studentLoanDebt = max(0, enrollmentStatus.studentLoanDebt - monthlyPayment)
             enrollmentStatus.lastLoanPaymentDate = character.currentDate
         } else {
-            // Missed payment - increase stress and still record the date
-            character.stress = min(100, character.stress + 5)
+            // Missed payment - increase stress (REDUCED from +5 to +2)
+            character.stress = min(100, character.stress + 2)
             enrollmentStatus.lastLoanPaymentDate = character.currentDate
         }
     }

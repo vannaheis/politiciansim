@@ -382,14 +382,14 @@ struct War: Codable, Identifiable {
             }
         }
 
-        /// Weekly stress increase for this exhaustion level
+        /// Weekly stress increase for this exhaustion level (DRASTICALLY REDUCED)
         var weeklyStressIncrease: Int {
             switch self {
             case .minimal: return 0
-            case .low: return 1
-            case .moderate: return 2
-            case .high: return 3
-            case .critical: return 5
+            case .low: return 0
+            case .moderate: return 1  // Was 2
+            case .high: return 1      // Was 3
+            case .critical: return 2  // Was 5
             }
         }
     }

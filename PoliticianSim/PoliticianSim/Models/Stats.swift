@@ -114,19 +114,27 @@ enum StatUtilities {
     static func calculateHealthDecay(stress: Int, age: Int) -> Int {
         var decay = 0
 
-        // Stress impact
-        if stress > 80 {
-            decay += 2
-        } else if stress > 60 {
-            decay += 1
+        // Stress impact (DRASTICALLY REDUCED)
+        if stress >= 95 {
+            decay += 1  // Only lose 1 health per day at extreme stress
+        } else if stress >= 85 {
+            // 50% chance to lose health at very high stress
+            if Int.random(in: 0...1) == 0 {
+                decay += 1
+            }
         }
+        // No health loss below 85 stress
 
-        // Age impact
-        if age > 70 {
-            decay += 2
-        } else if age > 50 {
+        // Age impact (REDUCED)
+        if age > 80 {
             decay += 1
+        } else if age > 70 {
+            // 50% chance at 70+
+            if Int.random(in: 0...1) == 0 {
+                decay += 1
+            }
         }
+        // No age-related health loss below 70
 
         return decay
     }

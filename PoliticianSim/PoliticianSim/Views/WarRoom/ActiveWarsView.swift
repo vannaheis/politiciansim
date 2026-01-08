@@ -555,8 +555,8 @@ struct DeclareWarSheet: View {
         // Apply approval penalty
         character.approvalRating = max(0, character.approvalRating + selectedJustification.approvalPenalty)
 
-        // Add stress
-        character.stress = min(100, character.stress + 20)
+        // Add stress (REDUCED from +20 to +5)
+        character.stress = min(100, character.stress + 5)
 
         gameManager.characterManager.updateCharacter(character)
 

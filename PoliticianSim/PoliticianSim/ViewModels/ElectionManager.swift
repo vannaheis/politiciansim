@@ -69,7 +69,7 @@ class ElectionManager: ObservableObject {
         campaign.activities.append(activity)
 
         // Add stress from campaigning
-        character.stress = min(100, character.stress + 5)
+        character.stress = min(100, character.stress + 2)  // REDUCED from +5 to +2
 
         activeCampaign = campaign
 

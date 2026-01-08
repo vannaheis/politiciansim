@@ -245,7 +245,7 @@ class DiplomacyManager: ObservableObject {
 
             // Cost reputation
             character.reputation = max(0, character.reputation - 10)
-            character.stress = min(100, character.stress + 5)
+            character.stress = min(100, character.stress + 2)  // REDUCED from +5 to +2
 
             return (true, "Treaty signed successfully!")
         } else {
