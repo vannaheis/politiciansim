@@ -160,9 +160,10 @@ class GameManager: ObservableObject {
                 self.publicOpinionManager.processActiveActions(character: &updatedChar, currentDate: updatedChar.currentDate)
 
                 // Military operations (President only)
-                if updatedChar.currentPosition?.level == 5 {
-                    // Advance technology research
-                    self.militaryManager.advanceResearch(days: 1)
+                if updatedChar.currentPosition?.level == 5, var militaryStats = updatedChar.militaryStats {
+                    // Advance technology research (auto-completes when done)
+                    self.militaryManager.advanceResearch(days: 1, militaryStats: &militaryStats)
+                    updatedChar.militaryStats = militaryStats
 
                     // Simulate active wars
                     self.warEngine.simulateDay(currentDate: updatedChar.currentDate)
@@ -288,9 +289,10 @@ class GameManager: ObservableObject {
                 self.publicOpinionManager.processActiveActions(character: &updatedChar, currentDate: updatedChar.currentDate)
 
                 // Military operations (President only)
-                if updatedChar.currentPosition?.level == 5 {
-                    // Advance technology research
-                    self.militaryManager.advanceResearch(days: 7)
+                if updatedChar.currentPosition?.level == 5, var militaryStats = updatedChar.militaryStats {
+                    // Advance technology research (auto-completes when done)
+                    self.militaryManager.advanceResearch(days: 7, militaryStats: &militaryStats)
+                    updatedChar.militaryStats = militaryStats
 
                     // Simulate active wars (7 days)
                     for dayOffset in 0..<7 {

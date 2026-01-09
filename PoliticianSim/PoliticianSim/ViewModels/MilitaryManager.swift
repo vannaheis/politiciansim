@@ -91,9 +91,32 @@ class MilitaryManager: ObservableObject {
         return research
     }
 
-    func advanceResearch(days: Int) {
+    func advanceResearch(days: Int, militaryStats: inout MilitaryStats) {
         for i in 0..<activeResearch.count {
             activeResearch[i].advanceProgress(days: days)
+        }
+
+        // Auto-complete any finished research
+        var completedIndices: [Int] = []
+        for (index, research) in activeResearch.enumerated() {
+            if research.isComplete {
+                completedIndices.append(index)
+            }
+        }
+
+        // Remove completed research in reverse order to maintain indices
+        for index in completedIndices.reversed() {
+            let research = activeResearch.remove(at: index)
+
+            // Upgrade technology level
+            militaryStats.technologyLevels[research.category] = research.targetLevel
+
+            print("✅ Research completed: \(research.category.rawValue) Level \(research.targetLevel)")
+        }
+
+        // Recalculate strength if any research completed
+        if !completedIndices.isEmpty {
+            militaryStats.strength = calculateStrength(militaryStats: militaryStats)
         }
     }
 
