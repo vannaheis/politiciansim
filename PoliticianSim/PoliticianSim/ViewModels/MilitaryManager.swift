@@ -14,24 +14,22 @@ class MilitaryManager: ObservableObject {
     // MARK: - Military Strength Calculation
 
     func calculateStrength(militaryStats: MilitaryStats) -> Int {
-        // Base strength from manpower
-        let baseStrength = Double(militaryStats.manpower) * 0.5
+        // Base strength from manpower (1:1 ratio)
+        let baseStrength = Double(militaryStats.manpower)
 
-        // Technology bonus (average tech level × 10,000)
-        let avgTechLevel = calculateAverageTechLevel(militaryStats: militaryStats)
-        let techBonus = avgTechLevel * 10_000
-
-        // Budget bonus (military budget / $10B)
-        let budgetBonus = Double(truncating: militaryStats.militaryBudget as NSNumber) / 10_000_000_000
-
-        // Calculate tech multipliers
+        // Calculate tech multipliers (each category contributes based on level)
         var techMultiplier = 1.0
         for (category, level) in militaryStats.technologyLevels {
+            // Each level contributes its proportional share of the category's multiplier
+            // Example: Level 5/10 in a 1.20 multiplier category adds (5/10) * 0.20 = 0.10
             let categoryContribution = (Double(level) / 10.0) * (category.strengthMultiplier - 1.0)
             techMultiplier += categoryContribution
         }
 
-        let totalStrength = (baseStrength + techBonus + budgetBonus) * techMultiplier
+        // Budget multiplier (for every $10B in budget, add 5% strength)
+        let budgetMultiplier = 1.0 + (Double(truncating: militaryStats.militaryBudget as NSNumber) / 10_000_000_000) * 0.05
+
+        let totalStrength = baseStrength * techMultiplier * budgetMultiplier
         return Int(totalStrength)
     }
 

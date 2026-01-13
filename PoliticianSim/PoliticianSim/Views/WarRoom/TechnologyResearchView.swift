@@ -74,7 +74,7 @@ struct TechnologyResearchView: View {
             Button("Start") {
                 if let category = showStartResearchConfirm,
                    var character = gameManager.character,
-                   let militaryStats = character.militaryStats {
+                   var militaryStats = character.militaryStats {
                     let currentLevel = militaryStats.technologyLevels[category] ?? 1
                     let cost = calculateResearchCost(currentLevel: currentLevel)
 
@@ -85,6 +85,8 @@ struct TechnologyResearchView: View {
                             currentDate: character.currentDate
                         ) {
                             character.campaignFunds -= research.cost
+                            // Update character with modified militaryStats
+                            character.militaryStats = militaryStats
                             gameManager.characterManager.updateCharacter(character)
                         }
                     }
