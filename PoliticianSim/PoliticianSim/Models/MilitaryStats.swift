@@ -69,7 +69,7 @@ struct MilitaryTreasury: Codable {
     var maintenanceCosts: Decimal      // Daily equipment maintenance
 
     init() {
-        self.cashReserves = 0
+        self.cashReserves = 50_000_000_000  // Start with $50B in reserves
         self.dailyRevenue = 0
         self.dailyExpenses = 0
         self.warCosts = 0

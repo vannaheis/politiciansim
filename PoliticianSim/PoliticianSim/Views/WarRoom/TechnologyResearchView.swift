@@ -67,7 +67,10 @@ struct TechnologyResearchView: View {
             .padding(.horizontal, 20)
             .padding(.bottom, 20)
         }
-        .alert("Start Research", isPresented: .constant(showStartResearchConfirm != nil)) {
+        .alert("Start Research", isPresented: Binding(
+            get: { showStartResearchConfirm != nil },
+            set: { if !$0 { showStartResearchConfirm = nil } }
+        )) {
             Button("Cancel", role: .cancel) {
                 showStartResearchConfirm = nil
             }
@@ -78,14 +81,13 @@ struct TechnologyResearchView: View {
                     let currentLevel = militaryStats.technologyLevels[category] ?? 1
                     let cost = calculateResearchCost(currentLevel: currentLevel)
 
-                    if character.campaignFunds >= cost {
+                    if militaryStats.treasury.cashReserves >= cost {
                         if let research = gameManager.militaryManager.startResearch(
                             category: category,
                             militaryStats: militaryStats,
                             currentDate: character.currentDate
                         ) {
-                            character.campaignFunds -= research.cost
-                            // Update character with modified militaryStats
+                            militaryStats.treasury.cashReserves -= research.cost
                             character.militaryStats = militaryStats
                             gameManager.characterManager.updateCharacter(character)
                         }
@@ -100,10 +102,13 @@ struct TechnologyResearchView: View {
                 let cost = calculateResearchCost(currentLevel: currentLevel)
                 let days = calculateResearchDays(targetLevel: currentLevel + 1)
 
-                Text("Research \(category.rawValue) to Level \(currentLevel + 1)?\n\nCost: \(formatMoney(cost))\nTime: \(days) days")
+                Text("Research \(category.rawValue) to Level \(currentLevel + 1)?\n\nCost: \(formatMoney(cost))\nTime: \(days) days\n\nMilitary Cash Reserves: \(formatMoney(militaryStats.treasury.cashReserves))")
             }
         }
-        .alert("Complete Research", isPresented: .constant(showCompleteResearchConfirm != nil)) {
+        .alert("Complete Research", isPresented: Binding(
+            get: { showCompleteResearchConfirm != nil },
+            set: { if !$0 { showCompleteResearchConfirm = nil } }
+        )) {
             Button("Cancel", role: .cancel) {
                 showCompleteResearchConfirm = nil
             }
@@ -123,15 +128,20 @@ struct TechnologyResearchView: View {
         } message: {
             Text("Complete this research and upgrade the technology level?")
         }
-        .alert("Cancel Research", isPresented: .constant(showCancelResearchConfirm != nil)) {
+        .alert("Cancel Research", isPresented: Binding(
+            get: { showCancelResearchConfirm != nil },
+            set: { if !$0 { showCancelResearchConfirm = nil } }
+        )) {
             Button("No", role: .cancel) {
                 showCancelResearchConfirm = nil
             }
             Button("Yes, Cancel", role: .destructive) {
                 if let researchId = showCancelResearchConfirm,
-                   var character = gameManager.character {
+                   var character = gameManager.character,
+                   var militaryStats = character.militaryStats {
                     let refund = gameManager.militaryManager.cancelResearch(researchId: researchId)
-                    character.campaignFunds += refund
+                    militaryStats.treasury.cashReserves += refund
+                    character.militaryStats = militaryStats
                     gameManager.characterManager.updateCharacter(character)
                 }
                 showCancelResearchConfirm = nil
