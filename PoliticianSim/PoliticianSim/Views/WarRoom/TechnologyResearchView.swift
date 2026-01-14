@@ -12,6 +12,7 @@ struct TechnologyResearchView: View {
     @State private var showStartResearchConfirm: TechCategory?
     @State private var showCompleteResearchConfirm: UUID?
     @State private var showCancelResearchConfirm: UUID?
+    @State private var showInsufficientFundsAlert = false
 
     var body: some View {
         ScrollView {
@@ -91,6 +92,8 @@ struct TechnologyResearchView: View {
                             character.militaryStats = militaryStats
                             gameManager.characterManager.updateCharacter(character)
                         }
+                    } else {
+                        showInsufficientFundsAlert = true
                     }
                 }
                 showStartResearchConfirm = nil
@@ -148,6 +151,15 @@ struct TechnologyResearchView: View {
             }
         } message: {
             Text("Cancel this research? You will receive a 50% refund.")
+        }
+        .alert("Insufficient Funds", isPresented: $showInsufficientFundsAlert) {
+            Button("OK", role: .cancel) {
+                showInsufficientFundsAlert = false
+            }
+        } message: {
+            if let militaryStats = gameManager.character?.militaryStats {
+                Text("The military treasury does not have sufficient funds for this research.\n\nAvailable: \(formatMoney(militaryStats.treasury.cashReserves))")
+            }
         }
     }
 
