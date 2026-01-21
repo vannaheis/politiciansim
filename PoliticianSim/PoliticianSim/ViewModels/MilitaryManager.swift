@@ -42,27 +42,72 @@ class MilitaryManager: ObservableObject {
 
     // MARK: - Recruitment
 
+    func calculateMaxManpower(population: Int, militaryStats: MilitaryStats) -> Int {
+        let baseMax = Double(population) * militaryStats.mobilizationLevel.percentage
+        let multiplier = militaryStats.recruitmentType.manpowerMultiplier
+        return Int(baseMax * multiplier)
+    }
+
     func changeRecruitmentType(militaryStats: inout MilitaryStats, to type: MilitaryStats.RecruitmentType) {
         militaryStats.recruitmentType = type
     }
 
-    func recruit(militaryStats: inout MilitaryStats, soldiers: Int) -> Decimal {
-        let costPerSoldier = militaryStats.recruitmentType.costPerSoldier
-        let totalCost = Decimal(soldiers) * costPerSoldier
+    func changeMobilizationLevel(militaryStats: inout MilitaryStats, to level: MobilizationLevel) {
+        militaryStats.mobilizationLevel = level
+    }
 
-        militaryStats.manpower += soldiers
+    func recruit(militaryStats: inout MilitaryStats, soldiers: Int, currentDate: Date) -> Decimal {
+        let recruitmentCost = militaryStats.recruitmentType.recruitmentCost
+        let totalCost = Decimal(soldiers) * recruitmentCost
 
-        // Recalculate strength
-        militaryStats.strength = calculateStrength(militaryStats: militaryStats)
+        // Create new training cohort
+        let cohort = RecruitmentCohort(
+            soldierCount: soldiers,
+            recruitmentType: militaryStats.recruitmentType,
+            startDate: currentDate
+        )
+
+        militaryStats.trainingQueue.append(cohort)
+        militaryStats.recruitsInTraining += soldiers
 
         return totalCost
     }
 
-    func demobilize(militaryStats: inout MilitaryStats, soldiers: Int) {
-        militaryStats.manpower = max(0, militaryStats.manpower - soldiers)
+    func demobilize(militaryStats: inout MilitaryStats, soldiers: Int) -> Decimal {
+        let actualDemobilize = min(soldiers, militaryStats.manpower)
+        militaryStats.manpower -= actualDemobilize
 
         // Recalculate strength
         militaryStats.strength = calculateStrength(militaryStats: militaryStats)
+
+        // Calculate severance cost for volunteers
+        let severanceCost: Decimal = militaryStats.recruitmentType == .volunteer ? 5_000 : 0
+        return Decimal(actualDemobilize) * severanceCost
+    }
+
+    func advanceTraining(militaryStats: inout MilitaryStats, days: Int) {
+        // Advance all cohorts
+        for i in 0..<militaryStats.trainingQueue.count {
+            militaryStats.trainingQueue[i].advanceDays(days)
+        }
+
+        // Process completed training
+        var completedSoldiers = 0
+        militaryStats.trainingQueue.removeAll { cohort in
+            if cohort.isComplete {
+                completedSoldiers += cohort.soldierCount
+                return true
+            }
+            return false
+        }
+
+        if completedSoldiers > 0 {
+            militaryStats.manpower += completedSoldiers
+            militaryStats.recruitsInTraining -= completedSoldiers
+            militaryStats.strength = calculateStrength(militaryStats: militaryStats)
+
+            print("✅ Training complete: \(completedSoldiers) soldiers graduated to active duty")
+        }
     }
 
     // MARK: - Technology Research

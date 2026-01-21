@@ -19,59 +19,60 @@ struct WarRoomView: View {
     }
 
     var body: some View {
-        ZStack {
-            StandardBackgroundView()
+        NavigationView {
+            ZStack {
+                StandardBackgroundView()
 
-            VStack(spacing: 0) {
-                // Top header
-                HStack {
-                    Button(action: {
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            gameManager.navigationManager.toggleMenu()
-                        }
-                    }) {
-                        Image(systemName: "line.3.horizontal")
-                            .font(.system(size: 24, weight: .medium))
-                            .foregroundColor(.white)
-                            .frame(width: 44, height: 44)
-                    }
-
-                    Spacer()
-
-                    Text("War Room")
-                        .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(.white)
-
-                    Spacer()
-
-                    Color.clear.frame(width: 44, height: 44)
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 16)
-
-                // Check if President
-                if let character = gameManager.character {
-                    if character.currentPosition?.level == 5 {
-                        // Tab selector
-                        WarRoomTabSelector(selectedTab: $selectedTab)
-                            .padding(.horizontal, 20)
-                            .padding(.top, 16)
-
-                        // Tab content
-                        Group {
-                            switch selectedTab {
-                            case .overview:
-                                MilitaryOverviewView()
-                            case .wars:
-                                ActiveWarsView()
-                            case .research:
-                                TechnologyResearchView()
-                            case .territories:
-                                TerritoryManagementView()
+                VStack(spacing: 0) {
+                    // Top header
+                    HStack {
+                        Button(action: {
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                gameManager.navigationManager.toggleMenu()
                             }
+                        }) {
+                            Image(systemName: "line.3.horizontal")
+                                .font(.system(size: 24, weight: .medium))
+                                .foregroundColor(.white)
+                                .frame(width: 44, height: 44)
                         }
-                        .padding(.top, 16)
-                    } else {
+
+                        Spacer()
+
+                        Text("War Room")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(.white)
+
+                        Spacer()
+
+                        Color.clear.frame(width: 44, height: 44)
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 16)
+
+                    // Check if President
+                    if let character = gameManager.character {
+                        if character.currentPosition?.level == 5 {
+                            // Tab selector
+                            WarRoomTabSelector(selectedTab: $selectedTab)
+                                .padding(.horizontal, 20)
+                                .padding(.top, 16)
+
+                            // Tab content
+                            Group {
+                                switch selectedTab {
+                                case .overview:
+                                    MilitaryOverviewView()
+                                case .wars:
+                                    ActiveWarsView()
+                                case .research:
+                                    TechnologyResearchView()
+                                case .territories:
+                                    TerritoryManagementView()
+                                }
+                            }
+                            .padding(.top, 16)
+                        } else {
                         // Not President
                         VStack(spacing: 16) {
                             Spacer()
@@ -101,9 +102,11 @@ struct WarRoomView: View {
             // Side menu overlay (must be last for proper z-index)
             SideMenuView(isOpen: $gameManager.navigationManager.isMenuOpen)
         }
+        .navigationBarHidden(true)
         .onAppear {
             // Initialize military stats if President but stats don't exist
             gameManager.initializeMilitaryStats()
+        }
         }
     }
 }

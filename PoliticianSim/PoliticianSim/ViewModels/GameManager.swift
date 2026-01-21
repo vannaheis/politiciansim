@@ -708,6 +708,15 @@ class GameManager: ObservableObject {
             )
         }
 
+        // Advance training
+        militaryManager.advanceTraining(militaryStats: &militaryStats, days: days)
+
+        // Apply mobilization approval penalty (daily)
+        let mobilizationPenalty = militaryStats.mobilizationLevel.approvalImpactDaily * Double(days)
+        if mobilizationPenalty < 0 {
+            modifyApproval(by: mobilizationPenalty, reason: "Mobilization level: \(militaryStats.mobilizationLevel.rawValue)")
+        }
+
         // Update character's military stats
         character.militaryStats = militaryStats
 

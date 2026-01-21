@@ -130,6 +130,9 @@
 		7CF1AEB52F09AD3800E31456 /* AIStrategyChangeNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF1AEB42F09AD3800E31456 /* AIStrategyChangeNotification.swift */; };
 		7CF1AEB72F09AD5100E31456 /* AIStrategyChangeNotificationPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF1AEB62F09AD5100E31456 /* AIStrategyChangeNotificationPopup.swift */; };
 		7CF1AEB92F09AD6A00E31456 /* StrategySelectionSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF1AEB82F09AD6A00E31456 /* StrategySelectionSheet.swift */; };
+		7CF1AEBC2F218F6F00E31456 /* MobilizationLevel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF1AEBA2F218F6F00E31456 /* MobilizationLevel.swift */; };
+		7CF1AEBD2F218F6F00E31456 /* RecruitmentCohort.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF1AEBB2F218F6F00E31456 /* RecruitmentCohort.swift */; };
+		7CF1AEBF2F218F8300E31456 /* RecruitmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF1AEBE2F218F8300E31456 /* RecruitmentView.swift */; };
 		FB1BD9A2FE914F06F1F9D2BC /* CustomAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61D83AE85A5956CC2FFCB315 /* CustomAlert.swift */; };
 /* End PBXBuildFile section */
 
@@ -259,6 +262,9 @@
 		7CF1AEB42F09AD3800E31456 /* AIStrategyChangeNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIStrategyChangeNotification.swift; sourceTree = "<group>"; };
 		7CF1AEB62F09AD5100E31456 /* AIStrategyChangeNotificationPopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIStrategyChangeNotificationPopup.swift; sourceTree = "<group>"; };
 		7CF1AEB82F09AD6A00E31456 /* StrategySelectionSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StrategySelectionSheet.swift; sourceTree = "<group>"; };
+		7CF1AEBA2F218F6F00E31456 /* MobilizationLevel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobilizationLevel.swift; sourceTree = "<group>"; };
+		7CF1AEBB2F218F6F00E31456 /* RecruitmentCohort.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecruitmentCohort.swift; sourceTree = "<group>"; };
+		7CF1AEBE2F218F8300E31456 /* RecruitmentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecruitmentView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -315,6 +321,8 @@
 		311 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				7CF1AEBA2F218F6F00E31456 /* MobilizationLevel.swift */,
+				7CF1AEBB2F218F6F00E31456 /* RecruitmentCohort.swift */,
 				7CF1AEB42F09AD3800E31456 /* AIStrategyChangeNotification.swift */,
 				103 /* Character.swift */,
 				7C6E450F2EC552FB005F7A3D /* Campaign.swift */,
@@ -601,6 +609,7 @@
 		7C6E46FF2ECD0F04005F7A3D /* WarRoom */ = {
 			isa = PBXGroup;
 			children = (
+				7CF1AEBE2F218F8300E31456 /* RecruitmentView.swift */,
 				7CF1AEB82F09AD6A00E31456 /* StrategySelectionSheet.swift */,
 				7CF1AEB62F09AD5100E31456 /* AIStrategyChangeNotificationPopup.swift */,
 				7C6E46FA2ECD0F04005F7A3D /* ActiveWarsView.swift */,
@@ -700,6 +709,7 @@
 				002 /* ContentView.swift in Sources */,
 				7C6E45412EC684BF005F7A3D /* Education.swift in Sources */,
 				7C6E450E2EC54B3E005F7A3D /* EventDialog.swift in Sources */,
+				7CF1AEBF2F218F8300E31456 /* RecruitmentView.swift in Sources */,
 				7CF1AEB52F09AD3800E31456 /* AIStrategyChangeNotification.swift in Sources */,
 				7C6E45152EC5532D005F7A3D /* CampaignView.swift in Sources */,
 				7C6E451A2EC55F08005F7A3D /* Policy.swift in Sources */,
@@ -761,6 +771,8 @@
 				7C6E47122EE77B6C005F7A3D /* WarUpdatePopup.swift in Sources */,
 				023 /* StatDisplay.swift in Sources */,
 				7C6E45242EC57F3C005F7A3D /* BudgetManager.swift in Sources */,
+				7CF1AEBC2F218F6F00E31456 /* MobilizationLevel.swift in Sources */,
+				7CF1AEBD2F218F6F00E31456 /* RecruitmentCohort.swift in Sources */,
 				7C6E45532EC6F1E2005F7A3D /* LineChartView.swift in Sources */,
 				7C6E46DF2ECAB841005F7A3D /* FiscalImpactCalculator.swift in Sources */,
 				024 /* TimeControlBar.swift in Sources */,

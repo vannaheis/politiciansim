@@ -10,7 +10,10 @@ import Foundation
 struct MilitaryStats: Codable {
     var strength: Int              // Abstract military power (0-1,000,000)
     var manpower: Int              // Active duty personnel
+    var recruitsInTraining: Int    // Soldiers currently in training
     var recruitmentType: RecruitmentType
+    var mobilizationLevel: MobilizationLevel
+    var trainingQueue: [RecruitmentCohort]  // Active training cohorts
     var technologyLevels: [TechCategory: Int] = [:]  // 1-10 per category
     var nuclearArsenal: NuclearArsenal
     var militaryBudget: Decimal    // Annual military spending
@@ -40,12 +43,22 @@ struct MilitaryStats: Codable {
             case .conscription: return 40_000  // Lower cost for conscripts
             }
         }
+
+        var recruitmentCost: Decimal {
+            switch self {
+            case .volunteer: return 10_000  // Upfront recruitment cost
+            case .conscription: return 5_000  // Lower upfront cost
+            }
+        }
     }
 
     init() {
         self.strength = 100_000
         self.manpower = 100_000
+        self.recruitsInTraining = 0
         self.recruitmentType = .volunteer
+        self.mobilizationLevel = .peacetime
+        self.trainingQueue = []
         self.nuclearArsenal = NuclearArsenal()
         self.militaryBudget = 50_000_000_000  // $50B default
         self.treasury = MilitaryTreasury()
@@ -54,6 +67,11 @@ struct MilitaryStats: Codable {
         for category in TechCategory.allCases {
             self.technologyLevels[category] = 1
         }
+    }
+
+    // Total personnel (active + training)
+    var totalPersonnel: Int {
+        manpower + recruitsInTraining
     }
 }
 

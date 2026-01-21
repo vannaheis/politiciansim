@@ -10,6 +10,12 @@ import SwiftUI
 struct MilitaryOverviewView: View {
     @EnvironmentObject var gameManager: GameManager
 
+    private func formatNumber(_ number: Int) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        return formatter.string(from: NSNumber(value: number)) ?? "\(number)"
+    }
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
@@ -53,26 +59,52 @@ struct MilitaryOverviewView: View {
                     .cornerRadius(12)
 
                     // Recruitment Type Card
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Recruitment")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(.white)
+                    NavigationLink(destination: RecruitmentView()) {
+                        VStack(alignment: .leading, spacing: 12) {
+                            HStack {
+                                Text("Recruitment")
+                                    .font(.system(size: 16, weight: .bold))
+                                    .foregroundColor(.white)
 
-                        HStack {
-                            Text(militaryStats.recruitmentType.rawValue)
-                                .font(.system(size: 15))
-                                .foregroundColor(.white)
+                                Spacer()
 
-                            Spacer()
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(Constants.Colors.buttonPrimary)
+                            }
 
-                            Text("Cost: \(formatMoney(militaryStats.recruitmentType.costPerSoldier))/soldier")
-                                .font(.system(size: 13))
+                            HStack {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("Active / Training")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(Constants.Colors.secondaryText)
+
+                                    Text("\(formatNumber(militaryStats.manpower)) / \(formatNumber(militaryStats.recruitsInTraining))")
+                                        .font(.system(size: 15, weight: .semibold))
+                                        .foregroundColor(.white)
+                                }
+
+                                Spacer()
+
+                                VStack(alignment: .trailing, spacing: 4) {
+                                    Text("Mobilization")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(Constants.Colors.secondaryText)
+
+                                    Text(militaryStats.mobilizationLevel.rawValue)
+                                        .font(.system(size: 13, weight: .semibold))
+                                        .foregroundColor(Constants.Colors.buttonPrimary)
+                                }
+                            }
+
+                            Text("Tap to manage recruitment and mobilization")
+                                .font(.system(size: 11))
                                 .foregroundColor(Constants.Colors.secondaryText)
                         }
+                        .padding(16)
+                        .background(Color(red: 0.15, green: 0.17, blue: 0.22))
+                        .cornerRadius(12)
                     }
-                    .padding(16)
-                    .background(Color(red: 0.15, green: 0.17, blue: 0.22))
-                    .cornerRadius(12)
+                    .buttonStyle(PlainButtonStyle())
 
                     // Military Budget Card
                     MilitaryBudgetCard(militaryStats: militaryStats)

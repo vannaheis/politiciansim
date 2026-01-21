@@ -53,6 +53,7 @@ struct SaveGame: Codable {
 
     // Military (President only)
     let activeResearch: [TechnologyResearch]
+    let trainingQueue: [RecruitmentCohort]
     let activeWars: [War]
     let warHistory: [War]
     let territories: [Territory]
@@ -127,6 +128,7 @@ struct SaveGame: Codable {
 
         // Military
         self.activeResearch = gameManager.militaryManager.activeResearch
+        self.trainingQueue = gameManager.character?.militaryStats?.trainingQueue ?? []
         self.activeWars = gameManager.warEngine.activeWars
         self.warHistory = gameManager.warEngine.warHistory
         self.territories = gameManager.territoryManager.territories
@@ -202,6 +204,15 @@ struct SaveGame: Codable {
 
         // Restore military
         gameManager.militaryManager.activeResearch = activeResearch
+
+        // Restore training queue to character's military stats
+        if var character = gameManager.characterManager.character,
+           var militaryStats = character.militaryStats {
+            militaryStats.trainingQueue = trainingQueue
+            character.militaryStats = militaryStats
+            gameManager.characterManager.character = character
+        }
+
         gameManager.warEngine.activeWars = activeWars
         gameManager.warEngine.warHistory = warHistory
         gameManager.territoryManager.territories = territories
