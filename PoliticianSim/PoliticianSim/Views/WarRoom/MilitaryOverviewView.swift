@@ -58,7 +58,7 @@ struct MilitaryOverviewView: View {
                     .background(Color(red: 0.15, green: 0.17, blue: 0.22))
                     .cornerRadius(12)
 
-                    // Recruitment Type Card
+                    // Recruitment Card
                     NavigationLink(destination: RecruitmentView()) {
                         VStack(alignment: .leading, spacing: 12) {
                             HStack {
@@ -74,11 +74,11 @@ struct MilitaryOverviewView: View {
 
                             HStack {
                                 VStack(alignment: .leading, spacing: 4) {
-                                    Text("Active / Training")
+                                    Text("Active Personnel")
                                         .font(.system(size: 12))
                                         .foregroundColor(Constants.Colors.secondaryText)
 
-                                    Text("\(formatNumber(militaryStats.manpower)) / \(formatNumber(militaryStats.recruitsInTraining))")
+                                    Text("\(formatNumber(militaryStats.manpower))")
                                         .font(.system(size: 15, weight: .semibold))
                                         .foregroundColor(.white)
                                 }
@@ -86,17 +86,17 @@ struct MilitaryOverviewView: View {
                                 Spacer()
 
                                 VStack(alignment: .trailing, spacing: 4) {
-                                    Text("Mobilization")
+                                    Text("Recruitment Type")
                                         .font(.system(size: 12))
                                         .foregroundColor(Constants.Colors.secondaryText)
 
-                                    Text(militaryStats.mobilizationLevel.rawValue)
+                                    Text(militaryStats.recruitmentType.rawValue)
                                         .font(.system(size: 13, weight: .semibold))
                                         .foregroundColor(Constants.Colors.buttonPrimary)
                                 }
                             }
 
-                            Text("Tap to manage recruitment and mobilization")
+                            Text("Tap to recruit or demobilize forces")
                                 .font(.system(size: 11))
                                 .foregroundColor(Constants.Colors.secondaryText)
                         }

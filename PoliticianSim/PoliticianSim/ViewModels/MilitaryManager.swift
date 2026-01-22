@@ -43,7 +43,8 @@ class MilitaryManager: ObservableObject {
     // MARK: - Recruitment
 
     func calculateMaxManpower(population: Int, militaryStats: MilitaryStats) -> Int {
-        let baseMax = Double(population) * militaryStats.mobilizationLevel.percentage
+        // Fixed 10% of population max (Total War capacity)
+        let baseMax = Double(population) * 0.10
         let multiplier = militaryStats.recruitmentType.manpowerMultiplier
         return Int(baseMax * multiplier)
     }
@@ -52,23 +53,15 @@ class MilitaryManager: ObservableObject {
         militaryStats.recruitmentType = type
     }
 
-    func changeMobilizationLevel(militaryStats: inout MilitaryStats, to level: MobilizationLevel) {
-        militaryStats.mobilizationLevel = level
-    }
-
-    func recruit(militaryStats: inout MilitaryStats, soldiers: Int, currentDate: Date) -> Decimal {
+    func recruit(militaryStats: inout MilitaryStats, soldiers: Int) -> Decimal {
         let recruitmentCost = militaryStats.recruitmentType.recruitmentCost
         let totalCost = Decimal(soldiers) * recruitmentCost
 
-        // Create new training cohort
-        let cohort = RecruitmentCohort(
-            soldierCount: soldiers,
-            recruitmentType: militaryStats.recruitmentType,
-            startDate: currentDate
-        )
+        // Immediate recruitment - no training delay
+        militaryStats.manpower += soldiers
 
-        militaryStats.trainingQueue.append(cohort)
-        militaryStats.recruitsInTraining += soldiers
+        // Recalculate strength
+        militaryStats.strength = calculateStrength(militaryStats: militaryStats)
 
         return totalCost
     }
@@ -83,31 +76,6 @@ class MilitaryManager: ObservableObject {
         // Calculate severance cost for volunteers
         let severanceCost: Decimal = militaryStats.recruitmentType == .volunteer ? 5_000 : 0
         return Decimal(actualDemobilize) * severanceCost
-    }
-
-    func advanceTraining(militaryStats: inout MilitaryStats, days: Int) {
-        // Advance all cohorts
-        for i in 0..<militaryStats.trainingQueue.count {
-            militaryStats.trainingQueue[i].advanceDays(days)
-        }
-
-        // Process completed training
-        var completedSoldiers = 0
-        militaryStats.trainingQueue.removeAll { cohort in
-            if cohort.isComplete {
-                completedSoldiers += cohort.soldierCount
-                return true
-            }
-            return false
-        }
-
-        if completedSoldiers > 0 {
-            militaryStats.manpower += completedSoldiers
-            militaryStats.recruitsInTraining -= completedSoldiers
-            militaryStats.strength = calculateStrength(militaryStats: militaryStats)
-
-            print("✅ Training complete: \(completedSoldiers) soldiers graduated to active duty")
-        }
     }
 
     // MARK: - Technology Research
