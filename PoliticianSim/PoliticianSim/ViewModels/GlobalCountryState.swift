@@ -26,7 +26,10 @@ class GlobalCountryState: ObservableObject, Codable {
         var lostTerritory: Double          // Territory lost to others (sq mi)
         var currentGDP: Double             // Current GDP in USD
         var population: Int                // Current population
-        var militaryStrength: Int          // Current military strength
+        var militaryStrength: Int          // Current military strength (peacetime or wartime)
+        var isAtWar: Bool = false          // Whether country is currently at war
+        var peacetimeStrength: Int         // Base peacetime strength
+        var estimatedTechLevel: Int        // Estimated average tech level (1-10)
 
         var totalTerritory: Double {
             baseTerritory + conqueredTerritory - lostTerritory
@@ -43,7 +46,8 @@ class GlobalCountryState: ObservableObject, Codable {
             baseTerritory: Double,
             population: Int,
             gdp: Double,
-            militaryStrength: Int
+            militaryStrength: Int,
+            estimatedTechLevel: Int = 3
         ) {
             self.id = UUID()
             self.code = code
@@ -54,6 +58,9 @@ class GlobalCountryState: ObservableObject, Codable {
             self.currentGDP = gdp
             self.population = population
             self.militaryStrength = militaryStrength
+            self.peacetimeStrength = militaryStrength
+            self.estimatedTechLevel = estimatedTechLevel
+            self.isAtWar = false
         }
     }
 
@@ -79,62 +86,62 @@ class GlobalCountryState: ObservableObject, Codable {
 
     static func initializeDefaultCountries() -> [CountryState] {
         return [
-            // Major Powers
-            CountryState(code: "USA", name: "United States", baseTerritory: 3_800_000, population: 335_000_000, gdp: 27_360_000_000_000, militaryStrength: 1_390_000),
-            CountryState(code: "CHN", name: "China", baseTerritory: 3_700_000, population: 1_425_000_000, gdp: 17_960_000_000_000, militaryStrength: 2_035_000),
-            CountryState(code: "RUS", name: "Russia", baseTerritory: 6_600_000, population: 144_000_000, gdp: 2_060_000_000_000, militaryStrength: 1_150_000),
-            CountryState(code: "IND", name: "India", baseTerritory: 1_269_000, population: 1_428_000_000, gdp: 3_890_000_000_000, militaryStrength: 1_450_000),
-            CountryState(code: "PRK", name: "North Korea", baseTerritory: 46_540, population: 26_000_000, gdp: 28_000_000_000, militaryStrength: 1_280_000),
-            CountryState(code: "PAK", name: "Pakistan", baseTerritory: 307_374, population: 240_000_000, gdp: 338_000_000_000, militaryStrength: 654_000),
+            // Major Powers (tech level 6-8)
+            CountryState(code: "USA", name: "United States", baseTerritory: 3_800_000, population: 335_000_000, gdp: 27_360_000_000_000, militaryStrength: 1_390_000, estimatedTechLevel: 8),
+            CountryState(code: "CHN", name: "China", baseTerritory: 3_700_000, population: 1_425_000_000, gdp: 17_960_000_000_000, militaryStrength: 2_035_000, estimatedTechLevel: 7),
+            CountryState(code: "RUS", name: "Russia", baseTerritory: 6_600_000, population: 144_000_000, gdp: 2_060_000_000_000, militaryStrength: 1_150_000, estimatedTechLevel: 6),
+            CountryState(code: "IND", name: "India", baseTerritory: 1_269_000, population: 1_428_000_000, gdp: 3_890_000_000_000, militaryStrength: 1_450_000, estimatedTechLevel: 5),
+            CountryState(code: "PRK", name: "North Korea", baseTerritory: 46_540, population: 26_000_000, gdp: 28_000_000_000, militaryStrength: 1_280_000, estimatedTechLevel: 4),
+            CountryState(code: "PAK", name: "Pakistan", baseTerritory: 307_374, population: 240_000_000, gdp: 338_000_000_000, militaryStrength: 654_000, estimatedTechLevel: 4),
 
-            // Regional Powers
-            CountryState(code: "IRN", name: "Iran", baseTerritory: 636_372, population: 89_000_000, gdp: 413_000_000_000, militaryStrength: 610_000),
-            CountryState(code: "KOR", name: "South Korea", baseTerritory: 38_691, population: 51_000_000, gdp: 1_710_000_000_000, militaryStrength: 555_000),
-            CountryState(code: "TUR", name: "Turkey", baseTerritory: 302_535, population: 85_000_000, gdp: 1_030_000_000_000, militaryStrength: 355_000),
-            CountryState(code: "EGY", name: "Egypt", baseTerritory: 390_121, population: 112_000_000, gdp: 476_000_000_000, militaryStrength: 440_000),
-            CountryState(code: "VNM", name: "Vietnam", baseTerritory: 127_882, population: 98_000_000, gdp: 430_000_000_000, militaryStrength: 482_000),
-            CountryState(code: "MMR", name: "Myanmar", baseTerritory: 261_228, population: 54_000_000, gdp: 65_000_000_000, militaryStrength: 406_000),
-            CountryState(code: "IDN", name: "Indonesia", baseTerritory: 735_358, population: 277_000_000, gdp: 1_390_000_000_000, militaryStrength: 400_000),
-            CountryState(code: "THA", name: "Thailand", baseTerritory: 198_117, population: 71_000_000, gdp: 514_000_000_000, militaryStrength: 361_000),
+            // Regional Powers (tech level 4-6)
+            CountryState(code: "IRN", name: "Iran", baseTerritory: 636_372, population: 89_000_000, gdp: 413_000_000_000, militaryStrength: 610_000, estimatedTechLevel: 4),
+            CountryState(code: "KOR", name: "South Korea", baseTerritory: 38_691, population: 51_000_000, gdp: 1_710_000_000_000, militaryStrength: 555_000, estimatedTechLevel: 7),
+            CountryState(code: "TUR", name: "Turkey", baseTerritory: 302_535, population: 85_000_000, gdp: 1_030_000_000_000, militaryStrength: 355_000, estimatedTechLevel: 5),
+            CountryState(code: "EGY", name: "Egypt", baseTerritory: 390_121, population: 112_000_000, gdp: 476_000_000_000, militaryStrength: 440_000, estimatedTechLevel: 4),
+            CountryState(code: "VNM", name: "Vietnam", baseTerritory: 127_882, population: 98_000_000, gdp: 430_000_000_000, militaryStrength: 482_000, estimatedTechLevel: 4),
+            CountryState(code: "MMR", name: "Myanmar", baseTerritory: 261_228, population: 54_000_000, gdp: 65_000_000_000, militaryStrength: 406_000, estimatedTechLevel: 3),
+            CountryState(code: "IDN", name: "Indonesia", baseTerritory: 735_358, population: 277_000_000, gdp: 1_390_000_000_000, militaryStrength: 400_000, estimatedTechLevel: 4),
+            CountryState(code: "THA", name: "Thailand", baseTerritory: 198_117, population: 71_000_000, gdp: 514_000_000_000, militaryStrength: 361_000, estimatedTechLevel: 4),
 
-            // NATO & Allies
-            CountryState(code: "GBR", name: "United Kingdom", baseTerritory: 93_628, population: 68_000_000, gdp: 3_340_000_000_000, militaryStrength: 148_000),
-            CountryState(code: "FRA", name: "France", baseTerritory: 248_573, population: 68_000_000, gdp: 3_050_000_000_000, militaryStrength: 203_000),
-            CountryState(code: "DEU", name: "Germany", baseTerritory: 137_988, population: 84_000_000, gdp: 4_430_000_000_000, militaryStrength: 183_000),
-            CountryState(code: "JPN", name: "Japan", baseTerritory: 145_937, population: 123_000_000, gdp: 4_210_000_000_000, militaryStrength: 247_000),
-            CountryState(code: "ITA", name: "Italy", baseTerritory: 116_348, population: 59_000_000, gdp: 2_190_000_000_000, militaryStrength: 165_000),
-            CountryState(code: "POL", name: "Poland", baseTerritory: 120_733, population: 38_000_000, gdp: 688_000_000_000, militaryStrength: 114_000),
+            // NATO & Allies (tech level 6-8)
+            CountryState(code: "GBR", name: "United Kingdom", baseTerritory: 93_628, population: 68_000_000, gdp: 3_340_000_000_000, militaryStrength: 148_000, estimatedTechLevel: 7),
+            CountryState(code: "FRA", name: "France", baseTerritory: 248_573, population: 68_000_000, gdp: 3_050_000_000_000, militaryStrength: 203_000, estimatedTechLevel: 7),
+            CountryState(code: "DEU", name: "Germany", baseTerritory: 137_988, population: 84_000_000, gdp: 4_430_000_000_000, militaryStrength: 183_000, estimatedTechLevel: 7),
+            CountryState(code: "JPN", name: "Japan", baseTerritory: 145_937, population: 123_000_000, gdp: 4_210_000_000_000, militaryStrength: 247_000, estimatedTechLevel: 7),
+            CountryState(code: "ITA", name: "Italy", baseTerritory: 116_348, population: 59_000_000, gdp: 2_190_000_000_000, militaryStrength: 165_000, estimatedTechLevel: 6),
+            CountryState(code: "POL", name: "Poland", baseTerritory: 120_733, population: 38_000_000, gdp: 688_000_000_000, militaryStrength: 114_000, estimatedTechLevel: 5),
 
-            // Middle East
-            CountryState(code: "SAU", name: "Saudi Arabia", baseTerritory: 830_000, population: 36_000_000, gdp: 1_070_000_000_000, militaryStrength: 257_000),
-            CountryState(code: "ISR", name: "Israel", baseTerritory: 8_019, population: 9_500_000, gdp: 525_000_000_000, militaryStrength: 170_000),
-            CountryState(code: "SYR", name: "Syria", baseTerritory: 71_498, population: 23_000_000, gdp: 9_000_000_000, militaryStrength: 169_000),
-            CountryState(code: "IRQ", name: "Iraq", baseTerritory: 168_754, population: 44_000_000, gdp: 250_000_000_000, militaryStrength: 193_000),
+            // Middle East (tech level 4-6)
+            CountryState(code: "SAU", name: "Saudi Arabia", baseTerritory: 830_000, population: 36_000_000, gdp: 1_070_000_000_000, militaryStrength: 257_000, estimatedTechLevel: 5),
+            CountryState(code: "ISR", name: "Israel", baseTerritory: 8_019, population: 9_500_000, gdp: 525_000_000_000, militaryStrength: 170_000, estimatedTechLevel: 7),
+            CountryState(code: "SYR", name: "Syria", baseTerritory: 71_498, population: 23_000_000, gdp: 9_000_000_000, militaryStrength: 169_000, estimatedTechLevel: 3),
+            CountryState(code: "IRQ", name: "Iraq", baseTerritory: 168_754, population: 44_000_000, gdp: 250_000_000_000, militaryStrength: 193_000, estimatedTechLevel: 3),
 
-            // Latin America
-            CountryState(code: "BRA", name: "Brazil", baseTerritory: 3_287_956, population: 216_000_000, gdp: 2_330_000_000_000, militaryStrength: 360_000),
-            CountryState(code: "COL", name: "Colombia", baseTerritory: 440_831, population: 52_000_000, gdp: 363_000_000_000, militaryStrength: 293_000),
-            CountryState(code: "MEX", name: "Mexico", baseTerritory: 761_610, population: 128_000_000, gdp: 1_460_000_000_000, militaryStrength: 277_000),
-            CountryState(code: "VEN", name: "Venezuela", baseTerritory: 353_841, population: 28_000_000, gdp: 97_000_000_000, militaryStrength: 123_000),
-            CountryState(code: "CUB", name: "Cuba", baseTerritory: 42_426, population: 11_000_000, gdp: 107_000_000_000, militaryStrength: 49_000),
+            // Latin America (tech level 3-5)
+            CountryState(code: "BRA", name: "Brazil", baseTerritory: 3_287_956, population: 216_000_000, gdp: 2_330_000_000_000, militaryStrength: 360_000, estimatedTechLevel: 5),
+            CountryState(code: "COL", name: "Colombia", baseTerritory: 440_831, population: 52_000_000, gdp: 363_000_000_000, militaryStrength: 293_000, estimatedTechLevel: 4),
+            CountryState(code: "MEX", name: "Mexico", baseTerritory: 761_610, population: 128_000_000, gdp: 1_460_000_000_000, militaryStrength: 277_000, estimatedTechLevel: 4),
+            CountryState(code: "VEN", name: "Venezuela", baseTerritory: 353_841, population: 28_000_000, gdp: 97_000_000_000, militaryStrength: 123_000, estimatedTechLevel: 3),
+            CountryState(code: "CUB", name: "Cuba", baseTerritory: 42_426, population: 11_000_000, gdp: 107_000_000_000, militaryStrength: 49_000, estimatedTechLevel: 3),
 
-            // Africa
-            CountryState(code: "NGA", name: "Nigeria", baseTerritory: 356_669, population: 223_000_000, gdp: 477_000_000_000, militaryStrength: 143_000),
-            CountryState(code: "ETH", name: "Ethiopia", baseTerritory: 426_373, population: 126_000_000, gdp: 156_000_000_000, militaryStrength: 162_000),
-            CountryState(code: "ZAF", name: "South Africa", baseTerritory: 471_445, population: 60_000_000, gdp: 380_000_000_000, militaryStrength: 73_000),
-            CountryState(code: "DZA", name: "Algeria", baseTerritory: 919_595, population: 45_000_000, gdp: 195_000_000_000, militaryStrength: 130_000),
+            // Africa (tech level 2-4)
+            CountryState(code: "NGA", name: "Nigeria", baseTerritory: 356_669, population: 223_000_000, gdp: 477_000_000_000, militaryStrength: 143_000, estimatedTechLevel: 3),
+            CountryState(code: "ETH", name: "Ethiopia", baseTerritory: 426_373, population: 126_000_000, gdp: 156_000_000_000, militaryStrength: 162_000, estimatedTechLevel: 2),
+            CountryState(code: "ZAF", name: "South Africa", baseTerritory: 471_445, population: 60_000_000, gdp: 380_000_000_000, militaryStrength: 73_000, estimatedTechLevel: 4),
+            CountryState(code: "DZA", name: "Algeria", baseTerritory: 919_595, population: 45_000_000, gdp: 195_000_000_000, militaryStrength: 130_000, estimatedTechLevel: 3),
 
-            // Oceania & Others
-            CountryState(code: "AUS", name: "Australia", baseTerritory: 2_969_907, population: 26_000_000, gdp: 1_690_000_000_000, militaryStrength: 60_000),
-            CountryState(code: "TWN", name: "Taiwan", baseTerritory: 13_976, population: 23_000_000, gdp: 790_000_000_000, militaryStrength: 169_000),
-            CountryState(code: "UKR", name: "Ukraine", baseTerritory: 233_032, population: 37_000_000, gdp: 160_000_000_000, militaryStrength: 700_000),
-            CountryState(code: "AFG", name: "Afghanistan", baseTerritory: 251_827, population: 42_000_000, gdp: 20_000_000_000, militaryStrength: 175_000),
+            // Oceania & Others (tech level 4-7)
+            CountryState(code: "AUS", name: "Australia", baseTerritory: 2_969_907, population: 26_000_000, gdp: 1_690_000_000_000, militaryStrength: 60_000, estimatedTechLevel: 7),
+            CountryState(code: "TWN", name: "Taiwan", baseTerritory: 13_976, population: 23_000_000, gdp: 790_000_000_000, militaryStrength: 169_000, estimatedTechLevel: 7),
+            CountryState(code: "UKR", name: "Ukraine", baseTerritory: 233_032, population: 37_000_000, gdp: 160_000_000_000, militaryStrength: 700_000, estimatedTechLevel: 5),
+            CountryState(code: "AFG", name: "Afghanistan", baseTerritory: 251_827, population: 42_000_000, gdp: 20_000_000_000, militaryStrength: 175_000, estimatedTechLevel: 2),
 
-            // Smaller Nations
-            CountryState(code: "BLR", name: "Belarus", baseTerritory: 80_155, population: 9_000_000, gdp: 72_000_000_000, militaryStrength: 48_000),
-            CountryState(code: "KAZ", name: "Kazakhstan", baseTerritory: 1_052_090, population: 20_000_000, gdp: 225_000_000_000, militaryStrength: 39_000),
-            CountryState(code: "SRB", name: "Serbia", baseTerritory: 29_913, population: 7_000_000, gdp: 68_000_000_000, militaryStrength: 28_000),
-            CountryState(code: "LBY", name: "Libya", baseTerritory: 679_362, population: 7_000_000, gdp: 45_000_000_000, militaryStrength: 32_000)
+            // Smaller Nations (tech level 2-4)
+            CountryState(code: "BLR", name: "Belarus", baseTerritory: 80_155, population: 9_000_000, gdp: 72_000_000_000, militaryStrength: 48_000, estimatedTechLevel: 4),
+            CountryState(code: "KAZ", name: "Kazakhstan", baseTerritory: 1_052_090, population: 20_000_000, gdp: 225_000_000_000, militaryStrength: 39_000, estimatedTechLevel: 3),
+            CountryState(code: "SRB", name: "Serbia", baseTerritory: 29_913, population: 7_000_000, gdp: 68_000_000_000, militaryStrength: 28_000, estimatedTechLevel: 4),
+            CountryState(code: "LBY", name: "Libya", baseTerritory: 679_362, population: 7_000_000, gdp: 45_000_000_000, militaryStrength: 32_000, estimatedTechLevel: 2)
         ]
     }
 
@@ -270,7 +277,92 @@ class GlobalCountryState: ObservableObject, Codable {
         strengthChange *= Double.random(in: 0.97...1.03)
 
         country.militaryStrength = Int(Double(country.militaryStrength) * strengthChange)
+        country.peacetimeStrength = country.militaryStrength  // Update peacetime baseline
 
         updateCountry(country)
+    }
+
+    // MARK: - Wartime Mobilization
+
+    /// Calculate wartime strength for an AI country (10% of population with tech/budget multipliers)
+    func calculateWartimeStrength(country: CountryState) -> Int {
+        // Max manpower = 10% of population
+        let maxManpower = Double(country.population) * 0.10
+
+        // Calculate tech multiplier based on estimated tech level
+        // Same formula as player: each category contributes based on level
+        // Simplified: estimate average tech level and apply proportional multiplier
+        let avgTechLevel = Double(country.estimatedTechLevel)
+
+        // Average strength multiplier across all 10 categories
+        // Categories range from 1.05x to 1.30x, average is ~1.16x
+        // At level 10, full contribution = (1.16 - 1.0) = 0.16
+        // At level N, contribution = (N/10) * 0.16
+        let techMultiplier = 1.0 + (avgTechLevel / 10.0) * 0.16 * 10.0  // x10 for all categories
+
+        // Budget multiplier: estimate military budget as % of GDP
+        // Major powers: 3-4% of GDP
+        // Regional powers: 2-3% of GDP
+        // Smaller nations: 1-2% of GDP
+        let budgetPercent: Double
+        if country.currentGDP > 10_000_000_000_000 {  // > $10T GDP
+            budgetPercent = 0.035  // 3.5%
+        } else if country.currentGDP > 1_000_000_000_000 {  // > $1T GDP
+            budgetPercent = 0.025  // 2.5%
+        } else {
+            budgetPercent = 0.015  // 1.5%
+        }
+
+        let militaryBudget = country.currentGDP * budgetPercent
+        let budgetMultiplier = 1.0 + (militaryBudget / 10_000_000_000) * 0.05
+
+        let wartimeStrength = maxManpower * techMultiplier * budgetMultiplier
+        return Int(wartimeStrength)
+    }
+
+    /// Mobilize a country for war (set strength to wartime levels)
+    func mobilizeCountry(countryCode: String) {
+        guard var country = getCountry(code: countryCode) else { return }
+        guard !country.isAtWar else { return }  // Already mobilized
+
+        print("🎖️ [MOBILIZATION] \(country.name) mobilizing for war...")
+        print("   Peacetime strength: \(formatStrength(country.militaryStrength))")
+
+        // Calculate wartime strength
+        let wartimeStrength = calculateWartimeStrength(country: country)
+
+        print("   Wartime strength: \(formatStrength(wartimeStrength))")
+        print("   Tech level: \(country.estimatedTechLevel)/10")
+        print("   Mobilization ratio: \(String(format: "%.1fx", Double(wartimeStrength) / Double(max(1, country.militaryStrength))))")
+
+        country.militaryStrength = wartimeStrength
+        country.isAtWar = true
+
+        updateCountry(country)
+    }
+
+    /// Demobilize a country after war ends (return to peacetime strength)
+    func demobilizeCountry(countryCode: String) {
+        guard var country = getCountry(code: countryCode) else { return }
+        guard country.isAtWar else { return }  // Not mobilized
+
+        print("🕊️ [DEMOBILIZATION] \(country.name) demobilizing after war...")
+        print("   Wartime strength: \(formatStrength(country.militaryStrength))")
+        print("   Returning to peacetime: \(formatStrength(country.peacetimeStrength))")
+
+        country.militaryStrength = country.peacetimeStrength
+        country.isAtWar = false
+
+        updateCountry(country)
+    }
+
+    private func formatStrength(_ strength: Int) -> String {
+        if strength >= 1_000_000 {
+            return String(format: "%.1fM", Double(strength) / 1_000_000.0)
+        } else if strength >= 1_000 {
+            return String(format: "%.0fk", Double(strength) / 1_000.0)
+        } else {
+            return "\(strength)"
+        }
     }
 }

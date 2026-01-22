@@ -32,8 +32,22 @@ class WarEngine: ObservableObject {
         justification: War.WarJustification,
         attackerStrength: Int,
         defenderStrength: Int,
-        currentDate: Date
+        currentDate: Date,
+        globalCountryState: GlobalCountryState? = nil
     ) -> War? {
+        // Mobilize AI countries for war (if globalCountryState provided)
+        if let globalState = globalCountryState {
+            // Check if attacker is AI country (not player)
+            if let _ = globalState.getCountry(code: attacker) {
+                globalState.mobilizeCountry(countryCode: attacker)
+            }
+
+            // Check if defender is AI country (not player)
+            if let _ = globalState.getCountry(code: defender) {
+                globalState.mobilizeCountry(countryCode: defender)
+            }
+        }
+
         let war = War(
             attacker: attacker,
             defender: defender,
@@ -209,16 +223,15 @@ class WarEngine: ObservableObject {
 
     // MARK: - Peace Negotiation
 
-    func negotiatePeace(warId: UUID, outcome: War.WarOutcome) -> Bool {
+    func negotiatePeace(warId: UUID, outcome: War.WarOutcome, globalCountryState: GlobalCountryState? = nil) -> Bool {
         guard let index = activeWars.firstIndex(where: { $0.id == warId }) else {
             return false
         }
 
         activeWars[index].resolveWar(outcome: outcome)
 
-        // Move to history
-        let completedWar = activeWars.remove(at: index)
-        warHistory.append(completedWar)
+        // Move to history and demobilize
+        endWar(warId: warId, globalCountryState: globalCountryState)
 
         return true
     }
@@ -325,10 +338,25 @@ class WarEngine: ObservableObject {
         let reparationAmount: Decimal
     }
 
-    func endWar(warId: UUID) {
+    func endWar(warId: UUID, globalCountryState: GlobalCountryState? = nil) {
         guard let index = activeWars.firstIndex(where: { $0.id == warId }) else { return }
         let completedWar = activeWars.remove(at: index)
         warHistory.append(completedWar)
+
+        // Demobilize AI countries after war ends
+        if let globalState = globalCountryState {
+            // Check if countries are still in other wars before demobilizing
+            let attackerStillAtWar = activeWars.contains { $0.attacker == completedWar.attacker || $0.defender == completedWar.attacker }
+            let defenderStillAtWar = activeWars.contains { $0.attacker == completedWar.defender || $0.defender == completedWar.defender }
+
+            if !attackerStillAtWar, let _ = globalState.getCountry(code: completedWar.attacker) {
+                globalState.demobilizeCountry(countryCode: completedWar.attacker)
+            }
+
+            if !defenderStillAtWar, let _ = globalState.getCountry(code: completedWar.defender) {
+                globalState.demobilizeCountry(countryCode: completedWar.defender)
+            }
+        }
     }
 
     // MARK: - Nuclear Strike
@@ -336,7 +364,8 @@ class WarEngine: ObservableObject {
     func launchNuclearStrike(
         warId: UUID,
         attackerNukes: NuclearArsenal,
-        defenderNukes: NuclearArsenal
+        defenderNukes: NuclearArsenal,
+        globalCountryState: GlobalCountryState? = nil
     ) -> NuclearStrikeResult {
         guard let index = activeWars.firstIndex(where: { $0.id == warId }) else {
             return NuclearStrikeResult(success: false, retaliation: false, casualties: 0)
@@ -357,9 +386,8 @@ class WarEngine: ObservableObject {
             // Mutual Assured Destruction
             activeWars[index].resolveWar(outcome: .nuclearAnnihilation)
 
-            // Move to history
-            let completedWar = activeWars.remove(at: index)
-            warHistory.append(completedWar)
+            // Move to history and demobilize
+            endWar(warId: warId, globalCountryState: globalCountryState)
 
             return NuclearStrikeResult(
                 success: true,
@@ -370,9 +398,8 @@ class WarEngine: ObservableObject {
             // Successful first strike, automatic victory
             activeWars[index].resolveWar(outcome: .attackerVictory)
 
-            // Move to history
-            let completedWar = activeWars.remove(at: index)
-            warHistory.append(completedWar)
+            // Move to history and demobilize
+            endWar(warId: warId, globalCountryState: globalCountryState)
 
             return NuclearStrikeResult(
                 success: true,
@@ -507,15 +534,24 @@ class WarEngine: ObservableObject {
         // Select appropriate justification
         let justification = selectJustification(aggressor: aggressor, target: target)
 
-        // Declare AI war
+        // Mobilize both countries before getting their strength
+        globalCountryState.mobilizeCountry(countryCode: aggressor.code)
+        globalCountryState.mobilizeCountry(countryCode: target.code)
+
+        // Get updated mobilized strength
+        let aggressorMobilized = globalCountryState.getCountry(code: aggressor.code)!
+        let targetMobilized = globalCountryState.getCountry(code: target.code)!
+
+        // Declare AI war with mobilized strength
         let war = declareWar(
             attacker: aggressor.code,
             defender: target.code,
             type: .offensive,
             justification: justification,
-            attackerStrength: aggressor.militaryStrength,
-            defenderStrength: target.militaryStrength,
-            currentDate: currentDate
+            attackerStrength: aggressorMobilized.militaryStrength,
+            defenderStrength: targetMobilized.militaryStrength,
+            currentDate: currentDate,
+            globalCountryState: globalCountryState
         )
 
         if let declaredWar = war {
@@ -655,7 +691,7 @@ class WarEngine: ObservableObject {
         guard let outcome = war.outcome else { return nil }
         guard outcome != .nuclearAnnihilation && outcome != .stalemate else {
             // Just end the war for these outcomes
-            endWar(warId: war.id)
+            endWar(warId: war.id, globalCountryState: globalCountryState)
             return nil
         }
 
@@ -692,7 +728,7 @@ class WarEngine: ObservableObject {
         )
 
         // End the war
-        endWar(warId: war.id)
+        endWar(warId: war.id, globalCountryState: globalCountryState)
 
         // Get country names for better logging
         let winnerName = globalCountryState.getCountry(code: winnerCode)?.name ?? winnerCode
