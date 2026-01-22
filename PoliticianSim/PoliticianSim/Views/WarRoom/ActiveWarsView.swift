@@ -420,13 +420,21 @@ struct DeclareWarSheet: View {
                                     .font(.system(size: 16, weight: .bold))
                                     .foregroundColor(.white)
 
-                                ForEach(RivalCountry.allRivals, id: \.code) { country in
+                                ForEach(gameManager.globalCountryState.countries.filter { $0.code != gameManager.character?.country }, id: \.code) { country in
                                     CountrySelectionCard(
-                                        country: country,
+                                        countryCode: country.code,
+                                        countryName: country.name,
+                                        population: country.population,
+                                        militaryStrength: country.militaryStrength,
                                         isSelected: selectedCountry?.code == country.code,
                                         playerStrength: gameManager.character?.militaryStats?.strength ?? 0
                                     ) {
-                                        selectedCountry = country
+                                        selectedCountry = RivalCountry(
+                                            name: country.name,
+                                            code: country.code,
+                                            population: country.population,
+                                            militaryStrength: country.militaryStrength
+                                        )
                                         // Auto-scroll to justification section after a brief delay to ensure view is rendered
                                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                                             withAnimation {
@@ -533,15 +541,22 @@ struct DeclareWarSheet: View {
 
         print("✅ Can declare war - proceeding")
 
-        // Declare war
+        // Mobilize defender before war
+        gameManager.globalCountryState.mobilizeCountry(countryCode: target.code)
+
+        // Get mobilized defender strength
+        let defenderMobilized = gameManager.globalCountryState.getCountry(code: target.code)!
+
+        // Declare war with mobilized strength
         let war = gameManager.warEngine.declareWar(
             attacker: character.country,
             defender: target.code,
             type: .offensive,
             justification: selectedJustification,
             attackerStrength: militaryStats.strength,
-            defenderStrength: target.militaryStrength,
-            currentDate: character.currentDate
+            defenderStrength: defenderMobilized.militaryStrength,
+            currentDate: character.currentDate,
+            globalCountryState: gameManager.globalCountryState
         )
 
         if let war = war {
@@ -571,13 +586,16 @@ struct DeclareWarSheet: View {
 }
 
 struct CountrySelectionCard: View {
-    let country: RivalCountry
+    let countryCode: String
+    let countryName: String
+    let population: Int
+    let militaryStrength: Int
     let isSelected: Bool
     let playerStrength: Int
     let action: () -> Void
 
     var strengthComparison: String {
-        let ratio = Double(playerStrength) / Double(max(1, country.militaryStrength))
+        let ratio = Double(playerStrength) / Double(max(1, militaryStrength))
         if ratio >= 2.0 {
             return "Overwhelming advantage"
         } else if ratio >= 1.5 {
@@ -594,7 +612,7 @@ struct CountrySelectionCard: View {
     }
 
     var strengthColor: Color {
-        let ratio = Double(playerStrength) / Double(max(1, country.militaryStrength))
+        let ratio = Double(playerStrength) / Double(max(1, militaryStrength))
         if ratio >= 1.5 {
             return Constants.Colors.positive
         } else if ratio >= 0.9 {
@@ -611,7 +629,7 @@ struct CountrySelectionCard: View {
                     Image(systemName: "flag.fill")
                         .foregroundColor(Constants.Colors.buttonPrimary)
 
-                    Text(country.name)
+                    Text(countryName)
                         .font(.system(size: 15, weight: .bold))
                         .foregroundColor(.white)
 
@@ -629,7 +647,7 @@ struct CountrySelectionCard: View {
                             .font(.system(size: 11))
                             .foregroundColor(Constants.Colors.secondaryText)
 
-                        Text(formatPopulation(country.population))
+                        Text(formatPopulation(population))
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundColor(.white)
                     }
@@ -639,7 +657,7 @@ struct CountrySelectionCard: View {
                             .font(.system(size: 11))
                             .foregroundColor(Constants.Colors.secondaryText)
 
-                        Text("\(country.militaryStrength)")
+                        Text("\(militaryStrength)")
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundColor(.white)
                     }

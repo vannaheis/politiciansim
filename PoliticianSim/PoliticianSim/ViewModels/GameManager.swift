@@ -711,11 +711,23 @@ class GameManager: ObservableObject {
         // Update character's military stats
         character.militaryStats = militaryStats
 
-        // Add stress if military is running a significant deficit
+        // Transfer military deficit to government treasury
         if militaryStats.treasury.isDeficit {
-            let deficitAmount = militaryStats.treasury.dailyExpenses - militaryStats.treasury.dailyRevenue
-            let deficitPercentage = Double(truncating: (deficitAmount / militaryStats.treasury.dailyRevenue * 100) as NSDecimalNumber)
+            let deficitAmount = militaryStats.treasury.netDaily
+            // Add deficit to government expenses/debt
+            if var treasury = treasuryManager.currentTreasury {
+                // Military deficit reduces government cash on hand
+                for _ in 0..<days {
+                    treasury.cashOnHand += deficitAmount  // netDaily is negative for deficits
+                    if deficitAmount < 0 {
+                        treasury.totalDebt += abs(deficitAmount)
+                    }
+                }
+                treasuryManager.currentTreasury = treasury
+            }
 
+            // Add stress if military is running a significant deficit
+            let deficitPercentage = Double(truncating: (abs(deficitAmount) / militaryStats.treasury.dailyRevenue * 100) as NSDecimalNumber)
             if deficitPercentage > 20 {
                 character.stress = min(100, character.stress + 1)
             }

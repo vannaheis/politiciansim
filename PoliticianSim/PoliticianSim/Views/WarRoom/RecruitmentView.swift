@@ -11,7 +11,6 @@ struct RecruitmentView: View {
     @EnvironmentObject var gameManager: GameManager
     @State private var showRecruitConfirm: Int?
     @State private var showDemobilizeConfirm: Int?
-    @State private var showInsufficientFundsAlert = false
     @State private var showExceedsMaxAlert = false
 
     var body: some View {
@@ -234,13 +233,10 @@ struct RecruitmentView: View {
                         soldiers: soldiers
                     )
 
-                    if militaryStats.treasury.cashReserves >= cost {
-                        militaryStats.treasury.cashReserves -= cost
-                        character.militaryStats = militaryStats
-                        gameManager.characterManager.updateCharacter(character)
-                    } else {
-                        showInsufficientFundsAlert = true
-                    }
+                    // Allow deficit spending - military can go into debt
+                    militaryStats.treasury.cashReserves -= cost
+                    character.militaryStats = militaryStats
+                    gameManager.characterManager.updateCharacter(character)
                 }
                 showRecruitConfirm = nil
             }
@@ -283,15 +279,6 @@ struct RecruitmentView: View {
                 let annualSavings = Decimal(soldiers) * militaryStats.recruitmentType.costPerSoldier
 
                 Text("Discharge \(formatNumber(soldiers)) soldiers?\n\nSeverance Cost: \(formatMoney(severanceCost))\nAnnual Savings: \(formatMoney(annualSavings))\n\nThis will reduce military strength immediately.")
-            }
-        }
-        .alert("Insufficient Funds", isPresented: $showInsufficientFundsAlert) {
-            Button("OK", role: .cancel) {
-                showInsufficientFundsAlert = false
-            }
-        } message: {
-            if let militaryStats = gameManager.character?.militaryStats {
-                Text("The military treasury does not have sufficient funds for this recruitment.\n\nAvailable: \(formatMoney(militaryStats.treasury.cashReserves))")
             }
         }
         .alert("Exceeds Maximum", isPresented: $showExceedsMaxAlert) {
