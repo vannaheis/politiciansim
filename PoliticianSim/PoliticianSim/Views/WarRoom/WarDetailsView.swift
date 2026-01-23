@@ -138,6 +138,61 @@ struct WarDetailsView: View {
                         .background(Color(red: 0.15, green: 0.17, blue: 0.22))
                         .cornerRadius(12)
 
+                        // Military Strength Comparison
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("MILITARY STRENGTH")
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundColor(Constants.Colors.secondaryText)
+
+                            HStack(spacing: 16) {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(playerCountry)
+                                        .font(.system(size: 13))
+                                        .foregroundColor(Constants.Colors.secondaryText)
+
+                                    Text(formatNumber(isPlayerAttacker ? war.attackerStrength : war.defenderStrength))
+                                        .font(.system(size: 20, weight: .bold))
+                                        .foregroundColor(Constants.Colors.buttonPrimary)
+                                }
+
+                                Spacer()
+
+                                Text("vs")
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(Constants.Colors.secondaryText)
+
+                                Spacer()
+
+                                VStack(alignment: .trailing, spacing: 4) {
+                                    Text(isPlayerAttacker ? war.defender : war.attacker)
+                                        .font(.system(size: 13))
+                                        .foregroundColor(Constants.Colors.secondaryText)
+
+                                    Text(formatNumber(isPlayerAttacker ? war.defenderStrength : war.attackerStrength))
+                                        .font(.system(size: 20, weight: .bold))
+                                        .foregroundColor(Constants.Colors.negative)
+                                }
+                            }
+
+                            // Strength ratio
+                            let playerStr = isPlayerAttacker ? war.attackerStrength : war.defenderStrength
+                            let enemyStr = isPlayerAttacker ? war.defenderStrength : war.attackerStrength
+                            let ratio = Double(playerStr) / Double(max(1, enemyStr))
+
+                            HStack(spacing: 6) {
+                                Image(systemName: ratio >= 1.0 ? "arrow.up.circle.fill" : "arrow.down.circle.fill")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(ratio >= 1.0 ? Constants.Colors.positive : Constants.Colors.negative)
+
+                                Text(ratio >= 1.0 ? "You have \(String(format: "%.1f", ratio))x advantage" : "Enemy has \(String(format: "%.1f", 1.0/ratio))x advantage")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(Constants.Colors.secondaryText)
+                            }
+                        }
+                        .padding(16)
+                        .background(Color(red: 0.15, green: 0.17, blue: 0.22))
+                        .cornerRadius(12)
+
                         // Battle Status
                         VStack(alignment: .leading, spacing: 12) {
                             Text("BATTLE STATUS")

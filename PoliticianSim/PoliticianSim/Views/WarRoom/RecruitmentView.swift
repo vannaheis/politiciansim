@@ -233,9 +233,29 @@ struct RecruitmentView: View {
                         soldiers: soldiers
                     )
 
-                    // Allow deficit spending - military can go into debt
+                    print("\n💰 [RECRUITMENT] Recruited \(soldiers) soldiers")
+                    print("💰 [RECRUITMENT] Cost: $\(cost)")
+                    print("💰 [RECRUITMENT] Military treasury before: $\(militaryStats.treasury.cashReserves)")
+
+                    // Deduct from military treasury (allow deficit)
                     militaryStats.treasury.cashReserves -= cost
+                    print("💰 [RECRUITMENT] Military treasury after: $\(militaryStats.treasury.cashReserves)")
                     character.militaryStats = militaryStats
+
+                    // One-time purchase: hit government treasury immediately
+                    if var treasury = gameManager.treasuryManager.currentTreasury {
+                        print("💰 [RECRUITMENT] Government cashOnHand before: $\(treasury.cashOnHand)")
+                        print("💰 [RECRUITMENT] Government totalDebt before: $\(treasury.totalDebt)")
+
+                        treasury.cashOnHand -= cost
+                        // Debt is always the absolute value of negative cashOnHand
+                        treasury.totalDebt = treasury.cashOnHand < 0 ? abs(treasury.cashOnHand) : 0
+
+                        print("💰 [RECRUITMENT] Government cashOnHand after: $\(treasury.cashOnHand)")
+                        print("💰 [RECRUITMENT] Government totalDebt after: $\(treasury.totalDebt)")
+                        gameManager.treasuryManager.currentTreasury = treasury
+                    }
+
                     gameManager.characterManager.updateCharacter(character)
                 }
                 showRecruitConfirm = nil

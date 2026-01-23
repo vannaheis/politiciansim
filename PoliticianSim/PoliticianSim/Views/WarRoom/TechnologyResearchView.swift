@@ -12,7 +12,6 @@ struct TechnologyResearchView: View {
     @State private var showStartResearchConfirm: TechCategory?
     @State private var showCompleteResearchConfirm: UUID?
     @State private var showCancelResearchConfirm: UUID?
-    @State private var showInsufficientFundsAlert = false
 
     var body: some View {
         ScrollView {
@@ -82,18 +81,36 @@ struct TechnologyResearchView: View {
                     let currentLevel = militaryStats.technologyLevels[category] ?? 1
                     let cost = calculateResearchCost(currentLevel: currentLevel)
 
-                    if militaryStats.treasury.cashReserves >= cost {
-                        if let research = gameManager.militaryManager.startResearch(
-                            category: category,
-                            militaryStats: militaryStats,
-                            currentDate: character.currentDate
-                        ) {
-                            militaryStats.treasury.cashReserves -= research.cost
-                            character.militaryStats = militaryStats
-                            gameManager.characterManager.updateCharacter(character)
+                    // Allow deficit spending for research
+                    if let research = gameManager.militaryManager.startResearch(
+                        category: category,
+                        militaryStats: militaryStats,
+                        currentDate: character.currentDate
+                    ) {
+                        print("\n🔬 [RESEARCH] Started research: \(category.rawValue)")
+                        print("🔬 [RESEARCH] Cost: $\(research.cost)")
+                        print("🔬 [RESEARCH] Military treasury before: $\(militaryStats.treasury.cashReserves)")
+
+                        // Deduct from military treasury (allow deficit)
+                        militaryStats.treasury.cashReserves -= research.cost
+                        print("🔬 [RESEARCH] Military treasury after: $\(militaryStats.treasury.cashReserves)")
+                        character.militaryStats = militaryStats
+
+                        // One-time purchase: hit government treasury immediately
+                        if var treasury = gameManager.treasuryManager.currentTreasury {
+                            print("🔬 [RESEARCH] Government cashOnHand before: $\(treasury.cashOnHand)")
+                            print("🔬 [RESEARCH] Government totalDebt before: $\(treasury.totalDebt)")
+
+                            treasury.cashOnHand -= research.cost
+                            // Debt is always the absolute value of negative cashOnHand
+                            treasury.totalDebt = treasury.cashOnHand < 0 ? abs(treasury.cashOnHand) : 0
+
+                            print("🔬 [RESEARCH] Government cashOnHand after: $\(treasury.cashOnHand)")
+                            print("🔬 [RESEARCH] Government totalDebt after: $\(treasury.totalDebt)")
+                            gameManager.treasuryManager.currentTreasury = treasury
                         }
-                    } else {
-                        showInsufficientFundsAlert = true
+
+                        gameManager.characterManager.updateCharacter(character)
                     }
                 }
                 showStartResearchConfirm = nil
@@ -151,15 +168,6 @@ struct TechnologyResearchView: View {
             }
         } message: {
             Text("Cancel this research? You will receive a 50% refund.")
-        }
-        .alert("Insufficient Funds", isPresented: $showInsufficientFundsAlert) {
-            Button("OK", role: .cancel) {
-                showInsufficientFundsAlert = false
-            }
-        } message: {
-            if let militaryStats = gameManager.character?.militaryStats {
-                Text("The military treasury does not have sufficient funds for this research.\n\nAvailable: \(formatMoney(militaryStats.treasury.cashReserves))")
-            }
         }
     }
 

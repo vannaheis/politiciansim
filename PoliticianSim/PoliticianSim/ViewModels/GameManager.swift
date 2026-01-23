@@ -439,16 +439,38 @@ class GameManager: ObservableObject {
         guard character.currentPosition?.level == 5 else { return } // President only
         guard character.militaryStats == nil else { return } // Don't reinitialize
 
+        print("🎖️ [INIT] Initializing military stats for President")
+
+        // Initialize treasury if it doesn't exist (needed for military purchases)
+        if treasuryManager.currentTreasury == nil {
+            print("🎖️ [INIT] Treasury doesn't exist - initializing now")
+            treasuryManager.initializeTreasury(for: character)
+        }
+
+        // Initialize budget if it doesn't exist
+        if budgetManager.currentBudget == nil {
+            print("🎖️ [INIT] Budget doesn't exist - initializing now")
+            let gdp = economicDataManager.economicData.federal.gdp.current
+            budgetManager.initializeBudget(
+                for: character,
+                gdp: gdp,
+                treasuryManager: treasuryManager,
+                territoryManager: territoryManager
+            )
+        }
+
         var militaryStats = MilitaryStats()
 
         // Sync with budget department if it exists
         if let budget = budgetManager.currentBudget,
            let militaryDept = budget.departments.first(where: { $0.category == .military }) {
             militaryStats.militaryBudget = militaryDept.allocatedFunds
+            print("🎖️ [INIT] Synced military budget from budget department: $\(militaryDept.allocatedFunds)")
         }
 
         character.militaryStats = militaryStats
         characterManager.updateCharacter(character)
+        print("🎖️ [INIT] Military stats initialization complete")
     }
 
     // MARK: - Monthly War Updates
@@ -683,6 +705,9 @@ class GameManager: ObservableObject {
     private func processMilitaryTreasury(character: inout Character, days: Int) {
         guard var militaryStats = character.militaryStats else { return }
 
+        print("\n📊 [MILITARY TREASURY] Processing \(days) day(s)")
+        print("📊 [MILITARY TREASURY] Starting cash reserves: $\(militaryStats.treasury.cashReserves)")
+
         // Calculate war costs
         var totalWarCost: Decimal = 0
         for war in warEngine.activeWars where war.isActive {
@@ -698,6 +723,10 @@ class GameManager: ObservableObject {
             totalResearchCost += research.cost / Decimal(research.daysRequired)
         }
 
+        print("📊 [MILITARY TREASURY] Daily war cost: $\(totalWarCost)")
+        print("📊 [MILITARY TREASURY] Daily research cost: $\(totalResearchCost)")
+        print("📊 [MILITARY TREASURY] Military budget (daily revenue): $\(militaryStats.militaryBudget / 365)")
+
         // Process each day
         for _ in 0..<days {
             militaryStats.treasury.processDay(
@@ -708,14 +737,24 @@ class GameManager: ObservableObject {
             )
         }
 
+        print("📊 [MILITARY TREASURY] After processing - cash reserves: $\(militaryStats.treasury.cashReserves)")
+        print("📊 [MILITARY TREASURY] Daily deficit: $\(militaryStats.treasury.netDaily)")
+        print("📊 [MILITARY TREASURY] Is in deficit: \(militaryStats.treasury.isDeficit)")
+
         // Update character's military stats
         character.militaryStats = militaryStats
 
         // Transfer military deficit to government treasury
         if militaryStats.treasury.isDeficit {
             let deficitAmount = militaryStats.treasury.netDaily
+            print("📊 [MILITARY TREASURY] Transferring deficit to government treasury")
+            print("📊 [MILITARY TREASURY] Deficit amount per day: $\(deficitAmount)")
+
             // Add deficit to government expenses/debt
             if var treasury = treasuryManager.currentTreasury {
+                print("📊 [MILITARY TREASURY] Government cashOnHand before: $\(treasury.cashOnHand)")
+                print("📊 [MILITARY TREASURY] Government totalDebt before: $\(treasury.totalDebt)")
+
                 // Military deficit reduces government cash on hand
                 for _ in 0..<days {
                     treasury.cashOnHand += deficitAmount  // netDaily is negative for deficits
@@ -723,6 +762,9 @@ class GameManager: ObservableObject {
                         treasury.totalDebt += abs(deficitAmount)
                     }
                 }
+
+                print("📊 [MILITARY TREASURY] Government cashOnHand after: $\(treasury.cashOnHand)")
+                print("📊 [MILITARY TREASURY] Government totalDebt after: $\(treasury.totalDebt)")
                 treasuryManager.currentTreasury = treasury
             }
 
@@ -731,6 +773,8 @@ class GameManager: ObservableObject {
             if deficitPercentage > 20 {
                 character.stress = min(100, character.stress + 1)
             }
+        } else {
+            print("📊 [MILITARY TREASURY] No deficit - military is self-sufficient")
         }
     }
 
